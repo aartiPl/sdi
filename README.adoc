@@ -1,0 +1,268 @@
+= Simple Dependency Injection
+
+SDI allows to excessively use Dependency Injection pattern in your application.
+It achieves it without using annotations or reflections - just simple Java code.
+Additionally, you can manage your service/application life cycle just by calling methods:
+init(), start(), stop() and close() also by just calling these method on parent service.
+You don't have any "configuration" for wiring up all classes - it is done in code.
+All that takes less than 300 LOC.
+
+== Concept and simple usage
+
+The general concept is that for all classes which you want to put into this smallish DI framework
+you prepare creator. Creator for some specific class has to inherit from abstract class Creator<>.
+
+In the simplest case, class and its creator can look like below:
+
+[source, java]
+----
+public class Config {
+}
+
+class ConfigCreator extends Creator<Config> {
+    @Override
+    public Config create(InstanceCreator instanceCreator) {
+        return new Config();
+    }
+}
+----
+
+Right now it's not very interesting - just a little bit more code to write. The fun part starts when
+we have more complicated classes.
+
+Let's say that we have class App which has class Config as a dependency.
+
+[source, java]
+----
+public class App {
+    public App(Config e) {
+    }
+}
+
+class AppCreator extends Creator<App> {
+    @Override
+    public App create(InstanceCreator instanceCreator) {
+        Config config = instanceCreator.getOrCreate(Config.class);
+        return new App(config);
+    }
+}
+----
+
+That way we have just applied dependency injection pattern in the simple case of two classes.
+We have just delegated the work to InstanceCreator, which is responsible for finding the correct creator.
+
+But how we can use such classes?
+
+Very simple: let's just create service which will keep information about classes:
+
+[source, java]
+----
+public static void main(String[] args) {
+    Service service = Service.builder()
+        .withMainClass(App.class)
+        .withCreator(new AppCreator())
+        .withCreator(new ConfigCreator())
+        .build();
+
+    App app = service.get(App.class);
+}
+----
+
+That way we can get any instance of a class from the class hierarchy of App without worrying about dependencies.
+
+
+== Initialization of services
+
+That's nice, but very often we need to initialize and later start at least some of the classes in order to start our application.
+And when finishing application, we need to stop e.g. working threads and finally release resources.
+That's still a lot of manual work.
+
+Fortunately, there is a simple solution to this problem in SDI. It's just necessary to mark classes,
+which should be initialized/started/stopped/closed with one of the two interfaces:
+Manageable or ManageableBasic. ManageableBasic has two methods init() and close(). In many cases, it is enough
+to initialize and shutdown instance of the class. In Manageable we can find additionally two methods:
+start() and stop().
+
+Let's see how it will work for another class MqListener.
+
+[source, java]
+----
+public class Config {
+}
+
+class ConfigCreator extends Creator<Config> {
+    @Override
+    public Config create(InstanceCreator instanceCreator) {
+        return new Config();
+    }
+}
+
+public class MqListener implements Manageable {
+    @Override
+    public void init() {
+        //Initialize class
+    }
+
+    @Override
+    public void start() {
+        //Start class
+    }
+
+    @Override
+    public void stop() {
+        //Stop class (with ability to start it again)
+    }
+
+    @Override
+    public void close() {
+        //Destruct class
+    }
+}
+
+class ConfigCreator extends Creator<Config> {
+    @Override
+    public Config create(InstanceCreator instanceCreator) {
+        return new Config();
+    }
+}
+
+public class App {
+    public App(Config e, MqListener mqListner) {
+    }
+}
+
+class AppCreator extends Creator<App> {
+    @Override
+    public App create(InstanceCreator instanceCreator) {
+        Config config = instanceCreator.getOrCreate(Config.class);
+        MqListener mqListener = instanceCreator.getOrCreate(MqListener.class);
+        return new App(config, mqListener);
+    }
+}
+----
+
+Now we can start an application from our main class:
+
+[source, java]
+----
+class Main {
+    public static void main(String[] args) {
+        final Service service = Service.builder()
+            .withMainClass(App.class)
+            .withCreator(new AppCreator())
+            .withCreator(new ConfigCreator())
+            .withCreator(new MqListenerCreator())
+            .build();
+
+        //It's before init() and start() to allow clean shutdown in case init() or start() throw exception.
+        Runtime.getRuntime().addShutdownHook(() -> {
+            service.stop();
+            service.close();
+        });
+
+        service.init();
+        service.start();
+
+    }
+}
+----
+
+That way you have full control over application lifecycle.
+
+== Parametrized creators
+
+Sometimes we would like to reuse creators in different contexts. For example when we create MqReceiver
+it can be used with different topics. Of course, we can add a dependency to configuration class to MqReceiverCreator
+but then it will be difficult to reuse this creator in other application. That's why creators can be parametrized.
+
+[source, java]
+----
+class ConfigCreator extends Creator<Config> {
+    @Override
+    public Config create(InstanceCreator instanceCreator, CreatorParams params) {
+        String fileName = params.get("fileName");
+
+        config = Config.createFromFile(fileName);
+
+        return config;
+    }
+}
+----
+
+On the call side we use it like this:
+
+[source, java]
+----
+class AppCreator extends Creator<App> {
+    @Override
+    public App create(InstanceCreator instanceCreator) {
+        CreatorParams params = CreatorParams.builder()
+                                .parameter("fileName", "~/config.init")
+                                .build();
+
+        Config config = instanceCreator.getOrCreate(Config.class, params);
+        MqListener mqListener = instanceCreator.getOrCreate(MqListener.class);
+        return new App(config, mqListener);
+    }
+}
+----
+
+== Default creators
+
+Each creator can provide a set of default creators which can be used to create its dependencies.
+
+For example if App creator needs for its work classes A, B and C, you can provide in it default creators for
+some or all of mentioned classes. It is accomplished by overriding method:
+[source, java]
+----
+List<Creator<?>> defaultCreators()
+----
+
+and returning from it instances of creators.
+
+[source, java]
+----
+class AppCreator extends Creator<App> {
+    @Override
+    public App create(InstanceCreator instanceCreator) {
+        A a = instanceCreator.getOrCreate(A.class);
+        B b = instanceCreator.getOrCreate(B.class);
+        C c = instanceCreator.getOrCreate(C.class);
+
+        return new App(a, b, c);
+    }
+
+    @Override
+    public List<Creator<?>> defaultCreators() {
+        return Lists.newArrayList(new ACreator(), new BCreator());
+    }
+}
+
+That way we do not have to provide in Service construction above creators. When SDI find that there is no
+explicit creator, then it will take necessary default one.
+
+Please notice that it is still possible to override default creator by setting different one
+on Service setting level.
+
+----
+
+== Properties of SDI in a glance
+
+* SDI manages only singleton instances of classes. If you need to create a bean on every request, just use
+  standard Java mechanism: new Request() in listening code.
+
+* SDI allows you to manage life cycle of application.
+
+== What are the advantages of such an approach?
+
+* Mild learning curve - you do not have to learn many new concepts on the start. Just leverage your
+  Java knowledge. Well, it's even hard to say about "curve" - above information is pretty much all
+  in this subject.
+
+* Encourages writing easily testable code. To get easily testable code you should write simple constructors,
+  (and creators take care about construction) and split your logic into construction and business logic
+  (it's like that by design). Of course, you still have dependency injection.
+
+* Does not pollute your application with annotations specific to DI framework.
+
+* Does not force you to create programs according to strict, but not always fitting, rules imposed by the framework.
