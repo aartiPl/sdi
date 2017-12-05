@@ -237,14 +237,13 @@ class AppCreator extends Creator<App> {
         return Lists.newArrayList(new ACreator(), new BCreator());
     }
 }
+----
 
-That way we do not have to provide in Service construction above creators. When SDI find that there is no
-explicit creator, then it will take necessary default one.
+That way we do not have to provide above creators during Service construction. When SDI finds that there is no
+explicit creator, then it will take a default one.
 
 Please notice that it is still possible to override default creator by setting different one
 on Service setting level.
-
-----
 
 == Properties of SDI in a glance
 
