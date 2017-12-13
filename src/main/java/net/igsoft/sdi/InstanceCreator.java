@@ -3,17 +3,13 @@ package net.igsoft.sdi;
 import static com.google.common.base.Preconditions.checkState;
 
 import java.util.ArrayDeque;
-import java.util.Collection;
 import java.util.Deque;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import net.igsoft.sdi.internal.MapKeyGenerator;
+import net.igsoft.sdi.internal.KeyGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,20 +17,20 @@ public class InstanceCreator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceCreator.class);
 
-    private final ImmutableMap<Class<?>, Creator<?>> creators;
-    private final Map<Class<?>, Creator<?>> creatorCheckMap;
-    private final ImmutableMap<Class<?>, Creator<?>> defaultCreators;
-    private final MapKeyGenerator keyGenerator;
+    private final Map<Class<?>, Creator<?>> creators;
+    private final Map<Class<?>, Creator<?>> defaultCreators;
+    private final Map<Class<?>, Creator<?>> unusedCreators;
+    private final KeyGenerator keyGenerator;
     private final Map<String, Object> instances;
     private final Map<String, Boolean> manualStartAndStopMap;
     private final Map<String, Integer> levels;
     private final Multimap<String, String> dependencies;
     private final Deque<String> stack;
 
-    public InstanceCreator(ImmutableMap<Class<?>, Creator<?>> creators, ImmutableMap<Class<?>, Creator<?>> defaultCreators,
-                           MapKeyGenerator keyGenerator) {
+    public InstanceCreator(Map<Class<?>, Creator<?>> creators,
+                           Map<Class<?>, Creator<?>> defaultCreators, KeyGenerator keyGenerator) {
         this.creators = creators;
-        this.creatorCheckMap = Maps.newHashMap(creators);
+        this.unusedCreators = Maps.newHashMap(creators);
         this.defaultCreators = defaultCreators;
         this.keyGenerator = keyGenerator;
         this.instances = Maps.newHashMap();
@@ -75,12 +71,15 @@ public class InstanceCreator {
 
         if (instance == null) {
             Creator<T> creator = (Creator<T>) creators.get(clazz);
-            creatorCheckMap.remove(clazz);
+            unusedCreators.remove(clazz);
 
             if (creator == null) {
-                LOGGER.info("No explicit creator has been found for class: {}. Looking in default creators...", clazz.getName());
+                LOGGER.info(
+                        "No explicit creator has been found for class: {}. Looking in default creators...",
+                        clazz.getName());
                 creator = (Creator<T>) defaultCreators.get(clazz);
-                LOGGER.info("Default creator for class {} has {}been found", clazz.getName(), creator == null ? "not " : "");
+                LOGGER.info("Default creator for class {} has {}been found", clazz.getName(),
+                            creator == null ? "not " : "");
             }
 
             checkState(creator != null, "No creator has been found for class: " + clazz.getName());
@@ -88,9 +87,9 @@ public class InstanceCreator {
             if (!params.isEmpty()) {
                 instance = creator.create(this, params);
                 if (!params.areAllUsed()) {
-                    LOGGER.warn("Not all parameters were used during construction of '{}'. Unused parameters: {}",
-                                clazz.getName(),
-                                params.unusedParameters());
+                    LOGGER.warn(
+                            "Not all parameters were used during construction of '{}'. Unused parameters: {}",
+                            clazz.getName(), params.unusedParameters());
                 }
             } else {
                 instance = creator.create(this);
@@ -130,8 +129,8 @@ public class InstanceCreator {
         return dependencies;
     }
 
-    public Map<Class<?>, Creator<?>> getCreatorCheckMap() {
-        return creatorCheckMap;
+    public Map<Class<?>, Creator<?>> getUnusedCreators() {
+        return unusedCreators;
     }
 
     public Map<String, Integer> getLevels() {
@@ -142,7 +141,7 @@ public class InstanceCreator {
         return instances;
     }
 
-    public MapKeyGenerator getKeyGenerator() {
+    public KeyGenerator getKeyGenerator() {
         return keyGenerator;
     }
 

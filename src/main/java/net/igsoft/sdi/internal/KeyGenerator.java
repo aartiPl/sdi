@@ -1,5 +1,5 @@
 package net.igsoft.sdi.internal;
 
-public interface MapKeyGenerator {
+public interface KeyGenerator {
     String generate(Class<?> clazz, String serializedParameters);
 }
