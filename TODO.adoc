@@ -1,2 +1,4 @@
 * Add transitions started->closed, initialized->closed etc.
 * Handle case where there are different default creators given for the same class.
+* Parallel init/start/stop/close of classes
+
