@@ -8,8 +8,6 @@ import java.util.function.Consumer;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.igsoft.sdi.internal.ManageableState;
-import net.igsoft.sdi.internal.MapKeyGenerator;
-import net.igsoft.sdi.internal.ServiceBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,20 +15,13 @@ public class Service implements Manageable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Service.class);
 
-    private final Class<?> mainClass;
-    private final MapKeyGenerator keyGenerator;
-    private final Map<String, Object> instances;
-    private final List<Collection<String>> sortedLevels;
-    private final Map<String, Boolean> manualStartAndStopMap;
     private final Map<String, ManageableState> states;
+    private final InstanceCreator instanceCreator;
+    private final List<Collection<String>> sortedLevels;
 
-    Service(Class<?> mainClass, MapKeyGenerator keyGenerator, Map<String, Object> instances,
-            List<Collection<String>> sortedLevels, Map<String, Boolean> manualStartAndStopMap) {
-        this.mainClass = mainClass;
-        this.keyGenerator = keyGenerator;
-        this.instances = instances;
+    Service(InstanceCreator instanceCreator, List<Collection<String>> sortedLevels) {
+        this.instanceCreator = instanceCreator;
         this.sortedLevels = sortedLevels;
-        this.manualStartAndStopMap = manualStartAndStopMap;
         this.states = Maps.newHashMap();
     }
 
@@ -40,7 +31,10 @@ public class Service implements Manageable {
 
     @SuppressWarnings("unchecked")
     public <T> T get(Class<T> clazz, CreatorParams params) {
-        return (T) instances.get(keyGenerator.generate(clazz, params.getSerializedParameters()));
+        return (T) instanceCreator.getInstances()
+                                  .get(instanceCreator.getKeyGenerator()
+                                                      .generate(clazz,
+                                                                params.getSerializedParameters()));
     }
 
     @Override
@@ -79,7 +73,7 @@ public class Service implements Manageable {
                                                             Consumer<T> operation) {
         for (Collection<String> ids : levels) {
             for (String id : ids) {
-                Object instance = instances.get(id);
+                Object instance = instanceCreator.getInstances().get(id);
 
                 boolean isSubclassOfClazz = clazz.isAssignableFrom(instance.getClass());
 
@@ -88,7 +82,8 @@ public class Service implements Manageable {
                     boolean isStartStopOperation = (finalState == ManageableState.STARTED ||
                                                     finalState == ManageableState.STOPPED);
 
-                    if (!isStartStopOperation || !manualStartAndStopMap.getOrDefault(id, false)) {
+                    if (!isStartStopOperation ||
+                        !instanceCreator.getManualStartAndStopMap().getOrDefault(id, false)) {
                         @SuppressWarnings("unchecked")
                         T manageable = (T) instance;
                         operation.accept(manageable);

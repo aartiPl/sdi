@@ -126,45 +126,28 @@ public class InstanceCreator {
         return getOrCreate(clazz, CreatorParams.EMPTY_PARAMS, false);
     }
 
-    public Service createService(Class<?> mainClass, CreatorParams params, boolean manualStartAndStop) {
-        getOrCreate(mainClass, params, manualStartAndStop);
+    public Multimap<String, String> getDependencies() {
+        return dependencies;
+    }
 
-        Multimap<Integer, String> multimap = ArrayListMultimap.create();
+    public Map<Class<?>, Creator<?>> getCreatorCheckMap() {
+        return creatorCheckMap;
+    }
 
-        for (Map.Entry<String, Integer> entry : levels.entrySet()) {
-            multimap.put(entry.getValue(), entry.getKey());
-        }
+    public Map<String, Integer> getLevels() {
+        return levels;
+    }
 
-        StringBuilder sb;
+    public Map<String, Object> getInstances() {
+        return instances;
+    }
 
-        sb = new StringBuilder();
-        for (Integer key : multimap.keySet()) {
-            sb.append("Level ").append(key).append(": ").append(multimap.get(key)).append('\n');
-        }
-        LOGGER.info("Dependencies by level:\n{}", sb);
+    public MapKeyGenerator getKeyGenerator() {
+        return keyGenerator;
+    }
 
-        List<Collection<String>> sortedLevels = multimap.asMap().keySet().stream().sorted().map(multimap::get).collect(Collectors.toList());
-
-        sb = new StringBuilder();
-        for (String key : dependencies.keySet()) {
-            sb.append("Class '").append(key).append("': ").append(dependencies.get(key)).append('\n');
-        }
-        LOGGER.info("Dependencies by class:\n{}", sb);
-
-        if (!creatorCheckMap.isEmpty()) {
-            sb = new StringBuilder();
-            for (Map.Entry<Class<?>, Creator<?>> entry : creatorCheckMap.entrySet()) {
-                sb.append(entry.getValue().getClass().getSimpleName())
-                  .append(" (for class: ")
-                  .append(entry.getKey().getSimpleName())
-                  .append(")\n");
-            }
-
-            LOGGER.warn("Some creators are not used during service construction. " +
-                        "Consider removing them from creator list:\n{}", sb);
-        }
-
-        return new Service(mainClass, keyGenerator, instances, sortedLevels, manualStartAndStopMap);
+    public Map<String, Boolean> getManualStartAndStopMap() {
+        return manualStartAndStopMap;
     }
 
     private void pushDown(String instanceKey, int levelDistance) {
