@@ -20,11 +20,14 @@ public class InstanceCreator {
     private final Map<Class<?>, Creator<?>> creators;
     private final Map<Class<?>, Creator<?>> defaultCreators;
     private final Map<Class<?>, Creator<?>> unusedCreators;
+
     private final KeyGenerator keyGenerator;
+
     private final Map<String, Object> instances;
     private final Map<String, Boolean> manualStartAndStopMap;
     private final Map<String, Integer> levels;
     private final Multimap<String, String> dependencies;
+
     private final Deque<String> stack;
 
     public InstanceCreator(Map<Class<?>, Creator<?>> creators,
@@ -56,44 +59,15 @@ public class InstanceCreator {
         }
 
         //LOGGER.debug("Before getting instance of {}", clazz);
-
-//NOTE: seems like a bug in JDK - below implementation (computeIfAbsent) doesn't work while standard implementation (checking for null) works
-//        T instance = (T) instances.computeIfAbsent(instanceKey, s -> {
-//            Creator<T> creator = (Creator<T>) creators.get(clazz);
-//            checkState(creator != null, "No creator has been found for class: " + clazz.getName());
-//
-//            T t = creator.create(this, params);
-//            LOGGER.debug("Inserting to instances: {} -> {}", instanceKey, instance);
-//            return t;
-//        });
+        //NOTE: seems like a bug in JDK - below implementation (computeIfAbsent) doesn't work while standard implementation (checking for null) works
+        //        T instance = (T) instances.computeIfAbsent(instanceKey, s -> {
+        //          return createInstance(clazz, params);
+        //        });
 
         T instance = (T) instances.get(instanceKey);
 
         if (instance == null) {
-            Creator<T> creator = (Creator<T>) creators.get(clazz);
-            unusedCreators.remove(clazz);
-
-            if (creator == null) {
-                LOGGER.info(
-                        "No explicit creator has been found for class: {}. Looking in default creators...",
-                        clazz.getName());
-                creator = (Creator<T>) defaultCreators.get(clazz);
-                LOGGER.info("Default creator for class {} has {}been found", clazz.getName(),
-                            creator == null ? "not " : "");
-            }
-
-            checkState(creator != null, "No creator has been found for class: " + clazz.getName());
-
-            if (!params.isEmpty()) {
-                instance = creator.create(this, params);
-                if (!params.areAllUsed()) {
-                    LOGGER.warn(
-                            "Not all parameters were used during construction of '{}'. Unused parameters: {}",
-                            clazz.getName(), params.unusedParameters());
-                }
-            } else {
-                instance = creator.create(this);
-            }
+            instance = createInstance(clazz, params);
 
             LOGGER.debug("Inserting to instances: {} -> {}", instanceKey, instance);
             instances.put(instanceKey, instance);
@@ -147,6 +121,37 @@ public class InstanceCreator {
 
     public Map<String, Boolean> getManualStartAndStopMap() {
         return manualStartAndStopMap;
+    }
+
+    private <T> T createInstance(Class<?> clazz, CreatorParams params) {
+        T instance;
+
+        Creator<T> creator = (Creator<T>) creators.get(clazz);
+        unusedCreators.remove(clazz);
+
+        if (creator == null) {
+            LOGGER.info(
+                    "No explicit creator has been found for class: {}. Looking in default creators...",
+                    clazz.getName());
+
+            creator = (Creator<T>) defaultCreators.get(clazz);
+            LOGGER.info("Default creator for class {} has {}been found", clazz.getName(),
+                        creator == null ? "not " : "");
+        }
+
+        checkState(creator != null, "No creator has been found for class: " + clazz.getName());
+
+        if (!params.isEmpty()) {
+            instance = creator.create(this, params);
+            if (!params.areAllUsed()) {
+                LOGGER.warn(
+                        "Not all parameters were used during construction of '{}'. Unused parameters: {}",
+                        clazz.getName(), params.unusedParameters());
+            }
+        } else {
+            instance = creator.create(this);
+        }
+        return instance;
     }
 
     private void pushDown(String instanceKey, int levelDistance) {
