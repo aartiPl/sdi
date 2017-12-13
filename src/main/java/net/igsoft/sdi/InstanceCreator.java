@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 public class InstanceCreator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceCreator.class);
-    private static final String NO_INSTANCE_ID = (String) null;
 
     private final ImmutableMap<Class<?>, Creator<?>> creators;
     private final Map<Class<?>, Creator<?>> creatorCheckMap;
@@ -45,11 +44,8 @@ public class InstanceCreator {
         this.stack = new ArrayDeque<>();
     }
 
-    //TODO: instanceId is probably not necessary - we can remove it as CreatorParams will always differentiate instances enough
-
     @SuppressWarnings("unchecked")
     public <T> T getOrCreate(Class<?> clazz, CreatorParams params, boolean manualStartAndStop) {
-
         //NOTE: ManualStartAndStop does not differentiate instances!
         String instanceKey = keyGenerator.generate(clazz, params.getSerializedParameters());
 

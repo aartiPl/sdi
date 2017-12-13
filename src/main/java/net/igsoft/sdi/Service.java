@@ -24,8 +24,8 @@ public class Service implements Manageable {
     private final Map<String, Boolean> manualStartAndStopMap;
     private final Map<String, ManageableState> states;
 
-    public Service(Class<?> mainClass, MapKeyGenerator keyGenerator, Map<String, Object> instances, List<Collection<String>> sortedLevels,
-                   Map<String, Boolean> manualStartAndStopMap) {
+    Service(Class<?> mainClass, MapKeyGenerator keyGenerator, Map<String, Object> instances,
+            List<Collection<String>> sortedLevels, Map<String, Boolean> manualStartAndStopMap) {
         this.mainClass = mainClass;
         this.keyGenerator = keyGenerator;
         this.instances = instances;
@@ -45,37 +45,51 @@ public class Service implements Manageable {
 
     @Override
     public void init() {
-        applyOperation(ManageableBasic.class, Lists.reverse(sortedLevels), null, ManageableState.INITIALIZED, ManageableBasic::init);
+        applyOperation(ManageableBasic.class, Lists.reverse(sortedLevels),
+                       Lists.newArrayList(ManageableState.CREATED), ManageableState.INITIALIZED,
+                       ManageableBasic::init);
     }
 
     @Override
     public void start() {
-        applyOperation(Manageable.class, Lists.reverse(sortedLevels), ManageableState.INITIALIZED, ManageableState.STARTED,
-                       Manageable::start);
+        applyOperation(Manageable.class, Lists.reverse(sortedLevels),
+                       Lists.newArrayList(ManageableState.INITIALIZED, ManageableState.STOPPED),
+                       ManageableState.STARTED, Manageable::start);
     }
 
     @Override
     public void stop() {
-        applyOperation(Manageable.class, sortedLevels, ManageableState.STARTED, ManageableState.STOPPED, Manageable::stop);
+        applyOperation(Manageable.class, sortedLevels, Lists.newArrayList(ManageableState.STARTED),
+                       ManageableState.STOPPED, Manageable::stop);
     }
 
     @Override
     public void close() {
-        applyOperation(ManageableBasic.class, sortedLevels, ManageableState.STARTED, ManageableState.CLOSED, ManageableBasic::close);
+        stop();
+
+        applyOperation(ManageableBasic.class, sortedLevels,
+                       Lists.newArrayList(ManageableState.STOPPED, ManageableState.INITIALIZED),
+                       ManageableState.CLOSED, ManageableBasic::close);
     }
 
-    private <T extends ManageableBasic> void applyOperation(Class<T> clazz, List<Collection<String>> levels, ManageableState baseState,
-                                                            ManageableState finalState, Consumer<T> operation) {
+    private <T extends ManageableBasic> void applyOperation(Class<T> clazz,
+                                                            List<Collection<String>> levels,
+                                                            List<ManageableState> baseState,
+                                                            ManageableState finalState,
+                                                            Consumer<T> operation) {
         for (Collection<String> ids : levels) {
             for (String id : ids) {
                 Object instance = instances.get(id);
 
                 boolean isSubclassOfClazz = clazz.isAssignableFrom(instance.getClass());
 
-                if (isSubclassOfClazz && states.get(id) == baseState) {
-                    boolean isStartStopOperation = (finalState == ManageableState.STARTED || finalState == ManageableState.STOPPED);
+                if (isSubclassOfClazz &&
+                    baseState.contains(states.getOrDefault(id, ManageableState.CREATED))) {
+                    boolean isStartStopOperation = (finalState == ManageableState.STARTED ||
+                                                    finalState == ManageableState.STOPPED);
 
                     if (!isStartStopOperation || !manualStartAndStopMap.getOrDefault(id, false)) {
+                        @SuppressWarnings("unchecked")
                         T manageable = (T) instance;
                         operation.accept(manageable);
                         states.put(id, finalState);

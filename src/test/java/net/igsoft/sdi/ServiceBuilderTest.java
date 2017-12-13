@@ -60,7 +60,6 @@ public class ServiceBuilderTest {
         service.close();
 
         assertThat(stepper.toString()).isEqualTo(
-                "E:ctor D:ctor B:ctor A:ctor C:ctor D:init B:init A:init C:init D:start B:start A:start C:start C:close A:close B:close " +
-                        "D:close");
+                "E:ctor D:ctor B:ctor A:ctor C:ctor D:init B:init A:init C:init D:start B:start A:start C:start C:stop A:stop B:stop D:stop C:close A:close B:close D:close");
     }
 }
