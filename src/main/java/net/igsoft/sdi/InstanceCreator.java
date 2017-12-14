@@ -59,7 +59,7 @@ public class InstanceCreator {
         Instance instance = instances.get(instanceKey);
 
         if (instance == null) {
-            instance = new Instance();                    ;
+            instance = new Instance();
             LOGGER.debug("Inserting to instances: {} -> {}", instanceKey, instance);
             instances.put(instanceKey, instance);
             instance.setValue(createInstanceValue(clazz, params));
