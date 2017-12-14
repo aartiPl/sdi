@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import net.igsoft.sdi.internal.Instance;
 import net.igsoft.sdi.internal.ManageableState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,19 +74,19 @@ public class Service implements Manageable {
                                                             Consumer<T> operation) {
         for (Collection<String> ids : levels) {
             for (String id : ids) {
-                Object instance = instanceCreator.getInstances().get(id);
+                Instance instance = instanceCreator.getInstances().get(id);
+                Object instanceValue = instance.getValue();
 
-                boolean isSubclassOfClazz = clazz.isAssignableFrom(instance.getClass());
+                boolean isSubclassOfClazz = clazz.isAssignableFrom(instanceValue.getClass());
 
                 if (isSubclassOfClazz &&
                     baseState.contains(states.getOrDefault(id, ManageableState.CREATED))) {
                     boolean isStartStopOperation = (finalState == ManageableState.STARTED ||
                                                     finalState == ManageableState.STOPPED);
 
-                    if (!isStartStopOperation ||
-                        !instanceCreator.getManualStartAndStopMap().getOrDefault(id, false)) {
+                    if (!(isStartStopOperation && instance.isManualStartAndStop())) {
                         @SuppressWarnings("unchecked")
-                        T manageable = (T) instance;
+                        T manageable = (T) instanceValue;
                         operation.accept(manageable);
                         states.put(id, finalState);
                     }

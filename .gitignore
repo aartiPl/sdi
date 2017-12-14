@@ -1,4 +1,3 @@
-# Created by .ignore support plugin (hsz.mobi)
 *.class
 *.log
 *.ctxt
@@ -13,3 +12,5 @@ hs_err_pid*
 
 .gradle/
 .idea/
+build/
+out/

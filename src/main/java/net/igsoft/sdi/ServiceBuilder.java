@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import net.igsoft.sdi.internal.Instance;
 import net.igsoft.sdi.internal.LoggingUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,8 +74,8 @@ public class ServiceBuilder {
 
         Multimap<Integer, String> instancesByLevel = ArrayListMultimap.create();
 
-        for (Map.Entry<String, Integer> entry : instanceCreator.getLevels().entrySet()) {
-            instancesByLevel.put(entry.getValue(), entry.getKey());
+        for (Map.Entry<String, Instance> entry : instanceCreator.getInstances().entrySet()) {
+            instancesByLevel.put(entry.getValue().getLevel(), entry.getKey());
         }
 
         LOGGER.info("\nDependencies by level:\n{}",
@@ -88,7 +89,7 @@ public class ServiceBuilder {
                                                                 .collect(Collectors.toList());
 
         LOGGER.info("\nDependencies by class:\n{}",
-                    LoggingUtils.dependenciesByClass(instanceCreator.getDependencies()));
+                    LoggingUtils.dependenciesByClass(instanceCreator.getInstances()));
 
         if (!instanceCreator.getUnusedCreators().isEmpty()) {
             LOGGER.warn("\nSome creators were not used during service construction. " +
