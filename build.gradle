@@ -1,13 +1,78 @@
 group 'net.igsoft'
-version '1.0-SNAPSHOT'
+version '0.8.0-SNAPSHOT'
 
 apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'signing'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 repositories {
     mavenCentral()
+}
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            pom.project {
+                name "Simple Dependency Injection for Java"
+                packaging 'jar'
+
+                description 'Simple Dependency Injection framework for Java'
+                url 'https://github.com/aartiPl/SDI'
+
+                scm {
+                    connection 'scm:git:git://https://github.com/aartiPl/SDI.git'
+                    developerConnection 'scm:git:ssh:https://github.com/aartiPl/SDI.git'
+                    url 'https://github.com/aartiPl/SDI/tree/master'
+                }
+
+                licenses {
+                    license {
+                        name 'MIT License'
+                        url 'https://opensource.org/licenses/MIT'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'aartiPl'
+                        name 'Marcin Kuszczak'
+                        email 'marcin.kuszczak.apps@gmail.com'
+                    }
+                }
+            }
+        }
+    }
 }
 
 dependencies {

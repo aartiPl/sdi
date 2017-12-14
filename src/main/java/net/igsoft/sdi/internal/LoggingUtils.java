@@ -33,9 +33,6 @@ public final class LoggingUtils {
         return sb.toString();
     }
 
-    private LoggingUtils() {
-    }
-
     public static String unusedCreators(Map<Class<?>, Creator<?>> unusedCreators) {
         StringBuilder sb = new StringBuilder();
 
@@ -46,5 +43,8 @@ public final class LoggingUtils {
               .append(")\n");
         }
         return sb.toString();
+    }
+
+    private LoggingUtils() {
     }
 }

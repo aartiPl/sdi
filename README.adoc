@@ -155,10 +155,10 @@ class Main {
             .build();
 
         //It's before init() and start() to allow clean shutdown in case init() or start() throw exception.
-        Runtime.getRuntime().addShutdownHook(() -> {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             service.stop();
             service.close();
-        });
+        }));
 
         service.init();
         service.start();
