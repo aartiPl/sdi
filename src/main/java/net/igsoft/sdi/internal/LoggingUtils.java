@@ -20,13 +20,14 @@ public final class LoggingUtils {
         return sb.toString();
     }
 
-    public static String dependenciesByClass(Multimap<String, String> dependencies) {
+    public static String dependenciesByClass(Map<String, Instance> instances) {
         StringBuilder sb = new StringBuilder();
-        for (String key : dependencies.keySet()) {
+
+        for (Map.Entry<String, Instance> entry : instances.entrySet()) {
             sb.append("Class '")
-              .append(key)
+              .append(entry.getKey())
               .append("': ")
-              .append(dependencies.get(key))
+              .append(entry.getValue().getDependencies())
               .append('\n');
         }
         return sb.toString();

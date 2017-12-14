@@ -9,8 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.TreeMultimap;
+import net.igsoft.sdi.internal.Instance;
 import net.igsoft.sdi.internal.LoggingUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,10 +72,10 @@ public class ServiceBuilder {
                                                               this::getInstanceKey);
         instanceCreator.getOrCreate(mainClass, params, manualStartAndStop);
 
-        Multimap<Integer, String> instancesByLevel = ArrayListMultimap.create();
+        Multimap<Integer, String> instancesByLevel = TreeMultimap.create();
 
-        for (Map.Entry<String, Integer> entry : instanceCreator.getLevels().entrySet()) {
-            instancesByLevel.put(entry.getValue(), entry.getKey());
+        for (Map.Entry<String, Instance> entry : instanceCreator.getInstances().entrySet()) {
+            instancesByLevel.put(entry.getValue().getLevel(), entry.getKey());
         }
 
         LOGGER.info("\nDependencies by level:\n{}",
@@ -88,7 +89,7 @@ public class ServiceBuilder {
                                                                 .collect(Collectors.toList());
 
         LOGGER.info("\nDependencies by class:\n{}",
-                    LoggingUtils.dependenciesByClass(instanceCreator.getDependencies()));
+                    LoggingUtils.dependenciesByClass(instanceCreator.getInstances()));
 
         if (!instanceCreator.getUnusedCreators().isEmpty()) {
             LOGGER.warn("\nSome creators were not used during service construction. " +
@@ -96,7 +97,7 @@ public class ServiceBuilder {
                         LoggingUtils.unusedCreators(instanceCreator.getUnusedCreators()));
         }
 
-        return new Service(instanceCreator, sortedLevels);
+        return new Service(this::getInstanceKey, instanceCreator.getInstances(), sortedLevels);
     }
 
     private Map<Class<?>, Creator<?>> extractDefaultCreators(Map<Class<?>, Creator<?>> creators) {
