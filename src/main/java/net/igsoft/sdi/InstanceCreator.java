@@ -19,13 +19,11 @@ public class InstanceCreator {
     private final Map<Class<?>, Creator<?>> creators;
     private final Map<Class<?>, Creator<?>> defaultCreators;
     private final Map<Class<?>, Creator<?>> unusedCreators;
-
     private final KeyGenerator keyGenerator;
-
+    private final Deque<Instance> stack;
     private final Map<String, Instance> instances;
-    private final Deque<String> stack;
 
-    public InstanceCreator(Map<Class<?>, Creator<?>> creators,
+    InstanceCreator(Map<Class<?>, Creator<?>> creators,
                            Map<Class<?>, Creator<?>> defaultCreators, KeyGenerator keyGenerator) {
         this.creators = creators;
         this.unusedCreators = Maps.newHashMap(creators);
@@ -41,28 +39,18 @@ public class InstanceCreator {
         String instanceKey = keyGenerator.generate(clazz, params.getSerializedParameters());
 
         if (!stack.isEmpty()) {
-            instances.get(stack.peek()).addDependency(instanceKey);
+            stack.peek().addDependency(instanceKey);
         }
 
-        stack.push(instanceKey);
+        Instance instance = instances.computeIfAbsent(instanceKey, s -> new Instance());
+
+        stack.push(instance);
 
 
-        //NOTE: seems like a bug in JDK - below implementation (computeIfAbsent) doesn't work while standard implementation (checking for null) works
-        //        T instance = (T) instances.computeIfAbsent(instanceKey, s -> {
-        //          instance = createInstance(clazz, params);
-        //          LOGGER.debug("Inserting to instances: {} -> {}", instanceKey, instance);\
-        //          return instance;
-        //        });
-
-//        T instance = (T) instances.get(instanceKey);
-
-        Instance instance = instances.get(instanceKey);
-
-        if (instance == null) {
-            instance = new Instance();
-            LOGGER.debug("Inserting to instances: {} -> {}", instanceKey, instance);
-            instances.put(instanceKey, instance);
-            instance.setValue(createInstanceValue(clazz, params));
+        if (instance.getLevel() == 0) {
+            //It's just freshly created instance...
+            instance.setValue(calculateInstanceValue(clazz, params));
+            instance.setLevel(stack.size());
         }
 
         instance.manualStartAndStop(manualStartAndStop);
@@ -96,13 +84,9 @@ public class InstanceCreator {
         return instances;
     }
 
-    public KeyGenerator getKeyGenerator() {
-        return keyGenerator;
-    }
-
     @SuppressWarnings("unchecked")
-    private <T> T createInstanceValue(Class<T> clazz, CreatorParams params) {
-        T instance;
+    private <T> T calculateInstanceValue(Class<T> clazz, CreatorParams params) {
+        T instanceValue;
 
         Creator<T> creator = (Creator<T>) creators.get(clazz);
         unusedCreators.remove(clazz);
@@ -120,16 +104,16 @@ public class InstanceCreator {
         checkState(creator != null, "No creator has been found for class: " + clazz.getName());
 
         if (!params.isEmpty()) {
-            instance = creator.create(this, params);
+            instanceValue = creator.create(this, params);
             if (!params.areAllUsed()) {
                 LOGGER.warn(
                         "Not all parameters were used during construction of '{}'. Unused parameters: {}",
                         clazz.getName(), params.unusedParameters());
             }
         } else {
-            instance = creator.create(this);
+            instanceValue = creator.create(this);
         }
-        return instance;
+        return instanceValue;
     }
 
     private void pushDown(Instance instance, int levelDistance) {

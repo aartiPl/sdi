@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.igsoft.sdi.internal.Instance;
+import net.igsoft.sdi.internal.KeyGenerator;
 import net.igsoft.sdi.internal.ManageableState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,11 +18,14 @@ public class Service implements Manageable {
     private static final Logger LOGGER = LoggerFactory.getLogger(Service.class);
 
     private final Map<String, ManageableState> states;
-    private final InstanceCreator instanceCreator;
+    private final KeyGenerator keyGenerator;
+    private final Map<String, Instance> instances;
     private final List<Collection<String>> sortedLevels;
 
-    Service(InstanceCreator instanceCreator, List<Collection<String>> sortedLevels) {
-        this.instanceCreator = instanceCreator;
+    Service(KeyGenerator keyGenerator, Map<String, Instance> instances,
+            List<Collection<String>> sortedLevels) {
+        this.keyGenerator = keyGenerator;
+        this.instances = instances;
         this.sortedLevels = sortedLevels;
         this.states = Maps.newHashMap();
     }
@@ -32,10 +36,7 @@ public class Service implements Manageable {
 
     @SuppressWarnings("unchecked")
     public <T> T get(Class<T> clazz, CreatorParams params) {
-        return (T) instanceCreator.getInstances()
-                                  .get(instanceCreator.getKeyGenerator()
-                                                      .generate(clazz,
-                                                                params.getSerializedParameters()));
+        return (T) instances.get(keyGenerator.generate(clazz, params.getSerializedParameters()));
     }
 
     @Override
@@ -74,7 +75,7 @@ public class Service implements Manageable {
                                                             Consumer<T> operation) {
         for (Collection<String> ids : levels) {
             for (String id : ids) {
-                Instance instance = instanceCreator.getInstances().get(id);
+                Instance instance = instances.get(id);
                 Object instanceValue = instance.getValue();
 
                 boolean isSubclassOfClazz = clazz.isAssignableFrom(instanceValue.getClass());

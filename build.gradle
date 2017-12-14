@@ -4,14 +4,15 @@ version '1.0-SNAPSHOT'
 apply plugin: 'java'
 
 sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    compile 'com.google.guava:guava:22.0'
-    compile 'org.apache.commons:commons-lang3:3.6'
+    compile 'com.google.guava:guava:23.5-jre'
+    compile 'org.apache.commons:commons-lang3:3.7'
     compile 'ch.qos.logback:logback-classic:1.2.3'
 
     testCompile 'junit:junit:4.12'

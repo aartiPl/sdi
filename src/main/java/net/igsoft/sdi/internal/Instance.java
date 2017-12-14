@@ -2,8 +2,10 @@ package net.igsoft.sdi.internal;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class Instance {
@@ -11,13 +13,13 @@ public class Instance {
     private Object value;
     private int level;
     private boolean manualStartAndStop;
-    private List<String> dependencies;
+    private Set<String> dependencies;
 
     public Instance() {
         this.value = null;
         this.level = 0;
         this.manualStartAndStop = false;
-        this.dependencies = Lists.newArrayList();
+        this.dependencies = Sets.newHashSet();
     }
 
     public Object getValue() {
@@ -46,7 +48,7 @@ public class Instance {
         this.manualStartAndStop = this.manualStartAndStop || manualStartAndStop;
     }
 
-    public List<String> getDependencies() {
+    public Set<String> getDependencies() {
         return dependencies;
     }
 
