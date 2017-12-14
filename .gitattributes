@@ -3,5 +3,6 @@
 *.jar binary
 
 *.bat text eol=crlf
+*.bat properties eol=crlf
 
 *.* text eol=lf
