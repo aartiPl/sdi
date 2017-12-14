@@ -43,9 +43,7 @@ public class InstanceCreator {
         }
 
         Instance instance = instances.computeIfAbsent(instanceKey, s -> new Instance());
-
         stack.push(instance);
-
 
         if (instance.getLevel() == 0) {
             //It's just freshly created instance...
