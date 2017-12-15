@@ -5,7 +5,36 @@ It achieves it without using annotations or reflections - just simple Java code.
 Additionally, you can manage your service/application life cycle just by calling methods:
 init(), start(), stop() and close() also by just calling these method on parent service.
 You don't have any "configuration" for wiring up all classes - it is done in code.
-All that takes less than 300 LOC.
+All that takes less than 300 LOC of code in micro-framework implementation.
+
+Please let me know if you have any comments or suggestions about this project.
+
+== How to start
+
+Add dependency on SDI framework in your build file:
+
+=== Maven
+
+[source,xml]
+----
+<dependency>
+    <groupId>net.igsoft</groupId>
+    <artifactId>sdi</artifactId>
+    <version>0.8.0</version>
+</dependency>
+----
+
+=== Gradle
+
+[source,gradle]
+----
+dependencies {
+    compile 'net.igsoft:sdi:0.8.0'
+}
+----
+
+SDI has only dependency on Guava, Apache Commons Lang and Logback.
+They are not critical, so I will consider to remove them.
 
 == Concept and simple usage
 

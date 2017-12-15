@@ -1,5 +1,5 @@
 group 'net.igsoft'
-version '0.8.0-SNAPSHOT'
+version '0.8.0'
 
 apply plugin: 'java'
 apply plugin: 'maven'

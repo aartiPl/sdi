@@ -1,3 +1,4 @@
 * Parallel init/start/stop/close of classes
 * More tests
-* Break circular dependencies
+* Test / break circular dependencies
+* Optionally remove dependency on Apache Commons / Guava
