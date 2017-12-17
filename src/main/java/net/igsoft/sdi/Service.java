@@ -36,7 +36,8 @@ public class Service implements Manageable {
 
     @SuppressWarnings("unchecked")
     public <T> T get(Class<T> clazz, CreatorParams params) {
-        return (T) instances.get(keyGenerator.generate(clazz, params.getSerializedParameters()));
+        return (T) instances.get(keyGenerator.generate(clazz, params.getSerializedParameters()))
+                            .getValue();
     }
 
     @Override
