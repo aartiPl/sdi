@@ -148,10 +148,10 @@ public class MqListener implements Manageable {
     }
 }
 
-class ConfigCreator extends Creator<Config> {
+class MqListenerCreator extends Creator<MqListener> {
     @Override
-    public Config create(InstanceCreator instanceCreator) {
-        return new Config();
+    public MqListener create(InstanceCreator instanceCreator) {
+        return new MqListener();
     }
 }
 
