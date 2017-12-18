@@ -1,6 +1,6 @@
 = Simple Dependency Injection
 
-SDI allows to excessively use Dependency Injection pattern in your application.
+SDI allows to extensively use Dependency Injection pattern in your application.
 It achieves it without using annotations or reflections - just simple Java code.
 Additionally, you can manage your service/application life cycle just by calling methods:
 init(), start(), stop() and close() also by just calling these method on parent service.
