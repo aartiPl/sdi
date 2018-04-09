@@ -1,4 +1,7 @@
-package net.igsoft.sdi;
+package net.igsoft.sdi.classes;
+
+import net.igsoft.sdi.Manageable;
+import net.igsoft.sdi.Stepper;
 
 class A implements Manageable {
     private final Stepper stepper;

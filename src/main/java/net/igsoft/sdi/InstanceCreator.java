@@ -16,15 +16,15 @@ public class InstanceCreator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceCreator.class);
 
-    private final Map<Class<?>, Creator<?>> creators;
-    private final Map<Class<?>, Creator<?>> defaultCreators;
-    private final Map<Class<?>, Creator<?>> unusedCreators;
+    private final Map<Class<?>, CreatorBase<?>> creators;
+    private final Map<Class<?>, CreatorBase<?>> defaultCreators;
+    private final Map<Class<?>, CreatorBase<?>> unusedCreators;
     private final KeyGenerator keyGenerator;
     private final Deque<Instance> stack;
     private final Map<String, Instance> instances;
 
-    InstanceCreator(Map<Class<?>, Creator<?>> creators,
-                           Map<Class<?>, Creator<?>> defaultCreators, KeyGenerator keyGenerator) {
+    InstanceCreator(Map<Class<?>, CreatorBase<?>> creators,
+                    Map<Class<?>, CreatorBase<?>> defaultCreators, KeyGenerator keyGenerator) {
         this.creators = creators;
         this.unusedCreators = Maps.newHashMap(creators);
         this.defaultCreators = defaultCreators;
@@ -74,7 +74,7 @@ public class InstanceCreator {
         return getOrCreate(clazz, CreatorParams.EMPTY_PARAMS, false);
     }
 
-    public Map<Class<?>, Creator<?>> getUnusedCreators() {
+    public Map<Class<?>, CreatorBase<?>> getUnusedCreators() {
         return unusedCreators;
     }
 
@@ -86,30 +86,30 @@ public class InstanceCreator {
     private <T> T calculateInstanceValue(Class<T> clazz, CreatorParams params) {
         T instanceValue;
 
-        Creator<T> creator = (Creator<T>) creators.get(clazz);
+        CreatorBase<T> creatorBase = (CreatorBase<T>) creators.get(clazz);
         unusedCreators.remove(clazz);
 
-        if (creator == null) {
+        if (creatorBase == null) {
             LOGGER.info(
                     "No explicit creator has been found for class: {}. Looking in default creators...",
                     clazz.getName());
 
-            creator = (Creator<T>) defaultCreators.get(clazz);
+            creatorBase = (CreatorBase<T>) defaultCreators.get(clazz);
             LOGGER.info("Default creator for class {} has {}been found", clazz.getName(),
-                        creator == null ? "not " : "");
+                        creatorBase == null ? "not " : "");
         }
 
-        checkState(creator != null, "No creator has been found for class: " + clazz.getName());
+        checkState(creatorBase != null, "No creator has been found for class: " + clazz.getName());
 
         if (!params.isEmpty()) {
-            instanceValue = creator.create(this, params);
+            instanceValue = creatorBase.create(this, params);
             if (!params.areAllUsed()) {
                 LOGGER.warn(
                         "Not all parameters were used during construction of '{}'. Unused parameters: {}",
                         clazz.getName(), params.unusedParameters());
             }
         } else {
-            instanceValue = creator.create(this);
+            instanceValue = creatorBase.create(this);
         }
         return instanceValue;
     }

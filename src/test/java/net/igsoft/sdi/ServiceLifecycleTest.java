@@ -2,10 +2,16 @@ package net.igsoft.sdi;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import net.igsoft.sdi.classes.ACreator;
+import net.igsoft.sdi.classes.BCreator;
+import net.igsoft.sdi.classes.C;
+import net.igsoft.sdi.classes.CCreator;
+import net.igsoft.sdi.classes.DCreator;
+import net.igsoft.sdi.classes.ECreator;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ServiceBuilderTest {
+public class ServiceLifecycleTest {
 
     /*
         Class hierarchy:

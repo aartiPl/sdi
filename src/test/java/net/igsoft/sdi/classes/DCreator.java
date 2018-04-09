@@ -1,6 +1,10 @@
-package net.igsoft.sdi;
+package net.igsoft.sdi.classes;
 
-class DCreator extends Creator<D> {
+import net.igsoft.sdi.CreatorBase;
+import net.igsoft.sdi.InstanceCreator;
+import net.igsoft.sdi.Stepper;
+
+public class DCreator extends CreatorBase<D> {
 
     private final Stepper stepper;
 

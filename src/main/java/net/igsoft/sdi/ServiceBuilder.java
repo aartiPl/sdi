@@ -20,7 +20,7 @@ public class ServiceBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceBuilder.class);
 
-    private final Map<Class<?>, Creator<?>> creators = new HashMap<>();
+    private final Map<Class<?>, CreatorBase<?>> creators = new HashMap<>();
 
     private Class<?> mainClass;
     private CreatorParams params;
@@ -48,8 +48,8 @@ public class ServiceBuilder {
         return this;
     }
 
-    public ServiceBuilder withCreator(Creator<?> creator) {
-        Class<?> createdClass = getCreatedClass(creator);
+    public ServiceBuilder withCreator(CreatorBase<?> creator) {
+        Class<?> createdClass = creator.getCreatedClass();
 
         if (creators.containsKey(createdClass)) {
             throw new IllegalArgumentException(
@@ -67,7 +67,7 @@ public class ServiceBuilder {
     public Service build() {
         checkNotNull(mainClass);
 
-        Map<Class<?>, Creator<?>> defaultCreators = extractDefaultCreators(creators);
+        Map<Class<?>, CreatorBase<?>> defaultCreators = extractDefaultCreators(creators);
         InstanceCreator instanceCreator = new InstanceCreator(creators, defaultCreators,
                                                               this::getInstanceKey);
         instanceCreator.getOrCreate(mainClass, params, manualStartAndStop);
@@ -100,12 +100,12 @@ public class ServiceBuilder {
         return new Service(this::getInstanceKey, instanceCreator.getInstances(), sortedLevels);
     }
 
-    private Map<Class<?>, Creator<?>> extractDefaultCreators(Map<Class<?>, Creator<?>> creators) {
-        Map<Class<?>, Creator<?>> defaultCreators = new HashMap<>();
+    private Map<Class<?>, CreatorBase<?>> extractDefaultCreators(Map<Class<?>, CreatorBase<?>> creators) {
+        Map<Class<?>, CreatorBase<?>> defaultCreators = new HashMap<>();
 
-        for (Creator<?> creator : creators.values()) {
-            for (Creator<?> defaultCreator : creator.defaultCreators()) {
-                Class<?> createdClass = getCreatedClass(defaultCreator);
+        for (CreatorBase<?> creatorBase : creators.values()) {
+            for (CreatorBase<?> defaultCreator : creatorBase.defaultCreators()) {
+                Class<?> createdClass = defaultCreator.getCreatedClass();
 
                 if (defaultCreators.containsKey(createdClass) &&
                     !creators.containsKey(createdClass)) {
@@ -135,26 +135,5 @@ public class ServiceBuilder {
         }
 
         return id;
-    }
-
-    private Class<?> getCreatedClass(Creator<?> creator) {
-        String typeName = ((ParameterizedType) creator.getClass()
-                                                      .getGenericSuperclass()).getActualTypeArguments()[0]
-                .getTypeName();
-        int typeParametersIndex = typeName.indexOf('<');
-
-        if (typeParametersIndex != -1) {
-            typeName = typeName.substring(0, typeParametersIndex);
-        }
-
-        Class<?> clazz;
-
-        try {
-            clazz = Class.forName(typeName);
-        } catch (ClassNotFoundException e) {
-            throw new IllegalStateException("Can not find a Class for '" + typeName + "'.", e);
-        }
-
-        return clazz;
     }
 }
