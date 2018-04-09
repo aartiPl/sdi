@@ -3,11 +3,13 @@
 *.ctxt
 .mtj.tmp/
 *.jar
+!./gradle/wrapper/gradle-wrapper.jar
 *.war
 *.ear
 *.zip
 *.tar.gz
 *.rar
+*.iml
 hs_err_pid*
 
 .gradle/
