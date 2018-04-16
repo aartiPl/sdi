@@ -2,5 +2,5 @@
 * More tests
 * Test / break circular dependencies
 * Optionally remove dependency on Apache Commons / Guava
-* Duplicated code: ServiceBuilder.java:getCreatedClass / Creator.java:getClassOfParentTypeParameter
 * 'start' should throw if there was no 'init' before
+* Create all classes, which have explicitly given creators - not necessary to specify main class

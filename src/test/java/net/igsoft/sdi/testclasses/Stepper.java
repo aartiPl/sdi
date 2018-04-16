@@ -1,4 +1,4 @@
-package net.igsoft.sdi;
+package net.igsoft.sdi.testclasses;
 
 import java.util.List;
 

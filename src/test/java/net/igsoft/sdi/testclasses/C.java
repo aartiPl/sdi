@@ -1,7 +1,6 @@
-package net.igsoft.sdi.classes;
+package net.igsoft.sdi.testclasses;
 
 import net.igsoft.sdi.Manageable;
-import net.igsoft.sdi.Stepper;
 
 public class C implements Manageable {
 

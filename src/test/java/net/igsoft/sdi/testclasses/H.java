@@ -1,6 +1,4 @@
-package net.igsoft.sdi.classes;
-
-import net.igsoft.sdi.Stepper;
+package net.igsoft.sdi.testclasses;
 
 public class H {
     public H(Stepper stepper, G g) {

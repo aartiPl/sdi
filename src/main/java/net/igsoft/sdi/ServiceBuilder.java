@@ -70,7 +70,12 @@ public class ServiceBuilder {
         Map<Class<?>, CreatorBase<?>> defaultCreators = extractDefaultCreators(creators);
         InstanceCreator instanceCreator = new InstanceCreator(creators, defaultCreators,
                                                               this::getInstanceKey);
-        instanceCreator.getOrCreate(mainClass, params, manualStartAndStop);
+
+        if (params.equals(CreatorParams.EMPTY_PARAMS)) {
+            instanceCreator.getOrCreate(mainClass, manualStartAndStop);
+        } else {
+            instanceCreator.getOrCreate(mainClass, params, manualStartAndStop);
+        }
 
         Multimap<Integer, String> instancesByLevel = TreeMultimap.create();
 

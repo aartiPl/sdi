@@ -2,7 +2,7 @@ package net.igsoft.sdi;
 
 import java.lang.reflect.Constructor;
 
-public class AutoCreator<T> extends CreatorBase<T> {
+public class AutoCreator<T> extends Creator<T> {
 
     public AutoCreator(Class<T> myClazz) {
         super(myClazz);

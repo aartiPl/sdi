@@ -2,12 +2,13 @@ package net.igsoft.sdi;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import net.igsoft.sdi.classes.ACreator;
-import net.igsoft.sdi.classes.BCreator;
-import net.igsoft.sdi.classes.C;
-import net.igsoft.sdi.classes.CCreator;
-import net.igsoft.sdi.classes.DCreator;
-import net.igsoft.sdi.classes.ECreator;
+import net.igsoft.sdi.testclasses.ACreator;
+import net.igsoft.sdi.testclasses.BCreator;
+import net.igsoft.sdi.testclasses.C;
+import net.igsoft.sdi.testclasses.CCreator;
+import net.igsoft.sdi.testclasses.DCreator;
+import net.igsoft.sdi.testclasses.ECreator;
+import net.igsoft.sdi.testclasses.Stepper;
 import org.junit.Before;
 import org.junit.Test;
 

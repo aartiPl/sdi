@@ -1,6 +1,6 @@
 package net.igsoft.sdi;
 
-import net.igsoft.sdi.classes.*;
+import net.igsoft.sdi.testclasses.*;
 import org.junit.Before;
 import org.junit.Test;
 

@@ -19,17 +19,6 @@ public abstract class CreatorBase<T> {
         this.myClazz = myClazz;
     }
 
-    public T create(InstanceCreator instanceCreator) {
-        throw new UnsupportedOperationException(
-                "Method 'T create(InstanceCreator instanceCreator)' must be implemented in creator of '" + myClazz.getName() + "'");
-    }
-
-    public T create(InstanceCreator instanceCreator, CreatorParams params) {
-        throw new UnsupportedOperationException(
-                "Method 'T create(InstanceCreator instanceCreator, CreatorParams params)' must be implemented in creator of '" +
-                        getCreatedClass().getName() + "'");
-    }
-
     public List<CreatorBase<?>> defaultCreators() {
         return Lists.newArrayList();
     }
