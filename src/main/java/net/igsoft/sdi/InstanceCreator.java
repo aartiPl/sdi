@@ -2,12 +2,9 @@ package net.igsoft.sdi;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import java.lang.reflect.Field;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 import com.google.common.collect.Maps;
 import net.igsoft.sdi.internal.Instance;
@@ -19,15 +16,17 @@ public class InstanceCreator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceCreator.class);
 
-    private final Map<Class<?>, CreatorBase<?>> creators;
-    private final Map<Class<?>, CreatorBase<?>> defaultCreators;
-    private final Map<Class<?>, CreatorBase<?>> unusedCreators;
+    private final Map<Class<?>, Creator<?, ?>> creators;
+    private final Map<Class<?>, Creator<?, ?>> defaultCreators;
+    private final Map<Class<?>, Creator<?, ?>> unusedCreators;
     private final KeyGenerator keyGenerator;
     private final Deque<Instance> stack;
     private final Map<String, Instance> instances;
 
-    InstanceCreator(Map<Class<?>, CreatorBase<?>> creators,
-                    Map<Class<?>, CreatorBase<?>> defaultCreators, KeyGenerator keyGenerator) {
+    InstanceCreator(Map<Class<?>, Creator<?, ?>> creators,
+                    Map<Class<?>, ParametersBase> parameters,
+                    Map<Class<?>, Creator<?, ?>> defaultCreators,
+                    KeyGenerator keyGenerator) {
         this.creators = creators;
         this.unusedCreators = Maps.newHashMap(creators);
         this.defaultCreators = defaultCreators;
@@ -36,46 +35,17 @@ public class InstanceCreator {
         this.stack = new ArrayDeque<>();
     }
 
-
-
-    public <P, R> R getOrCreate(Class<?> clazz, P params, boolean manualStartAndStop) {
-        return getOrCreateInternal(clazz, serialize(params), creatorBase -> ((ParametrizedCreator<P, R>)creatorBase).create(InstanceCreator.this, params), manualStartAndStop);
+    public <P extends ParametersBase, R> R getOrCreate(Class<?> clazz) {
+        return getOrCreate(clazz, LaunchType.AUTOMATIC);
     }
 
-    public <R> R getOrCreate(Class<?> clazz, boolean manualStartAndStop) {
-        return getOrCreateInternal(clazz, "", creatorBase -> ((Creator<R>)creatorBase).create(InstanceCreator.this), manualStartAndStop);
-    }
-
-    public <P, R> R getOrCreate(Class<?> clazz, P params) {
-        return getOrCreateInternal(clazz, serialize(params), creatorBase -> ((ParametrizedCreator<P, R>)creatorBase).create(InstanceCreator.this, params), false);
-    }
-
-    public <R> R getOrCreate(Class<?> clazz) {
-        return getOrCreateInternal(clazz, "", creatorBase -> ((Creator<R>)creatorBase).create(InstanceCreator.this), false);
-    }
-
-    public Map<Class<?>, CreatorBase<?>> getUnusedCreators() {
-        return unusedCreators;
-    }
-
-    public Map<String, Instance> getInstances() {
-        return instances;
-    }
-
-    private <P> String serialize(P params) {
-        Field[] declaredFields = params.getClass().getDeclaredFields();
-
-        for(Field field : declaredFields) {
-
-        }
-
-        return params.toString();
-    }
-
-    @SuppressWarnings("unchecked")
-    private <P, R> R getOrCreateInternal(Class<?> clazz, String serializedParams, Function<CreatorBase<R>, R> fn, boolean manualStartAndStop) {
+    public <P extends ParametersBase, R> R getOrCreate(Class<?> clazz, P params) {
         //NOTE: ManualStartAndStop does not differentiate instances!
-        String instanceKey = keyGenerator.generate(clazz, serializedParams);
+
+        //TODO: czy nie powinno się tu sprawdzać czy instancja już nie istnieje, a jeśli istnieje to wracać?
+        //w ServiceBuilder wołane jest to wielokrotnie, w przeciwieństwie do wcześniejszego kodu
+
+        String instanceKey = keyGenerator.generate(clazz, params.cachedUniqueId());
 
         if (!stack.isEmpty()) {
             stack.peek().addDependency(instanceKey);
@@ -86,11 +56,11 @@ public class InstanceCreator {
 
         if (instance.getLevel() == 0) {
             //It's just freshly created instance...
-            instance.setValue(calculateInstanceValue(clazz, fn));
+            instance.setValue(calculateInstanceValue(clazz, params));
             instance.setLevel(stack.size());
         }
 
-        instance.manualStartAndStop(manualStartAndStop);
+        instance.manualStartAndStop(params.isManualStartAndStop());
 
         if (instance.getLevel() < stack.size()) {
             pushDown(instance, stack.size() - instance.getLevel());
@@ -101,26 +71,33 @@ public class InstanceCreator {
         return (R) instance.getValue();
     }
 
-    @SuppressWarnings("unchecked")
-    private <P, R> R calculateInstanceValue(Class<?> clazz, Function<CreatorBase<R>, R> fn) {
-        R instanceValue;
+    public Map<Class<?>, Creator<?, ?>> getUnusedCreators() {
+        return unusedCreators;
+    }
 
-        CreatorBase<R> creatorBase = (CreatorBase<R>) creators.get(clazz);
+    public Map<String, Instance> getInstances() {
+        return instances;
+    }
+
+    @SuppressWarnings("unchecked")
+    private <P extends ParametersBase, R> R calculateInstanceValue(Class<?> clazz, P params) {
+        Creator<R, P> creator = (Creator<R, P>) creators.get(clazz);
+
         unusedCreators.remove(clazz);
 
-        if (creatorBase == null) {
+        if (creator == null) {
             LOGGER.info(
                     "No explicit creator has been found for class: {}. Looking in default creators...",
                     clazz.getName());
 
-            creatorBase = (CreatorBase<R>) defaultCreators.get(clazz);
+            creator = (Creator<R, P>) defaultCreators.get(clazz);
             LOGGER.info("Default creator for class {} has {}been found", clazz.getName(),
-                        creatorBase == null ? "not " : "");
+                        creator == null ? "not " : "");
         }
 
-        checkState(creatorBase != null, "No creator has been found for class: " + clazz.getName());
+        checkState(creator != null, "No creator has been found for class: " + clazz.getName());
 
-        return fn.apply(creatorBase);
+        return creator.create(this, params);
 
 //        if (!params.isEmpty()) {
 //            instanceValue = creatorBase.create(this, params);

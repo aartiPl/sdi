@@ -1,19 +1,12 @@
 package net.igsoft.sdi.testclasses;
 
 import net.igsoft.sdi.Creator;
-import net.igsoft.sdi.CreatorBase;
 import net.igsoft.sdi.InstanceCreator;
+import net.igsoft.sdi.LaunchType;
 
-public class ECreator extends Creator<E> {
-
-    private final Stepper stepper;
-
-    public ECreator(Stepper stepper) {
-        this.stepper = stepper;
-    }
-
+public class ECreator extends Creator<E, LaunchType> {
     @Override
-    public E create(InstanceCreator instanceCreator) {
-        return new E(stepper);
+    public E create(InstanceCreator instanceCreator, LaunchType launchType) {
+        return new E(instanceCreator.getOrCreate(Stepper.class));
     }
 }

@@ -2,7 +2,6 @@ package net.igsoft.sdi;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.lang.reflect.ParameterizedType;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -20,35 +19,15 @@ public class ServiceBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceBuilder.class);
 
-    private final Map<Class<?>, CreatorBase<?>> creators = new HashMap<>();
+    private final Map<Class<?>, Creator<?, ?>> creators = new HashMap<>();
+    private final Map<Class<?>, ParametersBase> defaultParameters = new HashMap<>();
 
-    private Class<?> mainClass;
-    private CreatorParams params;
-    private boolean manualStartAndStop;
-
-    public ServiceBuilder withMainClass(Class<?> mainClass) {
-        this.mainClass = mainClass;
-        this.params = CreatorParams.EMPTY_PARAMS;
-        this.manualStartAndStop = false;
+    public <P extends ParametersBase> ServiceBuilder withCreator(Creator<?, ?> creator) {
+        withCreator(creator, LaunchType.AUTOMATIC);
         return this;
     }
 
-    public ServiceBuilder withMainClass(Class<?> mainClass, CreatorParams params) {
-        this.mainClass = mainClass;
-        this.params = params;
-        this.manualStartAndStop = false;
-        return this;
-    }
-
-    public ServiceBuilder withMainClass(Class<?> mainClass, CreatorParams params,
-                                        boolean manualStartAndStop) {
-        this.mainClass = mainClass;
-        this.params = params;
-        this.manualStartAndStop = manualStartAndStop;
-        return this;
-    }
-
-    public ServiceBuilder withCreator(CreatorBase<?> creator) {
+    public <P extends ParametersBase> ServiceBuilder withCreator(Creator<?, ?> creator, P params) {
         Class<?> createdClass = creator.getCreatedClass();
 
         if (creators.containsKey(createdClass)) {
@@ -61,20 +40,23 @@ public class ServiceBuilder {
         }
 
         creators.put(createdClass, creator);
+        defaultParameters.put(createdClass, params);
         return this;
     }
 
     public Service build() {
-        checkNotNull(mainClass);
-
-        Map<Class<?>, CreatorBase<?>> defaultCreators = extractDefaultCreators(creators);
-        InstanceCreator instanceCreator = new InstanceCreator(creators, defaultCreators,
+        Map<Class<?>, Creator<?, ?>> defaultCreators = extractDefaultCreators(creators);
+        InstanceCreator instanceCreator = new InstanceCreator(creators, defaultParameters, defaultCreators,
                                                               this::getInstanceKey);
 
-        if (params.equals(CreatorParams.EMPTY_PARAMS)) {
-            instanceCreator.getOrCreate(mainClass, manualStartAndStop);
-        } else {
-            instanceCreator.getOrCreate(mainClass, params, manualStartAndStop);
+        //FIXME: to tworzy wszytkie instancje dla domyślnych parametrów --- nie jest to lazy
+        //niektóre instancje mogą być nadmiarowe
+        for(Map.Entry<Class<?>, Creator<?, ?>> entry : creators.entrySet()) {
+
+            //NOTE: we are building only instances with same parameter types
+            if ((entry.getValue().getParameterClass()).equals(defaultParameters.get(entry.getKey()).getClass())) {
+                instanceCreator.getOrCreate(entry.getKey(), defaultParameters.get(entry.getKey()));
+            }
         }
 
         Multimap<Integer, String> instancesByLevel = TreeMultimap.create();
@@ -105,11 +87,11 @@ public class ServiceBuilder {
         return new Service(this::getInstanceKey, instanceCreator.getInstances(), sortedLevels);
     }
 
-    private Map<Class<?>, CreatorBase<?>> extractDefaultCreators(Map<Class<?>, CreatorBase<?>> creators) {
-        Map<Class<?>, CreatorBase<?>> defaultCreators = new HashMap<>();
+    private Map<Class<?>, Creator<?, ?>> extractDefaultCreators(Map<Class<?>, Creator<?, ?>> creators) {
+        Map<Class<?>, Creator<?, ?>> defaultCreators = new HashMap<>();
 
-        for (CreatorBase<?> creatorBase : creators.values()) {
-            for (CreatorBase<?> defaultCreator : creatorBase.defaultCreators()) {
+        for (Creator<?, ?> creator : creators.values()) {
+            for (Creator<?, ?> defaultCreator : creator.defaultCreators()) {
                 Class<?> createdClass = defaultCreator.getCreatedClass();
 
                 if (defaultCreators.containsKey(createdClass) &&

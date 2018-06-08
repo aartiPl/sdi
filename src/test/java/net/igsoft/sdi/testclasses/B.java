@@ -6,7 +6,7 @@ class B implements Manageable {
 
     private final Stepper stepper;
 
-    public B(D d, Stepper stepper) {
+    public B(D d, P p, Stepper stepper) {
         this.stepper = stepper;
         stepper.addStep(this.getClass(), "ctor");
     }

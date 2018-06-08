@@ -12,7 +12,6 @@ public class AutoCreatorTest {
     @Before
     public void setUp() {
         service = Service.builder()
-                .withMainClass(F.class)
                 .withCreator(new AutoCreator<>(Stepper.class))
                 .withCreator(new AutoCreator<>(F.class))
                 .withCreator(new AutoCreator<>(G.class))

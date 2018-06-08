@@ -30,14 +30,16 @@ public class Service implements Manageable {
         this.states = Maps.newHashMap();
     }
 
-    public <T> T get(Class<T> clazz) {
-        return get(clazz, CreatorParams.EMPTY_PARAMS);
+    @SuppressWarnings("unchecked")
+    public <T, P extends ParametersBase> T get(Class<T> clazz, P params) {
+        return (T) instances.get(keyGenerator.generate(clazz, params.cachedUniqueId()))
+                            .getValue();
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T get(Class<T> clazz, CreatorParams params) {
-        return (T) instances.get(keyGenerator.generate(clazz, params.getSerializedParameters()))
-                            .getValue();
+    public <T, P extends ParametersBase> T get(Class<T> clazz) {
+        return (T) instances.get(keyGenerator.generate(clazz, ""))
+                .getValue();
     }
 
     @Override

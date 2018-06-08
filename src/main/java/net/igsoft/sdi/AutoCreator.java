@@ -2,14 +2,19 @@ package net.igsoft.sdi;
 
 import java.lang.reflect.Constructor;
 
-public class AutoCreator<T> extends Creator<T> {
+public class AutoCreator<T, P extends ParametersBase> extends Creator<T, P> {
 
     public AutoCreator(Class<T> myClazz) {
-        super(myClazz);
+        super(myClazz, (Class<P>)LaunchType.class);
     }
 
     @Override
-    public T create(InstanceCreator instanceCreator) {
+    public T create(InstanceCreator instanceCreator, P params) {
+
+        if (!params.getClass().equals(LaunchType.class)) {
+            throw new IllegalStateException("Can not automatically create instances based on parameters passed to creator.");
+        }
+
         Constructor<?>[] constructors = getCreatedClass().getConstructors();
 
         if (constructors.length > 1) {
@@ -35,7 +40,8 @@ public class AutoCreator<T> extends Creator<T> {
         Object[] values = new Object[constructor.getParameterCount()];
 
         for (int i = 0; i < constructor.getParameterCount(); i++) {
-            values[i] = instanceCreator.getOrCreate(constructor.getParameterTypes()[i]);
+            //NOTE: startStopManually will be passed automatically down the stack
+            values[i] = instanceCreator.getOrCreate(constructor.getParameterTypes()[i], params);
         }
 
         T instance;
