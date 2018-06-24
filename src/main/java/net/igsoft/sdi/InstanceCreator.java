@@ -24,7 +24,6 @@ public class InstanceCreator {
     private final Map<String, Instance> instances;
 
     InstanceCreator(Map<Class<?>, Creator<?, ?>> creators,
-                    Map<Class<?>, ParametersBase> parameters,
                     Map<Class<?>, Creator<?, ?>> defaultCreators,
                     KeyGenerator keyGenerator) {
         this.creators = creators;

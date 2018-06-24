@@ -1,5 +1,6 @@
 package net.igsoft.sdi;
 
+import net.igsoft.sdi.testclasses.P;
 import net.igsoft.sdi.testclasses.PCreator;
 import net.igsoft.sdi.testclasses.PCreatorParams;
 import net.igsoft.sdi.testclasses.RCreator;
@@ -15,7 +16,8 @@ public class ParametrizedCreatorTest {
     @Before
     public void setUp() {
         service = Service.builder()
-                .withCreator(new PCreator(), new PCreatorParams("id", false))
+                .withRootClass(P.class, new PCreatorParams("id", false))
+                .withCreator(new PCreator())
                 .withCreator(new RCreator())
                 .withCreator(new AutoCreator<>(Stepper.class))
                 .build();
