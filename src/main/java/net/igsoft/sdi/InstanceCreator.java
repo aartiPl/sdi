@@ -35,7 +35,7 @@ public class InstanceCreator {
         this.stack = new ArrayDeque<>();
     }
 
-    public <P extends ParametersBase, R> R getOrCreate(Class<?> clazz) {
+    public <R> R getOrCreate(Class<?> clazz) {
         return getOrCreate(clazz, LaunchType.AUTOMATIC);
     }
 
@@ -46,6 +46,10 @@ public class InstanceCreator {
         //w ServiceBuilder wołane jest to wielokrotnie, w przeciwieństwie do wcześniejszego kodu
 
         String instanceKey = keyGenerator.generate(clazz, params.cachedUniqueId());
+
+//        if (instances.containsKey(instanceKey) ) {
+//            return (R) instances.get(instanceKey).getValue();
+//        }
 
         if (!stack.isEmpty()) {
             stack.peek().addDependency(instanceKey);
@@ -92,7 +96,7 @@ public class InstanceCreator {
 
             creator = (Creator<R, P>) defaultCreators.get(clazz);
             LOGGER.info("Default creator for class {} has {}been found", clazz.getName(),
-                        creator == null ? "not " : "");
+                    creator == null ? "not " : "");
         }
 
         checkState(creator != null, "No creator has been found for class: " + clazz.getName());

@@ -15,10 +15,10 @@ public class ServiceLifecycleTest {
           2.        A  \
                    /    \
           3.      B      B
-                 |  \    | \
-          4.     D   P   D  P
-                 |       |
-          5.     E       E
+                 |  \     | \
+          4.     D   P    D  P
+                 |     \   |   \
+          5.     E     R    E    R
      */
 
     private Service service;

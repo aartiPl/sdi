@@ -1,12 +1,10 @@
 package net.igsoft.sdi.internal;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import java.util.Objects;
+import java.util.Set;
 
 public class Instance {
 
@@ -66,9 +64,9 @@ public class Instance {
         }
         Instance instance = (Instance) o;
         return level == instance.level &&
-               manualStartAndStop == instance.manualStartAndStop &&
-               Objects.equals(value, instance.value) &&
-               Objects.equals(dependencies, instance.dependencies);
+                manualStartAndStop == instance.manualStartAndStop &&
+                Objects.equals(value, instance.value) &&
+                Objects.equals(dependencies, instance.dependencies);
     }
 
     @Override
@@ -79,9 +77,9 @@ public class Instance {
     @Override
     public String toString() {
         return new ToStringBuilder(this).append("value", value)
-                                        .append("level", level)
-                                        .append("manualStartAndStop", manualStartAndStop)
-                                        .append("dependencies", dependencies)
-                                        .toString();
+                .append("level", level)
+                .append("manualStartAndStop", manualStartAndStop)
+                .append("dependencies", dependencies)
+                .toString();
     }
 }
