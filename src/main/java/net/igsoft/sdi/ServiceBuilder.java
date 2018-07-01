@@ -1,6 +1,11 @@
 package net.igsoft.sdi;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.TreeMultimap;
+import net.igsoft.sdi.internal.Instance;
+import net.igsoft.sdi.internal.LoggingUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -8,12 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.Multimap;
-import com.google.common.collect.TreeMultimap;
-import net.igsoft.sdi.internal.Instance;
-import net.igsoft.sdi.internal.LoggingUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.lang.String.format;
 
 public class ServiceBuilder {
 
@@ -28,8 +28,8 @@ public class ServiceBuilder {
 
     public ServiceBuilder withRootClass(Class<?> clazz, ParametersBase parameters) {
         if (roots.containsKey(clazz)) {
-            throw new IllegalArgumentException("Class " + clazz.getSimpleName() + " already provided as a root class " +
-                    "before.");
+            throw new IllegalArgumentException(format("Class %s already provided as a root class before.",
+                    clazz.getSimpleName()));
         }
 
         roots.put(clazz, parameters);
@@ -41,11 +41,8 @@ public class ServiceBuilder {
 
         if (creators.containsKey(createdClass)) {
             throw new IllegalArgumentException(
-                    "Duplicated creator given in 'withCreator' method:\n" +
-                            creator.getClass().getSimpleName() +
-                            " (for class: " +
-                            createdClass.getSimpleName() +
-                            ")");
+                    format("Duplicated creator given in 'withCreator' method:\n%s (for class: %s)",
+                            creator.getClass().getSimpleName(), createdClass.getSimpleName()));
         }
 
         creators.put(createdClass, creator);
@@ -58,6 +55,7 @@ public class ServiceBuilder {
 
         //TODO: root classes are the level 1 classes --- it is not really necessary to pass them explicitly
         //But is it really good? How to pass creator parameters? Is it clear what program does then?
+        //Also it is not possible to test if the code is clean e.g. if all creators are used.
         //Additionally when I move below block down, then dependencies are not yet calculated
         for (Map.Entry<Class<?>, ParametersBase> entry : roots.entrySet()) {
             instanceCreator.getOrCreate(entry.getKey(), entry.getValue());
@@ -103,17 +101,12 @@ public class ServiceBuilder {
             for (Creator<?, ?> defaultCreator : creator.defaultCreators()) {
                 Class<?> createdClass = defaultCreator.getCreatedClass();
 
-                if (defaultCreators.containsKey(createdClass) &&
-                        !creators.containsKey(createdClass)) {
-                    throw new IllegalStateException("Found duplicated default creators (c1: " +
-                            defaultCreator.getClass().getSimpleName() +
-                            ", c2: " +
-                            defaultCreators.get(createdClass)
-                                    .getClass()
-                                    .getSimpleName() +
-                            "), but no explicit creator for class '" +
-                            createdClass.getSimpleName() +
-                            "' was given.");
+                if (defaultCreators.containsKey(createdClass) && !creators.containsKey(createdClass)) {
+                    throw new IllegalStateException(format("Found duplicated default creators (c1: %s, c2: %s)" +
+                                    ", but no explicit creator for class '%s' was given.",
+                            defaultCreator.getClass().getSimpleName(),
+                            defaultCreators.get(createdClass).getClass().getSimpleName(),
+                            createdClass.getSimpleName()));
                 }
 
                 defaultCreators.put(createdClass, defaultCreator);

@@ -5,18 +5,18 @@ import net.igsoft.sdi.testclasses.PCreator;
 import net.igsoft.sdi.testclasses.PCreatorParams;
 import net.igsoft.sdi.testclasses.RCreator;
 import net.igsoft.sdi.testclasses.Stepper;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ParametrizedCreatorTest {
     private Service service;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         service = Service.builder()
-                .withRootClass(P.class, new PCreatorParams("id", false))
+                .withRootClass(P.class, new PCreatorParams(false, "id"))
                 .withCreator(new PCreator())
                 .withCreator(new RCreator())
                 .withCreator(new AutoCreator<>(Stepper.class))

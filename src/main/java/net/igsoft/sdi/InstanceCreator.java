@@ -41,14 +41,7 @@ public class InstanceCreator {
     public <P extends ParametersBase, R> R getOrCreate(Class<?> clazz, P params) {
         //NOTE: ManualStartAndStop does not differentiate instances!
 
-        //TODO: czy nie powinno się tu sprawdzać czy instancja już nie istnieje, a jeśli istnieje to wracać?
-        //w ServiceBuilder wołane jest to wielokrotnie, w przeciwieństwie do wcześniejszego kodu
-
         String instanceKey = keyGenerator.generate(clazz, params.cachedUniqueId());
-
-//        if (instances.containsKey(instanceKey) ) {
-//            return (R) instances.get(instanceKey).getValue();
-//        }
 
         if (!stack.isEmpty()) {
             stack.peek().addDependency(instanceKey);
@@ -101,18 +94,6 @@ public class InstanceCreator {
         checkState(creator != null, "No creator has been found for class: " + clazz.getName());
 
         return creator.create(this, params);
-
-//        if (!params.isEmpty()) {
-//            instanceValue = creatorBase.create(this, params);
-//            if (!params.areAllUsed()) {
-//                LOGGER.warn(
-//                        "Not all parameters were used during construction of '{}'. Unused parameters: {}",
-//                        clazz.getName(), params.unusedParameters());
-//            }
-//        } else {
-//            instanceValue = creatorBase.create(this);
-//        }
-//        return instanceValue;
     }
 
     private void pushDown(Instance instance, int levelDistance) {

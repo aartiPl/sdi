@@ -6,7 +6,7 @@ public final class PCreatorParams extends ParametersBase {
 
     private final String id;
 
-    public PCreatorParams(String id, boolean manualStartAndStop) {
+    public PCreatorParams(boolean manualStartAndStop, String id) {
         super(manualStartAndStop);
         this.id = id;
     }

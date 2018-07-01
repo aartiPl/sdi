@@ -4,6 +4,7 @@ version '0.8.1'
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'signing'
+apply plugin: 'scala'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -79,7 +80,22 @@ dependencies {
     compile 'com.google.guava:guava:23.5-jre'
     compile 'org.apache.commons:commons-lang3:3.7'
     compile 'ch.qos.logback:logback-classic:1.2.3'
+    compile 'org.scala-lang:scala-library:2.12.6'
 
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.assertj:assertj-core:3.8.0'
+    testRuntime 'org.junit.jupiter:junit-jupiter-engine:5.2.0'
+    testCompile 'org.junit.jupiter:junit-jupiter-api:5.2.0'
+    testCompile 'org.assertj:assertj-core:3.10.0'
+    testCompile 'org.scalatest:scalatest_2.12:3.2.0-SNAP10'
+}
+
+test {
+//    useJUnitPlatform()
+//
+//    testLogging {
+//        events "passed", "skipped", "failed"
+//    }
+//
+//    reports {
+//        html.enabled = true
+//    }
 }

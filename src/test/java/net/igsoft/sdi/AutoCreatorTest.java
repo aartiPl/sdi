@@ -1,15 +1,18 @@
 package net.igsoft.sdi;
 
-import net.igsoft.sdi.testclasses.*;
-import org.junit.Before;
-import org.junit.Test;
+import net.igsoft.sdi.testclasses.F;
+import net.igsoft.sdi.testclasses.G;
+import net.igsoft.sdi.testclasses.H;
+import net.igsoft.sdi.testclasses.Stepper;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class AutoCreatorTest {
     private Service service;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         service = Service.builder()
                 .withRootClass(F.class)

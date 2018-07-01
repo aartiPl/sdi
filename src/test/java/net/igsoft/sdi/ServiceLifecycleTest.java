@@ -1,10 +1,10 @@
 package net.igsoft.sdi;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import net.igsoft.sdi.testclasses.*;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ServiceLifecycleTest {
 
@@ -23,7 +23,7 @@ public class ServiceLifecycleTest {
 
     private Service service;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         service = Service.builder()
                 .withRootClass(C.class)

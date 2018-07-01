@@ -8,6 +8,10 @@ public abstract class ParametersBase {
         this.manualStartAndStop = manualStartAndStop;
     }
 
+    protected ParametersBase() {
+        this(false);
+    }
+
     public boolean isManualStartAndStop() {
         return manualStartAndStop;
     }
