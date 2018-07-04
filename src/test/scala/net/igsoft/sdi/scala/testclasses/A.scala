@@ -2,7 +2,6 @@ package net.igsoft.sdi.scala.testclasses
 
 import net.igsoft.sdi.Manageable
 
-
 class A(val b: B, val stepper: Stepper) extends Manageable {
   stepper.addStep(this.getClass, "ctor")
 

@@ -2,7 +2,7 @@ package net.igsoft.sdi.scala.testclasses
 
 import net.igsoft.sdi.{Creator, InstanceCreator, ParametersBase}
 
-case class RCreatorParams private[testclasses](name: String, surname: String) extends ParametersBase {
+case class RCreatorParams(name: String, surname: String) extends ParametersBase {
   override def uniqueId: String = name + surname
 }
 
