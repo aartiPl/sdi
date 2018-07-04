@@ -1,7 +1,7 @@
 package net.igsoft.sdi;
 
 public abstract class ParametersBase {
-    private String serialized = null;
+    private String serialized;
     private boolean manualStartAndStop;
 
     protected ParametersBase(boolean manualStartAndStop) {

@@ -5,7 +5,7 @@ It achieves it without using annotations or reflections - just simple Java code.
 Additionally, you can manage your service/application life cycle just by calling methods:
 init(), start(), stop() and close() also by just calling these method on parent service.
 You don't have any "configuration" for wiring up all classes - it is done in code.
-All that takes less than 300 LOC of code in micro-framework implementation.
+All that takes about 500 lines of code.
 
 Please let me know if you have any comments or suggestions about this project.
 
@@ -20,7 +20,7 @@ Add dependency on SDI framework in your build file:
 <dependency>
     <groupId>net.igsoft</groupId>
     <artifactId>sdi</artifactId>
-    <version>0.8.1</version>
+    <version>0.9.0</version>
 </dependency>
 ----
 
@@ -29,12 +29,12 @@ Add dependency on SDI framework in your build file:
 [source,gradle]
 ----
 dependencies {
-    compile 'net.igsoft:sdi:0.8.1'
+    compile 'net.igsoft:sdi:0.9.0'
 }
 ----
 
-SDI has only dependency on Guava, Apache Commons Lang and Logback.
-They are not critical, so I will consider to remove them.
+SDI has only dependency on Guava and Logback.
+Dependency on Guava is not critical, so I will consider to remove it.
 
 == Concept and simple usage
 
@@ -48,9 +48,9 @@ In the simplest case, class and its creator can look like below:
 public class Config {
 }
 
-class ConfigCreator extends Creator<Config> {
+class ConfigCreator extends Creator<Config, LaunchType> {
     @Override
-    public Config create(InstanceCreator instanceCreator) {
+    public Config create(InstanceCreator instanceCreator, LaunchType launchType) {
         return new Config();
     }
 }
@@ -68,9 +68,9 @@ public class App {
     }
 }
 
-class AppCreator extends Creator<App> {
+class AppCreator extends Creator<App, LaunchType> {
     @Override
-    public App create(InstanceCreator instanceCreator) {
+    public App create(InstanceCreator instanceCreator, LaunchType launchType) {
         Config config = instanceCreator.getOrCreate(Config.class);
         return new App(config);
     }
@@ -160,9 +160,9 @@ public class App {
     }
 }
 
-class AppCreator extends Creator<App> {
+class AppCreator extends Creator<App, LaunchType> {
     @Override
-    public App create(InstanceCreator instanceCreator) {
+    public App create(InstanceCreator instanceCreator, LaunchType launchType) {
         Config config = instanceCreator.getOrCreate(Config.class);
         MqListener mqListener = instanceCreator.getOrCreate(MqListener.class);
         return new App(config, mqListener);
@@ -198,6 +198,10 @@ class Main {
 
 That way you have full control over application lifecycle.
 
+== Automatic creators
+
+
+
 == Parametrized creators
 
 Sometimes we would like to reuse creators in different contexts. For example when we create MqReceiver
@@ -206,13 +210,29 @@ but then it will be difficult to reuse this creator in other application. That's
 
 [source, java]
 ----
-class ConfigCreator extends Creator<Config> {
+class ConfigCreatorParams extends ParametersBase {
+    private final File file;
+
+    public ConfigCreatorParams(File file) {
+        super(false);
+        this.file = file;
+    }
+
+    public File getFile() {
+        return file;
+    }
+
     @Override
-    public Config create(InstanceCreator instanceCreator, CreatorParams params) {
-        String fileName = params.get("fileName");
+    public String uniqueId() {
+        return file.getName();
+    }
+}
 
+class ConfigCreator extends Creator<Config, ConfigCreatorParams> {
+    @Override
+    public Config create(InstanceCreator instanceCreator, ConfigCreatorParams params) {
+        File file = params.getFile();
         config = Config.createFromFile(fileName);
-
         return config;
     }
 }
@@ -222,13 +242,10 @@ On the call side we use it like this:
 
 [source, java]
 ----
-class AppCreator extends Creator<App> {
+class AppCreator extends Creator<App, LaunchType> {
     @Override
-    public App create(InstanceCreator instanceCreator) {
-        CreatorParams params = CreatorParams.builder()
-                                .parameter("fileName", "~/config.init")
-                                .build();
-
+    public App create(InstanceCreator instanceCreator, LaunchType launchType) {
+        ConfigCreatorParams params = new ConfigCreatorParams(new File("~/config.init"));
         Config config = instanceCreator.getOrCreate(Config.class, params);
         MqListener mqListener = instanceCreator.getOrCreate(MqListener.class);
         return new App(config, mqListener);
@@ -244,16 +261,16 @@ For example if App creator needs for its work classes A, B and C, you can provid
 some or all of mentioned classes. It is accomplished by overriding method:
 [source, java]
 ----
-List<Creator<?>> defaultCreators()
+List<Creator<?, ?>> defaultCreators()
 ----
 
 and returning from it instances of creators.
 
 [source, java]
 ----
-class AppCreator extends Creator<App> {
+class AppCreator extends Creator<App, LaunchType> {
     @Override
-    public App create(InstanceCreator instanceCreator) {
+    public App create(InstanceCreator instanceCreator, LaunchType launchType) {
         A a = instanceCreator.getOrCreate(A.class);
         B b = instanceCreator.getOrCreate(B.class);
         C c = instanceCreator.getOrCreate(C.class);
@@ -262,7 +279,7 @@ class AppCreator extends Creator<App> {
     }
 
     @Override
-    public List<Creator<?>> defaultCreators() {
+    public List<Creator<?, ?>> defaultCreators() {
         return Lists.newArrayList(new ACreator(), new BCreator());
     }
 }

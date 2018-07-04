@@ -1,9 +1,9 @@
 package net.igsoft.sdi.testclasses;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
-import org.apache.commons.lang3.StringUtils;
 
 public class Stepper {
     private final List<String> steps;
@@ -20,7 +20,8 @@ public class Stepper {
         return steps;
     }
 
+    @Override
     public String toString() {
-        return StringUtils.join(steps, ' ');
+        return steps.stream().collect(Collectors.joining(" "));
     }
 }

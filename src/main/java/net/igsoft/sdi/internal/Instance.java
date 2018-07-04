@@ -1,17 +1,16 @@
 package net.igsoft.sdi.internal;
 
-import com.google.common.collect.Sets;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
 import java.util.Objects;
 import java.util.Set;
 
+import com.google.common.collect.Sets;
+
 public class Instance {
 
+    private final Set<String> dependencies;
     private Object value;
     private int level;
     private boolean manualStartAndStop;
-    private Set<String> dependencies;
 
     public Instance() {
         this.value = null;
@@ -76,10 +75,11 @@ public class Instance {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this).append("value", value)
-                .append("level", level)
-                .append("manualStartAndStop", manualStartAndStop)
-                .append("dependencies", dependencies)
-                .toString();
+        return new StringBuilder("Instance{")
+        .append("value=").append(value)
+        .append(", level=").append(level)
+        .append(", manualStartAndStop=").append(manualStartAndStop)
+        .append(", dependencies=").append(dependencies)
+        .append('}').toString();
     }
 }

@@ -1,5 +1,5 @@
 group 'net.igsoft'
-version '0.8.1'
+version '0.9.0'
 
 apply plugin: 'java'
 apply plugin: 'maven'
@@ -78,7 +78,6 @@ uploadArchives {
 
 dependencies {
     compile 'com.google.guava:guava:23.5-jre'
-    compile 'org.apache.commons:commons-lang3:3.7'
     compile 'ch.qos.logback:logback-classic:1.2.3'
     compile 'org.scala-lang:scala-library:2.12.6'
 
@@ -89,13 +88,9 @@ dependencies {
 }
 
 test {
-//    useJUnitPlatform()
-//
-//    testLogging {
-//        events "passed", "skipped", "failed"
-//    }
-//
-//    reports {
-//        html.enabled = true
-//    }
+    useJUnitPlatform()
+
+    reports {
+        html.enabled = true
+    }
 }
