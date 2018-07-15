@@ -8,7 +8,6 @@ public final class RCreatorParams extends ParametersBase {
     private final String surname;
 
     RCreatorParams(String name, String surname) {
-        super();
         this.name = name;
         this.surname = surname;
     }

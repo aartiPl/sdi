@@ -26,6 +26,8 @@ public class ServiceBuilder {
         return withRootClass(clazz, LaunchType.AUTOMATIC);
     }
 
+    //TODO: podawać jako argument Creator<?, P> ???
+    //TODO: jeśli to nie jest podane, to automatyczne wykrywanie rootów
     public ServiceBuilder withRootClass(Class<?> clazz, ParametersBase parameters) {
         if (roots.containsKey(clazz)) {
             throw new IllegalArgumentException(format("Class %s already provided as a root class before.",
@@ -35,6 +37,10 @@ public class ServiceBuilder {
         roots.put(clazz, parameters);
         return this;
     }
+
+    //TODO: default parameters?
+//    public <P extends ParametersBase> ServiceBuilder withCreator(Creator<?, P> creator, P defaultParameters) {
+//    }
 
     public ServiceBuilder withCreator(Creator<?, ?> creator) {
         Class<?> createdClass = creator.getCreatedClass();

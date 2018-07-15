@@ -1,8 +1,8 @@
 package net.igsoft.sdi;
 
 public abstract class ParametersBase {
+    private final boolean manualStartAndStop;
     private String serialized;
-    private boolean manualStartAndStop;
 
     protected ParametersBase(boolean manualStartAndStop) {
         this.manualStartAndStop = manualStartAndStop;

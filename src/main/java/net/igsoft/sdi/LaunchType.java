@@ -2,8 +2,8 @@ package net.igsoft.sdi;
 
 public final class LaunchType extends ParametersBase {
 
-    public static final ParametersBase MANUAL = new LaunchType(true);
-    public static final ParametersBase AUTOMATIC = new LaunchType(false);
+    public static final LaunchType MANUAL = new LaunchType(true);
+    public static final LaunchType AUTOMATIC = new LaunchType(false);
 
     private LaunchType(boolean manualStartAndStop) {
         super(manualStartAndStop);

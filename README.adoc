@@ -177,7 +177,7 @@ Now we can start an application from our main class:
 class Main {
     public static void main(String[] args) {
         final Service service = Service.builder()
-            .withMainClass(App.class)
+            .withRootClass(App.class)
             .withCreator(new AppCreator())
             .withCreator(new ConfigCreator())
             .withCreator(new MqListenerCreator())
