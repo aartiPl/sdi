@@ -48,7 +48,7 @@ public class InstanceCreator {
         }
 
         Specification specification =
-                runtimeSpecificationMap.computeIfAbsent(instanceKey, s -> new Specification());
+                runtimeSpecificationMap.computeIfAbsent(instanceKey, s -> specificationMap.get(clazz));
         stack.push(specification);
 
         if (specification.getLevel() == 0) {
