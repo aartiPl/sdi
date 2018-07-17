@@ -15,14 +15,14 @@ public class AutoCreator<T, P extends ParameterBase> extends Creator<T, P> {
 
         if (!params.getClass().equals(LaunchType.class)) {
             throw new IllegalStateException(
-                    "Can not automatically create instances based on parameters passed to creator.");
+                    "Can not automatically create instance based on creator parameters.");
         }
 
         Constructor<?>[] constructors = getCreatedClass().getConstructors();
 
         if (constructors.length > 1) {
             throw new IllegalStateException(
-                    format("Class '%s' has more than one public constructor. Can not automatically create this class.",
+                    format("Class '%s' has more than one public constructor. Can not automatically create classes with more than one public constructors.",
                            getCreatedClass().getSimpleName()));
         }
 
@@ -44,8 +44,7 @@ public class AutoCreator<T, P extends ParameterBase> extends Creator<T, P> {
         Object[] values = new Object[constructor.getParameterCount()];
 
         for (int i = 0; i < constructor.getParameterCount(); i++) {
-            //NOTE: startStopManually will be passed automatically down the stack
-            values[i] = instanceCreator.getOrCreate(constructor.getParameterTypes()[i], params);
+            values[i] = instanceCreator.getOrCreate(constructor.getParameterTypes()[i]);
         }
 
         T instance;

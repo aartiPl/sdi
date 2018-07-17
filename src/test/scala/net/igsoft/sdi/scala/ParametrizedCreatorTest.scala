@@ -10,8 +10,8 @@ class ParametrizedCreatorTest {
 
   @BeforeEach def setUp(): Unit = {
     service = Service.builder
-              .withRootCreator(new PCreator, new PCreatorParams(false, "id"))
-              .withCreator(new RCreator)
+              .withRootCreator(new ParametrizedCreator2, new ParametrizedCreator2Params(false, "id"))
+              .withCreator(new ParametrizedCreator1)
               .withCreator(new AutoCreator[Stepper, ParameterBase](classOf[Stepper]))
               .build
   }

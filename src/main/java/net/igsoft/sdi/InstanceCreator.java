@@ -1,6 +1,7 @@
 package net.igsoft.sdi;
 
 import static com.google.common.base.Preconditions.checkState;
+import static java.lang.String.format;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -8,7 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,26 +20,26 @@ public class InstanceCreator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceCreator.class);
 
-    private final Map<Class<?>, Specification> specification;
-    private final Map<String, Specification> runtimeSpecification;
+    private final Map<Class<?>, Specification> specificationMap;
+    private final Map<String, Specification> runtimeSpecificationMap;
     private final Map<Class<?>, Specification> unusedCreators;
     private final KeyGenerator keyGenerator;
     private final Deque<Specification> stack;
 
-    InstanceCreator(Map<Class<?>, Specification> specification, KeyGenerator keyGenerator) {
+    InstanceCreator(Map<Class<?>, Specification> specificationMap, KeyGenerator keyGenerator) {
         this.keyGenerator = keyGenerator;
-        this.specification = specification;
-        this.runtimeSpecification = new HashMap<>();
-        this.unusedCreators = new HashMap<>(specification);
+        this.specificationMap = specificationMap;
+        this.runtimeSpecificationMap = new HashMap<>();
+        this.unusedCreators = new HashMap<>(specificationMap);
         this.stack = new ArrayDeque<>();
     }
 
     public <R> R getOrCreate(Class<?> clazz) {
-        return getOrCreate(clazz, specification.get(clazz).getDefaultParameter());
+        return getOrCreate(clazz, specificationMap.get(clazz).getDefaultParameter());
     }
 
     public <P extends ParameterBase, R> R getOrCreate(Class<?> clazz, P params) {
-        //NOTE: ManualStartAndStop does not differentiate runtimeSpecification!
+        //NOTE: ManualStartAndStop does not differentiate runtimeSpecificationMap!
 
         String instanceKey = keyGenerator.generate(clazz, params.cachedUniqueId());
 
@@ -47,12 +47,12 @@ public class InstanceCreator {
             stack.peek().addDependency(instanceKey);
         }
 
-        Specification specification =
-                runtimeSpecification.computeIfAbsent(instanceKey, s -> new Specification());
+        Specification<R, P> specification =
+                runtimeSpecificationMap.computeIfAbsent(instanceKey, s -> new Specification<R, P>());
         stack.push(specification);
 
         if (specification.getLevel() == 0) {
-            //It's just freshly created specification...
+            //It's just freshly created specificationMap...
             specification.setValue(calculateInstanceValue(clazz, params));
             specification.setLevel(stack.size());
         }
@@ -72,21 +72,21 @@ public class InstanceCreator {
         return unusedCreators;
     }
 
-    public Map<String, Specification> getRuntimeSpecification() {
-        return runtimeSpecification;
+    public Map<String, Specification> getRuntimeSpecificationMap() {
+        return runtimeSpecificationMap;
     }
 
     public Map<String, Instance> getInstances() {
-        return runtimeSpecification.entrySet()
-                                   .stream()
-                                   .collect(Collectors.toMap(e -> e.getKey(), e -> new Instance(
-                                           e.getValue().getValue(),
-                                           e.getValue().isManualStartAndStop())));
+        return runtimeSpecificationMap.entrySet()
+                                      .stream()
+                                      .collect(Collectors.toMap(e -> e.getKey(), e -> new Instance(
+                                              e.getValue().getValue(),
+                                              e.getValue().isManualStartAndStop())));
     }
 
     @SuppressWarnings("unchecked")
     private <P extends ParameterBase, R> R calculateInstanceValue(Class<?> clazz, P params) {
-        Specification specification = this.specification.get(clazz);
+        Specification specification = specificationMap.computeIfAbsent(clazz, s -> new Specification<R, P>());
         Creator<R, P> creator = (Creator<R, P>) specification.getCreator();
 
         unusedCreators.remove(clazz);
@@ -103,16 +103,20 @@ public class InstanceCreator {
         }
 
         checkState(creator != null, "No creator has been found for class: " + clazz.getName());
+        checkState(creator.getParameterClass().isAssignableFrom(params.getClass()),
+                   format("Invalid parameter class '%s' for creator '%s' ('%s' expected)",
+                          params.getClass().getSimpleName(), creator.getClass().getSimpleName(),
+                          creator.getParameterClass().getSimpleName()));
 
         return creator.create(this, params);
     }
 
-    private void pushDown(Specification specification, int levelDistance) {
+    private <R, P extends ParameterBase> void pushDown(Specification<R, P> specification, int levelDistance) {
         int newLevel = specification.getLevel() + levelDistance;
         specification.setLevel(newLevel);
 
         for (String dependency : specification.getDependencies()) {
-            pushDown(runtimeSpecification.get(dependency), levelDistance);
+            pushDown(runtimeSpecificationMap.get(dependency), levelDistance);
         }
     }
 }

@@ -6,20 +6,20 @@ import java.util.List;
 import com.google.common.collect.Lists;
 
 //NOTE: This class has to be abstract class and not the interface to allow
-//discovery of T class on runtime (if it is abstract class erasure is not deleting type of Creator).
-public abstract class Creator<T, P extends ParameterBase> {
+//discovery of R class on runtime (if it is abstract class erasure is not deleting type of Creator).
+public abstract class Creator<R, P extends ParameterBase> {
 
     private final Class<?> myClazz;
     private final Class<?> myParameter;
 
-    public abstract T create(InstanceCreator instanceCreator, P params);
+    public abstract R create(InstanceCreator instanceCreator, P params);
 
     protected Creator() {
         myClazz = getClassOfParentTypeParameter(this.getClass(), 0);
         myParameter = getClassOfParentTypeParameter(this.getClass(), 1);
     }
 
-    protected Creator(Class<T> myClazz, Class<P> myParameter) {
+    protected Creator(Class<R> myClazz, Class<P> myParameter) {
         this.myClazz = myClazz;
         this.myParameter = myParameter;
     }
@@ -28,8 +28,8 @@ public abstract class Creator<T, P extends ParameterBase> {
         return Lists.newArrayList();
     }
 
-    public Class<T> getCreatedClass() {
-        return (Class<T>) myClazz;
+    public Class<R> getCreatedClass() {
+        return (Class<R>) myClazz;
     }
 
     public Class<P> getParameterClass() {

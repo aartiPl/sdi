@@ -8,33 +8,33 @@ import com.google.common.collect.Sets;
 import net.igsoft.sdi.Creator;
 import net.igsoft.sdi.ParameterBase;
 
-public class Specification {
+public class Specification<R, P extends ParameterBase> {
 
-    private final Set<String> dependencies;
-    private Creator<?, ?> creator;
-    private Creator<?, ?> defaultCreator;
+    private Creator<R, P> creator;
+    private Creator<R, P> defaultCreator;
+    private P defaultParameter;
     private boolean rootCreator;
-    private ParameterBase defaultParameter;
-    private Object value;
+    private R value;
     private int level;
     private boolean manualStartAndStop;
+    private final Set<String> dependencies;
 
     public Specification() {
+        this.creator = null;
         this.defaultCreator = null;
         this.defaultParameter = null;
         this.rootCreator = false;
-        this.creator = null;
         this.value = null;
         this.level = 0;
         this.manualStartAndStop = false;
         this.dependencies = Sets.newHashSet();
     }
 
-    public Object getValue() {
+    public R getValue() {
         return value;
     }
 
-    public void setValue(Object value) {
+    public void setValue(R value) {
         this.value = value;
     }
 
@@ -98,11 +98,11 @@ public class Specification {
                                                   .toString();
     }
 
-    public Creator<?, ?> getCreator() {
+    public Creator<R, P> getCreator() {
         return creator;
     }
 
-    public void setCreator(Creator<?, ?> creator) {
+    public void setCreator(Creator<R, P> creator) {
         this.creator = creator;
     }
 
@@ -118,15 +118,15 @@ public class Specification {
         return defaultParameter;
     }
 
-    public void setDefaultParameter(ParameterBase defaultParameter) {
-        this.defaultParameter = defaultParameter;
+    public void setDefaultParameter(Object defaultParameter) {
+        this.defaultParameter = (P) defaultParameter;
     }
 
-    public Creator<?, ?> getDefaultCreator() {
+    public Creator<R, P> getDefaultCreator() {
         return defaultCreator;
     }
 
     public void setDefaultCreator(Creator<?, ?> defaultCreator) {
-        this.defaultCreator = defaultCreator;
+        this.defaultCreator = (Creator<R, P>) defaultCreator;
     }
 }

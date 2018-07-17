@@ -29,8 +29,8 @@ class ServiceLifecycleTest {
               .withCreator(new BCreator)
               .withCreator(new DCreator)
               .withCreator(new ECreator)
-              .withCreator(new PCreator)
-              .withCreator(new RCreator)
+              .withCreator(new ParametrizedCreator2)
+              .withCreator(new ParametrizedCreator1)
               .withCreator(new AutoCreator[Stepper, ParameterBase](classOf[Stepper]))
               .build
   }

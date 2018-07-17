@@ -20,8 +20,8 @@ public class ServiceBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceBuilder.class);
 
-    private final Map<Class<?>, Specification> specification = new HashMap<>();
-    private final Map<Class<?>, Specification> rootSpecification = new HashMap<>();
+    private final Map<Class<?>, Specification> specificationMap = new HashMap<>();
+    private final Map<Class<?>, Specification> rootSpecificationMap = new HashMap<>();
 
     public ServiceBuilder withCreator(Creator<?, ?> creator) {
         return withCreator(false, creator, null);
@@ -47,7 +47,7 @@ public class ServiceBuilder {
         Class<?> createdClass = creator.getCreatedClass();
 
         Specification specification =
-                this.specification.computeIfAbsent(createdClass, s -> new Specification());
+                this.specificationMap.computeIfAbsent(createdClass, s -> new Specification());
 
         if (specification.getCreator() != null) {
             throw new IllegalArgumentException(
@@ -61,31 +61,33 @@ public class ServiceBuilder {
                 defaultParameter == null ? LaunchType.AUTOMATIC : defaultParameter);
 
         if (rootCreator) {
-            rootSpecification.put(createdClass, specification);
+            rootSpecificationMap.put(createdClass, specification);
         }
 
         return this;
     }
 
     public Service build() {
-        assignDefaultCreators();
-        InstanceCreator instanceCreator = new InstanceCreator(specification, this::getInstanceKey);
+        for (Specification<?, ?> spec : specificationMap.values()) {
+            assignDefaultCreators(spec);
+        }
+        InstanceCreator instanceCreator = new InstanceCreator(specificationMap, this::getInstanceKey);
 
         Map<Class<?>, Specification> instancesToInitiate =
-                rootSpecification.isEmpty() ? specification : rootSpecification;
+                rootSpecificationMap.isEmpty() ? specificationMap : rootSpecificationMap;
 
         for (Map.Entry<Class<?>, Specification> entry : instancesToInitiate.entrySet()) {
-            if (entry.getValue()
-                     .getCreator()
-                     .getParameterClass()
-                     .isAssignableFrom(entry.getValue().getDefaultParameter().getClass())) {
+            if (!rootSpecificationMap.isEmpty() || entry.getValue()
+                                                        .getCreator()
+                                                        .getParameterClass()
+                                                        .isAssignableFrom(entry.getValue().getDefaultParameter().getClass())) {
                 instanceCreator.getOrCreate(entry.getKey(), entry.getValue().getDefaultParameter());
             }
         }
 
         Multimap<Integer, String> instancesByLevel = TreeMultimap.create();
 
-        for (Map.Entry<String, Specification> entry : instanceCreator.getRuntimeSpecification()
+        for (Map.Entry<String, Specification> entry : instanceCreator.getRuntimeSpecificationMap()
                                                                      .entrySet()) {
             instancesByLevel.put(entry.getValue().getLevel(), entry.getKey());
         }
@@ -106,7 +108,7 @@ public class ServiceBuilder {
         LOGGER.info("\nRoot classes:\n{}", instancesByLevel.get(1));
 
         LOGGER.info("\nDependencies by class:\n{}",
-                    LoggingUtils.dependenciesByClass(instanceCreator.getRuntimeSpecification()));
+                    LoggingUtils.dependenciesByClass(instanceCreator.getRuntimeSpecificationMap()));
 
         if (!instanceCreator.getUnusedCreators().isEmpty()) {
             LOGGER.warn("\nSome creators were not used during service construction. " +
@@ -117,15 +119,15 @@ public class ServiceBuilder {
         return new Service(this::getInstanceKey, instanceCreator.getInstances(), sortedLevels);
     }
 
-    private void assignDefaultCreators() {
-        for (Specification spec : specification.values()) {
+    private void assignDefaultCreators(Specification<?, ?> spec) {
+
             for (Creator<?, ?> defaultCreator : spec.getCreator().defaultCreators()) {
                 Class<?> createdClass = defaultCreator.getCreatedClass();
 
-                Specification createdSpecification =
-                        specification.computeIfAbsent(createdClass, s -> new Specification());
+                Specification<?, ?> createdSpecification =
+                        specificationMap.computeIfAbsent(createdClass, s -> new Specification());
 
-                //TODO: jeśli default creatory są te same, to nie jest to problem
+                //TODO: jeśli default creatory są te same, a także ich parametry są te same, to nie jest to problem
                 if (createdSpecification.getDefaultCreator() != null &&
                     createdSpecification.getCreator() == null) {
                     throw new IllegalStateException(
@@ -139,8 +141,9 @@ public class ServiceBuilder {
                 }
 
                 createdSpecification.setDefaultCreator(defaultCreator);
+                createdSpecification.setDefaultParameter(LaunchType.AUTOMATIC);
             }
-        }
+
     }
 
     private <T> String getInstanceKey(Class<T> clazz, String serializedParameters) {
