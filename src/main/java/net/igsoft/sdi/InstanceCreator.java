@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -20,16 +21,16 @@ public class InstanceCreator {
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceCreator.class);
 
     private final Map<Class<?>, Specification> specification;
-    private final Map<String, Specification> dynamicSpecification;
+    private final Map<String, Specification> runtimeSpecification;
     private final Map<Class<?>, Specification> unusedCreators;
     private final KeyGenerator keyGenerator;
     private final Deque<Specification> stack;
 
     InstanceCreator(Map<Class<?>, Specification> specification, KeyGenerator keyGenerator) {
-        this.specification = specification;
-        this.unusedCreators = Maps.newHashMap(specification);
         this.keyGenerator = keyGenerator;
-        this.dynamicSpecification = Maps.newHashMap();
+        this.specification = specification;
+        this.runtimeSpecification = new HashMap<>();
+        this.unusedCreators = new HashMap<>(specification);
         this.stack = new ArrayDeque<>();
     }
 
@@ -38,7 +39,7 @@ public class InstanceCreator {
     }
 
     public <P extends ParameterBase, R> R getOrCreate(Class<?> clazz, P params) {
-        //NOTE: ManualStartAndStop does not differentiate dynamicSpecification!
+        //NOTE: ManualStartAndStop does not differentiate runtimeSpecification!
 
         String instanceKey = keyGenerator.generate(clazz, params.cachedUniqueId());
 
@@ -47,7 +48,7 @@ public class InstanceCreator {
         }
 
         Specification specification =
-                dynamicSpecification.computeIfAbsent(instanceKey, s -> new Specification());
+                runtimeSpecification.computeIfAbsent(instanceKey, s -> new Specification());
         stack.push(specification);
 
         if (specification.getLevel() == 0) {
@@ -71,12 +72,12 @@ public class InstanceCreator {
         return unusedCreators;
     }
 
-    public Map<String, Specification> getDynamicSpecification() {
-        return dynamicSpecification;
+    public Map<String, Specification> getRuntimeSpecification() {
+        return runtimeSpecification;
     }
 
     public Map<String, Instance> getInstances() {
-        return dynamicSpecification.entrySet()
+        return runtimeSpecification.entrySet()
                                    .stream()
                                    .collect(Collectors.toMap(e -> e.getKey(), e -> new Instance(
                                            e.getValue().getValue(),
@@ -111,7 +112,7 @@ public class InstanceCreator {
         specification.setLevel(newLevel);
 
         for (String dependency : specification.getDependencies()) {
-            pushDown(dynamicSpecification.get(dependency), levelDistance);
+            pushDown(runtimeSpecification.get(dependency), levelDistance);
         }
     }
 }

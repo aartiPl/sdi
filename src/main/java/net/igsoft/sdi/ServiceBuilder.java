@@ -68,24 +68,24 @@ public class ServiceBuilder {
     }
 
     public Service build() {
-        assignDefaultCreators(specification);
+        assignDefaultCreators();
         InstanceCreator instanceCreator = new InstanceCreator(specification, this::getInstanceKey);
-
-        //TODO: root classes are the level 1 classes --- it is not really necessary to pass them explicitly
-        //But is it really good? How to pass creator parameters? Is it clear what program does then?
-        //Also it is not possible to test if the code is clean e.g. if all creators are used.
-        //Additionally when I move below block down, then dependencies are not yet calculated
 
         Map<Class<?>, Specification> instancesToInitiate =
                 rootSpecification.isEmpty() ? specification : rootSpecification;
 
         for (Map.Entry<Class<?>, Specification> entry : instancesToInitiate.entrySet()) {
-            instanceCreator.getOrCreate(entry.getKey(), entry.getValue().getDefaultParameter());
+            if (entry.getValue()
+                     .getCreator()
+                     .getParameterClass()
+                     .isAssignableFrom(entry.getValue().getDefaultParameter().getClass())) {
+                instanceCreator.getOrCreate(entry.getKey(), entry.getValue().getDefaultParameter());
+            }
         }
 
         Multimap<Integer, String> instancesByLevel = TreeMultimap.create();
 
-        for (Map.Entry<String, Specification> entry : instanceCreator.getDynamicSpecification()
+        for (Map.Entry<String, Specification> entry : instanceCreator.getRuntimeSpecification()
                                                                      .entrySet()) {
             instancesByLevel.put(entry.getValue().getLevel(), entry.getKey());
         }
@@ -106,7 +106,7 @@ public class ServiceBuilder {
         LOGGER.info("\nRoot classes:\n{}", instancesByLevel.get(1));
 
         LOGGER.info("\nDependencies by class:\n{}",
-                    LoggingUtils.dependenciesByClass(instanceCreator.getDynamicSpecification()));
+                    LoggingUtils.dependenciesByClass(instanceCreator.getRuntimeSpecification()));
 
         if (!instanceCreator.getUnusedCreators().isEmpty()) {
             LOGGER.warn("\nSome creators were not used during service construction. " +
@@ -117,13 +117,13 @@ public class ServiceBuilder {
         return new Service(this::getInstanceKey, instanceCreator.getInstances(), sortedLevels);
     }
 
-    private void assignDefaultCreators(Map<Class<?>, Specification> instances) {
-        for (Specification specification : instances.values()) {
-            for (Creator<?, ?> defaultCreator : specification.getCreator().defaultCreators()) {
+    private void assignDefaultCreators() {
+        for (Specification spec : specification.values()) {
+            for (Creator<?, ?> defaultCreator : spec.getCreator().defaultCreators()) {
                 Class<?> createdClass = defaultCreator.getCreatedClass();
 
                 Specification createdSpecification =
-                        instances.computeIfAbsent(createdClass, s -> new Specification());
+                        specification.computeIfAbsent(createdClass, s -> new Specification());
 
                 //TODO: jeśli default creatory są te same, to nie jest to problem
                 if (createdSpecification.getDefaultCreator() != null &&
