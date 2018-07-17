@@ -7,11 +7,12 @@ import java.util.function.Consumer;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.igsoft.sdi.internal.Instance;
 import net.igsoft.sdi.internal.KeyGenerator;
 import net.igsoft.sdi.internal.ManageableState;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Service implements Manageable {
 
@@ -31,13 +32,13 @@ public class Service implements Manageable {
     }
 
     @SuppressWarnings("unchecked")
-    public <T, P extends ParametersBase> T get(Class<T> clazz, P params) {
+    public <T, P extends ParameterBase> T get(Class<T> clazz, P params) {
         return (T) instances.get(keyGenerator.generate(clazz, params.cachedUniqueId()))
                             .getValue();
     }
 
     @SuppressWarnings("unchecked")
-    public <T, P extends ParametersBase> T get(Class<T> clazz) {
+    public <T, P extends ParameterBase> T get(Class<T> clazz) {
         return (T) instances.get(keyGenerator.generate(clazz, ""))
                 .getValue();
     }

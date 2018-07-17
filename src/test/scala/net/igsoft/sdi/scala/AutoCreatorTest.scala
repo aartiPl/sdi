@@ -1,6 +1,6 @@
 package net.igsoft.sdi.scala
 
-import net.igsoft.sdi.{AutoCreator, ParametersBase, Service}
+import net.igsoft.sdi.{AutoCreator, LaunchType, ParameterBase, Service}
 import net.igsoft.sdi.scala.testclasses._
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.{BeforeEach, Test}
@@ -12,12 +12,11 @@ class AutoCreatorTest {
   @BeforeEach
   def setUp(): Unit = {
     service = Service.builder
-      .withRootClass(classOf[F])
-      .withCreator(new AutoCreator[Stepper, ParametersBase](classOf[Stepper]))
-      .withCreator(new AutoCreator[F, ParametersBase](classOf[F]))
-      .withCreator(new AutoCreator[G, ParametersBase](classOf[G]))
-      .withCreator(new AutoCreator[H, ParametersBase](classOf[H]))
-      .build
+              .withRootCreator(new AutoCreator[F, LaunchType](classOf[F]))
+              .withCreator(new AutoCreator[Stepper, ParameterBase](classOf[Stepper]))
+              .withCreator(new AutoCreator[G, ParameterBase](classOf[G]))
+              .withCreator(new AutoCreator[H, ParameterBase](classOf[H]))
+              .build
   }
 
   @Test

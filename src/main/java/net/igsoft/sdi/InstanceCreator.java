@@ -5,41 +5,40 @@ import static com.google.common.base.Preconditions.checkState;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.Maps;
-import net.igsoft.sdi.internal.Instance;
-import net.igsoft.sdi.internal.KeyGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import net.igsoft.sdi.internal.Instance;
+import net.igsoft.sdi.internal.KeyGenerator;
+import net.igsoft.sdi.internal.Specification;
 
 public class InstanceCreator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceCreator.class);
 
-    private final Map<Class<?>, Creator<?, ?>> creators;
-    private final Map<Class<?>, Creator<?, ?>> defaultCreators;
-    private final Map<Class<?>, Creator<?, ?>> unusedCreators;
+    private final Map<Class<?>, Specification> specification;
+    private final Map<String, Specification> dynamicSpecification;
+    private final Map<Class<?>, Specification> unusedCreators;
     private final KeyGenerator keyGenerator;
-    private final Deque<Instance> stack;
-    private final Map<String, Instance> instances;
+    private final Deque<Specification> stack;
 
-    InstanceCreator(Map<Class<?>, Creator<?, ?>> creators,
-                    Map<Class<?>, Creator<?, ?>> defaultCreators,
-                    KeyGenerator keyGenerator) {
-        this.creators = creators;
-        this.unusedCreators = Maps.newHashMap(creators);
-        this.defaultCreators = defaultCreators;
+    InstanceCreator(Map<Class<?>, Specification> specification, KeyGenerator keyGenerator) {
+        this.specification = specification;
+        this.unusedCreators = Maps.newHashMap(specification);
         this.keyGenerator = keyGenerator;
-        this.instances = Maps.newHashMap();
+        this.dynamicSpecification = Maps.newHashMap();
         this.stack = new ArrayDeque<>();
     }
 
     public <R> R getOrCreate(Class<?> clazz) {
-        return getOrCreate(clazz, LaunchType.AUTOMATIC);
+        return getOrCreate(clazz, specification.get(clazz).getDefaultParameter());
     }
 
-    public <P extends ParametersBase, R> R getOrCreate(Class<?> clazz, P params) {
-        //NOTE: ManualStartAndStop does not differentiate instances!
+    public <P extends ParameterBase, R> R getOrCreate(Class<?> clazz, P params) {
+        //NOTE: ManualStartAndStop does not differentiate dynamicSpecification!
 
         String instanceKey = keyGenerator.generate(clazz, params.cachedUniqueId());
 
@@ -47,37 +46,47 @@ public class InstanceCreator {
             stack.peek().addDependency(instanceKey);
         }
 
-        Instance instance = instances.computeIfAbsent(instanceKey, s -> new Instance());
-        stack.push(instance);
+        Specification specification =
+                dynamicSpecification.computeIfAbsent(instanceKey, s -> new Specification());
+        stack.push(specification);
 
-        if (instance.getLevel() == 0) {
-            //It's just freshly created instance...
-            instance.setValue(calculateInstanceValue(clazz, params));
-            instance.setLevel(stack.size());
+        if (specification.getLevel() == 0) {
+            //It's just freshly created specification...
+            specification.setValue(calculateInstanceValue(clazz, params));
+            specification.setLevel(stack.size());
         }
 
-        instance.manualStartAndStop(params.isManualStartAndStop());
+        specification.manualStartAndStop(params.isManualStartAndStop());
 
-        if (instance.getLevel() < stack.size()) {
-            pushDown(instance, stack.size() - instance.getLevel());
+        if (specification.getLevel() < stack.size()) {
+            pushDown(specification, stack.size() - specification.getLevel());
         }
 
         stack.poll();
 
-        return (R) instance.getValue();
+        return (R) specification.getValue();
     }
 
-    public Map<Class<?>, Creator<?, ?>> getUnusedCreators() {
+    public Map<Class<?>, Specification> getUnusedCreators() {
         return unusedCreators;
     }
 
+    public Map<String, Specification> getDynamicSpecification() {
+        return dynamicSpecification;
+    }
+
     public Map<String, Instance> getInstances() {
-        return instances;
+        return dynamicSpecification.entrySet()
+                                   .stream()
+                                   .collect(Collectors.toMap(e -> e.getKey(), e -> new Instance(
+                                           e.getValue().getValue(),
+                                           e.getValue().isManualStartAndStop())));
     }
 
     @SuppressWarnings("unchecked")
-    private <P extends ParametersBase, R> R calculateInstanceValue(Class<?> clazz, P params) {
-        Creator<R, P> creator = (Creator<R, P>) creators.get(clazz);
+    private <P extends ParameterBase, R> R calculateInstanceValue(Class<?> clazz, P params) {
+        Specification specification = this.specification.get(clazz);
+        Creator<R, P> creator = (Creator<R, P>) specification.getCreator();
 
         unusedCreators.remove(clazz);
 
@@ -86,9 +95,10 @@ public class InstanceCreator {
                     "No explicit creator has been found for class: {}. Looking in default creators...",
                     clazz.getName());
 
-            creator = (Creator<R, P>) defaultCreators.get(clazz);
+            creator = (Creator<R, P>) specification.getDefaultCreator();
+
             LOGGER.info("Default creator for class {} has {}been found", clazz.getName(),
-                    creator == null ? "not " : "");
+                        creator == null ? "not " : "");
         }
 
         checkState(creator != null, "No creator has been found for class: " + clazz.getName());
@@ -96,12 +106,12 @@ public class InstanceCreator {
         return creator.create(this, params);
     }
 
-    private void pushDown(Instance instance, int levelDistance) {
-        int newLevel = instance.getLevel() + levelDistance;
-        instance.setLevel(newLevel);
+    private void pushDown(Specification specification, int levelDistance) {
+        int newLevel = specification.getLevel() + levelDistance;
+        specification.setLevel(newLevel);
 
-        for (String dependency : instance.getDependencies()) {
-            pushDown(instances.get(dependency), levelDistance);
+        for (String dependency : specification.getDependencies()) {
+            pushDown(dynamicSpecification.get(dependency), levelDistance);
         }
     }
 }

@@ -1,8 +1,8 @@
 package net.igsoft.sdi.scala.testclasses
 
-import net.igsoft.sdi.{Creator, InstanceCreator, ParametersBase}
+import net.igsoft.sdi.{Creator, InstanceCreator, ParameterBase}
 
-case class PCreatorParams(manualStartAndStop: Boolean, id: String) extends ParametersBase(manualStartAndStop) {
+case class PCreatorParams(manualStartAndStop: Boolean, id: String) extends ParameterBase(manualStartAndStop) {
   override def uniqueId: String = id
 }
 

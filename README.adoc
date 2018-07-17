@@ -97,7 +97,7 @@ public static void main(String[] args) {
 }
 ----
 
-That way we can get any instance of a class from the class hierarchy of App without worrying about dependencies.
+That way we can get any specification of a class from the class hierarchy of App without worrying about dependencies.
 
 
 == Initialization of services
@@ -109,7 +109,7 @@ That's still a lot of manual work.
 Fortunately, there is a simple solution to this problem in SDI. It's just necessary to mark classes,
 which should be initialized/started/stopped/closed with one of the two interfaces:
 Manageable or ManageableBasic. ManageableBasic has two methods init() and close(). In many cases, it is enough
-to initialize and shutdown instance of the class. In Manageable we can find additionally two methods:
+to initialize and shutdown specification of the class. In Manageable we can find additionally two methods:
 start() and stop().
 
 Let's see how it will work for another class MqListener.

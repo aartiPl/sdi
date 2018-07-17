@@ -1,8 +1,8 @@
 package net.igsoft.sdi.testclasses;
 
-import net.igsoft.sdi.ParametersBase;
+import net.igsoft.sdi.ParameterBase;
 
-public final class RCreatorParams extends ParametersBase {
+public final class RCreatorParams extends ParameterBase {
 
     private final String name;
     private final String surname;

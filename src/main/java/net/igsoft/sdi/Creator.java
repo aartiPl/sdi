@@ -7,7 +7,7 @@ import java.util.List;
 
 //NOTE: This class has to be abstract class and not the interface to allow
 //discovery of T class on runtime (if it is abstract class erasure is not deleting type of Creator).
-public abstract class Creator<T, P extends ParametersBase> {
+public abstract class Creator<T, P extends ParameterBase> {
 
     private final Class<?> myClazz;
     private final Class<?> myParameter;

@@ -2,7 +2,7 @@ package net.igsoft.sdi;
 
 import java.lang.reflect.Constructor;
 
-public class AutoCreator<T, P extends ParametersBase> extends Creator<T, P> {
+public class AutoCreator<T, P extends ParameterBase> extends Creator<T, P> {
 
     public AutoCreator(Class<T> myClazz) {
         super(myClazz, (Class<P>)LaunchType.class);

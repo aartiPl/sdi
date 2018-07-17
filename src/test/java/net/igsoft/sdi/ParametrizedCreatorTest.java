@@ -1,14 +1,14 @@
 package net.igsoft.sdi;
 
-import net.igsoft.sdi.testclasses.P;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import net.igsoft.sdi.testclasses.PCreator;
 import net.igsoft.sdi.testclasses.PCreatorParams;
 import net.igsoft.sdi.testclasses.RCreator;
 import net.igsoft.sdi.testclasses.Stepper;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class ParametrizedCreatorTest {
     private Service service;
@@ -16,8 +16,7 @@ public class ParametrizedCreatorTest {
     @BeforeEach
     public void setUp() {
         service = Service.builder()
-                .withRootClass(P.class, new PCreatorParams(false, "id"))
-                .withCreator(new PCreator())
+                .withRootCreator(new PCreator(), new PCreatorParams(false, "id"))
                 .withCreator(new RCreator())
                 .withCreator(new AutoCreator<>(Stepper.class))
                 .build();

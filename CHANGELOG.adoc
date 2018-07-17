@@ -1,7 +1,12 @@
 0.9
 
 * Added Scala examples
-* Ability to create more than one main class (now called RootClasses)
+* Ability to create more than one main class (now defined by RootCreator)
+* Defining RootCreators is optional as roots are automatically discovered - if they are defined then
+  there is better correctness checking: reporting of unused creators, it's more clear what are
+  main classes of application for the user.
+* Default creator's types - you can provide such a default on top level and call creators without parameters.
+  Explicit parameters always override defaults.
 * Typesafe creator's parameters
 * Automatic start/stop for classes is now one of parameters to Creators
 * Automatic creators (reflection based)

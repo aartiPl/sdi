@@ -26,10 +26,9 @@ public class ServiceLifecycleTest {
     @BeforeEach
     public void setUp() {
         service = Service.builder()
-                .withRootClass(C.class)
+                .withRootCreator(new CCreator())
                 .withCreator(new ACreator())
                 .withCreator(new BCreator())
-                .withCreator(new CCreator())
                 .withCreator(new DCreator())
                 .withCreator(new ECreator())
                 .withCreator(new PCreator())

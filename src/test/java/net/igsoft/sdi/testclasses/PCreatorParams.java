@@ -1,8 +1,8 @@
 package net.igsoft.sdi.testclasses;
 
-import net.igsoft.sdi.ParametersBase;
+import net.igsoft.sdi.ParameterBase;
 
-public final class PCreatorParams extends ParametersBase {
+public final class PCreatorParams extends ParameterBase {
 
     private final String id;
 
