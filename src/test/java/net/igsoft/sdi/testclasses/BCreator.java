@@ -1,5 +1,9 @@
 package net.igsoft.sdi.testclasses;
 
+import java.util.List;
+
+import com.google.common.collect.Lists;
+
 import net.igsoft.sdi.Creator;
 import net.igsoft.sdi.InstanceCreator;
 import net.igsoft.sdi.LaunchType;
@@ -11,5 +15,10 @@ public class BCreator extends Creator<B, LaunchType> {
         P p = instanceCreator.getOrCreate(P.class, new ParametrizedCreator2Params(false, "id"));
 
         return new B(d, p, instanceCreator.getOrCreate(Stepper.class));
+    }
+
+    @Override
+    public List<Creator<?, ?>> defaultCreators() {
+        return Lists.newArrayList(new ParametrizedCreator2());
     }
 }

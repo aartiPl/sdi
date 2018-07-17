@@ -2,7 +2,9 @@ package net.igsoft.sdi;
 
 import static java.lang.String.format;
 
+import java.util.ArrayDeque;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,19 +70,26 @@ public class ServiceBuilder {
     }
 
     public Service build() {
-        for (Specification<?, ?> spec : specificationMap.values()) {
-            assignDefaultCreators(spec);
+        Deque<Specification> stack = new ArrayDeque<>(specificationMap.values());
+
+        while (!stack.isEmpty()) {
+            Map<Class<?>, Specification> discoveredSpecs = getDefaultCreators(stack.poll());
+            stack.addAll(discoveredSpecs.values());
+            specificationMap.putAll(discoveredSpecs);
         }
-        InstanceCreator instanceCreator = new InstanceCreator(specificationMap, this::getInstanceKey);
+
+        InstanceCreator instanceCreator =
+                new InstanceCreator(specificationMap, this::getInstanceKey);
 
         Map<Class<?>, Specification> instancesToInitiate =
                 rootSpecificationMap.isEmpty() ? specificationMap : rootSpecificationMap;
 
         for (Map.Entry<Class<?>, Specification> entry : instancesToInitiate.entrySet()) {
-            if (!rootSpecificationMap.isEmpty() || entry.getValue()
-                                                        .getCreator()
-                                                        .getParameterClass()
-                                                        .isAssignableFrom(entry.getValue().getDefaultParameter().getClass())) {
+            if (!rootSpecificationMap.isEmpty() ||
+                entry.getValue()
+                     .getCreator()
+                     .getParameterClass()
+                     .isAssignableFrom(entry.getValue().getDefaultParameter().getClass())) {
                 instanceCreator.getOrCreate(entry.getKey(), entry.getValue().getDefaultParameter());
             }
         }
@@ -119,31 +128,35 @@ public class ServiceBuilder {
         return new Service(this::getInstanceKey, instanceCreator.getInstances(), sortedLevels);
     }
 
-    private void assignDefaultCreators(Specification<?, ?> spec) {
+    private Map<Class<?>, Specification> getDefaultCreators(Specification spec) {
+        Map<Class<?>, Specification> discoveredSpecs = new HashMap<>();
 
-            for (Creator<?, ?> defaultCreator : spec.getCreator().defaultCreators()) {
-                Class<?> createdClass = defaultCreator.getCreatedClass();
+        for (Creator<?, ?> defaultCreator : spec.getEffectiveCreator().defaultCreators()) {
+            Class<?> createdClass = defaultCreator.getCreatedClass();
 
-                Specification<?, ?> createdSpecification =
-                        specificationMap.computeIfAbsent(createdClass, s -> new Specification());
-
-                //TODO: jeśli default creatory są te same, a także ich parametry są te same, to nie jest to problem
-                if (createdSpecification.getDefaultCreator() != null &&
-                    createdSpecification.getCreator() == null) {
-                    throw new IllegalStateException(
-                            format("Found duplicated default creators (c1: %s, c2: %s)" +
-                                   ", but no explicit creator for class '%s' was given.",
-                                   defaultCreator.getClass().getSimpleName(),
-                                   createdSpecification.getDefaultCreator()
-                                                       .getClass()
-                                                       .getSimpleName(),
-                                   createdClass.getSimpleName()));
-                }
-
+            if (!specificationMap.containsKey(createdClass)) {
+                Specification createdSpecification = new Specification();
                 createdSpecification.setDefaultCreator(defaultCreator);
+                //TODO: passing default parameters for default creators
                 createdSpecification.setDefaultParameter(LaunchType.AUTOMATIC);
+                discoveredSpecs.put(createdClass, createdSpecification);
+                continue;
             }
 
+            //TODO: jeśli default creatory są te same, a także ich parametry są te same, to nie jest to problem
+            if (specificationMap.get(createdClass).getDefaultCreator() != null &&
+                specificationMap.get(createdClass).getCreator() == null) {
+                throw new IllegalStateException(
+                        format("Found duplicated default creators (c1: %s, c2: %s)" +
+                               ", but no explicit creator for class '%s' was given.",
+                               defaultCreator.getClass().getSimpleName(),
+                               specificationMap.get(createdClass)
+                                               .getDefaultCreator()
+                                               .getClass()
+                                               .getSimpleName(), createdClass.getSimpleName()));
+            }
+        }
+        return discoveredSpecs;
     }
 
     private <T> String getInstanceKey(Class<T> clazz, String serializedParameters) {

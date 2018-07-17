@@ -23,6 +23,6 @@ public class DefaultCreatorTest {
 
     @Test
     public void assertThatServiceIsBuiltCorrectly() {
-        assertThat(service.get(Stepper.class).toString()).isEqualTo("G:ctor H:ctor F:ctor");
+        assertThat(service.get(Stepper.class).toString()).isEqualTo("E:ctor D:ctor R:ctor(name surname)");
     }
 }

@@ -14,7 +14,6 @@ public class ParametrizedWithDefaultCreatorsCreator
     public R create(InstanceCreator instanceCreator,
                     ParametrizedWithDefaultCreatorsCreatorParams parametrizedCreatorParams) {
         //Test that C, D and E are available
-        C c = instanceCreator.getOrCreate(C.class);
         D d = instanceCreator.getOrCreate(D.class);
 
         return new R(instanceCreator.getOrCreate(Stepper.class),
@@ -23,6 +22,6 @@ public class ParametrizedWithDefaultCreatorsCreator
 
     @Override
     public List<Creator<?, ?>> defaultCreators() {
-        return Lists.newArrayList(new CCreator(), new DCreator(), new AutoCreator(Stepper.class));
+        return Lists.newArrayList(new DCreator(), new AutoCreator(Stepper.class));
     }
 }

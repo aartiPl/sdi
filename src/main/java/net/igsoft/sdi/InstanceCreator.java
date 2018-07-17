@@ -47,8 +47,8 @@ public class InstanceCreator {
             stack.peek().addDependency(instanceKey);
         }
 
-        Specification<R, P> specification =
-                runtimeSpecificationMap.computeIfAbsent(instanceKey, s -> new Specification<R, P>());
+        Specification specification =
+                runtimeSpecificationMap.computeIfAbsent(instanceKey, s -> new Specification());
         stack.push(specification);
 
         if (specification.getLevel() == 0) {
@@ -86,7 +86,7 @@ public class InstanceCreator {
 
     @SuppressWarnings("unchecked")
     private <P extends ParameterBase, R> R calculateInstanceValue(Class<?> clazz, P params) {
-        Specification specification = specificationMap.computeIfAbsent(clazz, s -> new Specification<R, P>());
+        Specification specification = specificationMap.computeIfAbsent(clazz, s -> new Specification());
         Creator<R, P> creator = (Creator<R, P>) specification.getCreator();
 
         unusedCreators.remove(clazz);
@@ -111,7 +111,7 @@ public class InstanceCreator {
         return creator.create(this, params);
     }
 
-    private <R, P extends ParameterBase> void pushDown(Specification<R, P> specification, int levelDistance) {
+    private <R, P extends ParameterBase> void pushDown(Specification specification, int levelDistance) {
         int newLevel = specification.getLevel() + levelDistance;
         specification.setLevel(newLevel);
 
