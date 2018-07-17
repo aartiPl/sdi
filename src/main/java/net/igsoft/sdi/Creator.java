@@ -1,9 +1,9 @@
 package net.igsoft.sdi;
 
-import com.google.common.collect.Lists;
-
 import java.lang.reflect.ParameterizedType;
 import java.util.List;
+
+import com.google.common.collect.Lists;
 
 //NOTE: This class has to be abstract class and not the interface to allow
 //discovery of T class on runtime (if it is abstract class erasure is not deleting type of Creator).
@@ -36,9 +36,11 @@ public abstract class Creator<T, P extends ParameterBase> {
         return (Class<P>) myParameter;
     }
 
-    private static Class<?> getClassOfParentTypeParameter(Class<?> derivedClazz, int typeParameterIndex) {
-        String typeName = ((ParameterizedType) derivedClazz.getGenericSuperclass()).getActualTypeArguments()[typeParameterIndex]
-                .getTypeName();
+    private static Class<?> getClassOfParentTypeParameter(Class<?> derivedClazz,
+                                                          int typeParameterIndex) {
+        String typeName =
+                ((ParameterizedType) derivedClazz.getGenericSuperclass()).getActualTypeArguments()[typeParameterIndex]
+                        .getTypeName();
         int typeParametersIndex = typeName.indexOf('<');
 
         if (typeParametersIndex != -1) {

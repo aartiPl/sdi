@@ -1,10 +1,18 @@
 package net.igsoft.sdi;
 
-import net.igsoft.sdi.testclasses.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import net.igsoft.sdi.testclasses.ACreator;
+import net.igsoft.sdi.testclasses.BCreator;
+import net.igsoft.sdi.testclasses.CCreator;
+import net.igsoft.sdi.testclasses.DCreator;
+import net.igsoft.sdi.testclasses.ECreator;
+import net.igsoft.sdi.testclasses.PCreator;
+import net.igsoft.sdi.testclasses.RCreator;
+import net.igsoft.sdi.testclasses.Stepper;
 
 public class ServiceLifecycleTest {
 
@@ -26,15 +34,15 @@ public class ServiceLifecycleTest {
     @BeforeEach
     public void setUp() {
         service = Service.builder()
-                .withRootCreator(new CCreator())
-                .withCreator(new ACreator())
-                .withCreator(new BCreator())
-                .withCreator(new DCreator())
-                .withCreator(new ECreator())
-                .withCreator(new PCreator())
-                .withCreator(new RCreator())
-                .withCreator(new AutoCreator<>(Stepper.class))
-                .build();
+                         .withRootCreator(new CCreator())
+                         .withCreator(new ACreator())
+                         .withCreator(new BCreator())
+                         .withCreator(new DCreator())
+                         .withCreator(new ECreator())
+                         .withCreator(new PCreator())
+                         .withCreator(new RCreator())
+                         .withCreator(new AutoCreator<>(Stepper.class))
+                         .build();
     }
 
     @Test
@@ -49,8 +57,8 @@ public class ServiceLifecycleTest {
     public void assertThatStartingServiceWithoutInitDoesntWork() {
         service.start();
 
-        assertThat(service.get(Stepper.class)
-                .toString()).isEqualTo("E:ctor D:ctor R:ctor(name surname) P:ctor(id r) B:ctor A:ctor C:ctor");
+        assertThat(service.get(Stepper.class).toString()).isEqualTo(
+                "E:ctor D:ctor R:ctor(name surname) P:ctor(id r) B:ctor A:ctor C:ctor");
     }
 
     @Test
@@ -60,15 +68,15 @@ public class ServiceLifecycleTest {
 
         assertThat(service.get(Stepper.class).toString()).isEqualTo(
                 "E:ctor D:ctor R:ctor(name surname) P:ctor(id r) B:ctor A:ctor C:ctor D:init B:init A:init C:init " +
-                        "D:start B:start A:start C:start");
+                "D:start B:start A:start C:start");
     }
 
     @Test
     public void assertThatClosingServiceWhichIsNotStartedDoesntWork() {
         service.close();
 
-        assertThat(service.get(Stepper.class)
-                .toString()).isEqualTo("E:ctor D:ctor R:ctor(name surname) P:ctor(id r) B:ctor A:ctor C:ctor");
+        assertThat(service.get(Stepper.class).toString()).isEqualTo(
+                "E:ctor D:ctor R:ctor(name surname) P:ctor(id r) B:ctor A:ctor C:ctor");
     }
 
     @Test
@@ -79,6 +87,6 @@ public class ServiceLifecycleTest {
 
         assertThat(service.get(Stepper.class).toString()).isEqualTo(
                 "E:ctor D:ctor R:ctor(name surname) P:ctor(id r) B:ctor A:ctor C:ctor D:init B:init A:init C:init " +
-                        "D:start B:start A:start C:start C:stop A:stop B:stop D:stop C:close A:close B:close D:close");
+                "D:start B:start A:start C:start C:stop A:stop B:stop D:stop C:close A:close B:close D:close");
     }
 }

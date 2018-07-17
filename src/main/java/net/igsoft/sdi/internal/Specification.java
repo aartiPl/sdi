@@ -86,12 +86,16 @@ public class Specification {
 
     @Override
     public String toString() {
-        return new StringBuilder("Specification{")
-        .append("value=").append(value)
-        .append(", level=").append(level)
-        .append(", manualStartAndStop=").append(manualStartAndStop)
-        .append(", dependencies=").append(dependencies)
-        .append('}').toString();
+        return new StringBuilder("Specification{").append("value=")
+                                                  .append(value)
+                                                  .append(", level=")
+                                                  .append(level)
+                                                  .append(", manualStartAndStop=")
+                                                  .append(manualStartAndStop)
+                                                  .append(", dependencies=")
+                                                  .append(dependencies)
+                                                  .append('}')
+                                                  .toString();
     }
 
     public Creator<?, ?> getCreator() {

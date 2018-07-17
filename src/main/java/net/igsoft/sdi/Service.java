@@ -33,14 +33,12 @@ public class Service implements Manageable {
 
     @SuppressWarnings("unchecked")
     public <T, P extends ParameterBase> T get(Class<T> clazz, P params) {
-        return (T) instances.get(keyGenerator.generate(clazz, params.cachedUniqueId()))
-                            .getValue();
+        return (T) instances.get(keyGenerator.generate(clazz, params.cachedUniqueId())).getValue();
     }
 
     @SuppressWarnings("unchecked")
     public <T, P extends ParameterBase> T get(Class<T> clazz) {
-        return (T) instances.get(keyGenerator.generate(clazz, ""))
-                .getValue();
+        return (T) instances.get(keyGenerator.generate(clazz, "")).getValue();
     }
 
     @Override

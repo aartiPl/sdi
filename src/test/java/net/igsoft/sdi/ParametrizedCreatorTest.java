@@ -16,14 +16,15 @@ public class ParametrizedCreatorTest {
     @BeforeEach
     public void setUp() {
         service = Service.builder()
-                .withRootCreator(new PCreator(), new PCreatorParams(false, "id"))
-                .withCreator(new RCreator())
-                .withCreator(new AutoCreator<>(Stepper.class))
-                .build();
+                         .withRootCreator(new PCreator(), new PCreatorParams(false, "id"))
+                         .withCreator(new RCreator())
+                         .withCreator(new AutoCreator<>(Stepper.class))
+                         .build();
     }
 
     @Test
     public void assertThatServiceIsBuiltCorrectly() {
-        assertThat(service.get(Stepper.class).toString()).isEqualTo("R:ctor(name surname) P:ctor(id r)");
+        assertThat(service.get(Stepper.class).toString()).isEqualTo(
+                "R:ctor(name surname) P:ctor(id r)");
     }
 }

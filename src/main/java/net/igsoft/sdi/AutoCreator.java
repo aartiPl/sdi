@@ -1,25 +1,29 @@
 package net.igsoft.sdi;
 
+import static java.lang.String.format;
+
 import java.lang.reflect.Constructor;
 
 public class AutoCreator<T, P extends ParameterBase> extends Creator<T, P> {
 
     public AutoCreator(Class<T> myClazz) {
-        super(myClazz, (Class<P>)LaunchType.class);
+        super(myClazz, (Class<P>) LaunchType.class);
     }
 
     @Override
     public T create(InstanceCreator instanceCreator, P params) {
 
         if (!params.getClass().equals(LaunchType.class)) {
-            throw new IllegalStateException("Can not automatically create instances based on parameters passed to creator.");
+            throw new IllegalStateException(
+                    "Can not automatically create instances based on parameters passed to creator.");
         }
 
         Constructor<?>[] constructors = getCreatedClass().getConstructors();
 
         if (constructors.length > 1) {
-            throw new IllegalStateException("Class '" + getCreatedClass().getSimpleName() + "' has more than one public " +
-                    "constructor. Can not automatically construct these classes.");
+            throw new IllegalStateException(
+                    format("Class '%s' has more than one public constructor. Can not automatically create this class.",
+                           getCreatedClass().getSimpleName()));
         }
 
         if (constructors.length == 0 || constructors[0].getParameterCount() == 0) {
@@ -27,8 +31,8 @@ public class AutoCreator<T, P extends ParameterBase> extends Creator<T, P> {
             try {
                 instance = getCreatedClass().newInstance();
             } catch (Exception e) {
-                throw new IllegalStateException("Can not automatically create class '" + getCreatedClass().getSimpleName() + "'",
-                        e);
+                throw new IllegalStateException(format("Can not automatically create class '%s'",
+                                                       getCreatedClass().getSimpleName()), e);
             }
 
             return instance;
@@ -48,8 +52,8 @@ public class AutoCreator<T, P extends ParameterBase> extends Creator<T, P> {
         try {
             instance = constructor.newInstance(values);
         } catch (Exception e) {
-            throw new IllegalStateException("Can not automatically create class '" + getCreatedClass().getSimpleName() + "'",
-                    e);
+            throw new IllegalStateException(format("Can not automatically create class '%s'",
+                                                   getCreatedClass().getSimpleName()), e);
         }
 
         return instance;
