@@ -1,5 +1,8 @@
 package net.igsoft.sdi;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.lang.String.format;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -31,14 +34,29 @@ public class Service implements Manageable {
         this.states = Maps.newHashMap();
     }
 
+    public static ServiceBuilder builder() {
+        return new ServiceBuilder();
+    }
+
     @SuppressWarnings("unchecked")
     public <T, P extends ParameterBase> T get(Class<T> clazz, P params) {
-        return (T) instances.get(keyGenerator.generate(clazz, params.cachedUniqueId())).getValue();
+        checkArgument(clazz != null);
+        checkArgument(params != null);
+        Instance instance = instances.get(keyGenerator.generate(clazz, params.cachedUniqueId()));
+        checkArgument(instance != null, new IllegalArgumentException(
+                format("There is no instance of class %s with parameters %s available in Service",
+                       clazz.getSimpleName(), params)));
+        return (T) instance.getValue();
     }
 
     @SuppressWarnings("unchecked")
     public <T, P extends ParameterBase> T get(Class<T> clazz) {
-        return (T) instances.get(keyGenerator.generate(clazz, "")).getValue();
+        checkArgument(clazz != null);
+        Instance instance = instances.get(keyGenerator.generate(clazz, ""));
+        checkArgument(instance != null, new IllegalArgumentException(
+                format("There is no instance of class %s available in Service",
+                       clazz.getSimpleName())));
+        return (T) instance.getValue();
     }
 
     @Override
@@ -96,9 +114,5 @@ public class Service implements Manageable {
                 }
             }
         }
-    }
-
-    public static ServiceBuilder builder() {
-        return new ServiceBuilder();
     }
 }

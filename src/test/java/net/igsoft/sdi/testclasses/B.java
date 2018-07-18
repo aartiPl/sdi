@@ -2,7 +2,7 @@ package net.igsoft.sdi.testclasses;
 
 import net.igsoft.sdi.Manageable;
 
-class B implements Manageable {
+public class B implements Manageable {
 
     private final Stepper stepper;
 

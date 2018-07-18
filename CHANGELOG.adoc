@@ -5,10 +5,12 @@
 * Defining RootCreators is optional as roots are automatically discovered - if they are defined then
   there is better correctness checking: reporting of unused creators, it's more clear what are
   main classes of application for the user.
-* Default creator's types - you can provide such a default on top level and call creators without parameters.
+* Default creator's parameters - you can provide such a default on top level and call creators without parameters.
   Explicit parameters always override defaults.
 * Typesafe creator's parameters
-* Automatic start/stop for classes is now one of parameters to Creators
+* Every creator now has to have parameter.
+* Automatic start/stop is passed through creator parameter.
+* If there is no need for additional Creator parameters there is automatically applied LaunchType.AUTOMATIC parameter.
 * Automatic creators (reflection based)
 * Removed dependency on Apache Commons
 * Updated dependencies: Gradle, AssertJ, JUnit

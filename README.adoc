@@ -5,7 +5,7 @@ It achieves it without using annotations or reflections - just simple Java code.
 Additionally, you can manage your service/application life cycle just by calling methods:
 init(), start(), stop() and close() also by just calling these method on parent service.
 You don't have any "configuration" for wiring up all classes - it is done in code.
-All that takes about 500 lines of code.
+All that takes about 600 lines of code.
 
 Please let me know if you have any comments or suggestions about this project.
 

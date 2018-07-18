@@ -2,12 +2,12 @@ package net.igsoft.sdi.testclasses;
 
 import net.igsoft.sdi.ParameterBase;
 
-public final class WithDefaultCreatorsCreatorParams extends ParameterBase {
+public final class RParametrizedCreatorParams extends ParameterBase {
 
     private final String name;
     private final String surname;
 
-    public WithDefaultCreatorsCreatorParams(String name, String surname) {
+    RParametrizedCreatorParams(String name, String surname) {
         this.name = name;
         this.surname = surname;
     }

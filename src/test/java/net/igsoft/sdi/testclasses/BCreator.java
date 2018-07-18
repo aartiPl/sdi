@@ -12,13 +12,13 @@ public class BCreator extends Creator<B, LaunchType> {
     @Override
     public B create(InstanceCreator instanceCreator, LaunchType launchType) {
         D d = instanceCreator.getOrCreate(D.class, launchType);
-        P p = instanceCreator.getOrCreate(P.class, new ParametrizedCreator2Params(false, "id"));
+        P p = instanceCreator.getOrCreate(P.class, new PParametrizedCreatorParams(false, "id"));
 
         return new B(d, p, instanceCreator.getOrCreate(Stepper.class));
     }
 
     @Override
     public List<Creator<?, ?>> defaultCreators() {
-        return Lists.newArrayList(new ParametrizedCreator2());
+        return Lists.newArrayList(new PParametrizedCreator());
     }
 }

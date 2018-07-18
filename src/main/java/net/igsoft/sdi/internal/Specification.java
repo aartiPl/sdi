@@ -7,10 +7,10 @@ import com.google.common.collect.Sets;
 
 public class Specification {
 
+    private final Set<String> dependencies;
     private Object value;
     private int level;
     private boolean manualStartAndStop;
-    private final Set<String> dependencies;
 
     public Specification() {
         this.value = null;
@@ -75,15 +75,15 @@ public class Specification {
 
     @Override
     public String toString() {
-        return new StringBuilder("Specification{").append("value=")
-                                                  .append(value)
-                                                  .append(", level=")
-                                                  .append(level)
-                                                  .append(", manualStartAndStop=")
-                                                  .append(manualStartAndStop)
-                                                  .append(", dependencies=")
-                                                  .append(dependencies)
-                                                  .append('}')
-                                                  .toString();
+        return "Specification{" +
+               "value=" +
+               value +
+               ", level=" +
+               level +
+               ", manualStartAndStop=" +
+               manualStartAndStop +
+               ", dependencies=" +
+               dependencies +
+               '}';
     }
 }

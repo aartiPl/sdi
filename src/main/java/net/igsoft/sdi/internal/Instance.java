@@ -39,10 +39,6 @@ public class Instance {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("Instance{");
-        sb.append("value=").append(value);
-        sb.append(", manualStartAndStop=").append(manualStartAndStop);
-        sb.append('}');
-        return sb.toString();
+        return "Instance{" + "value=" + value + ", manualStartAndStop=" + manualStartAndStop + '}';
     }
 }

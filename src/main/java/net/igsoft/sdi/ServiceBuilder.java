@@ -45,7 +45,7 @@ public class ServiceBuilder {
         return withCreator(false, creator, defaultParameter);
     }
 
-    public <P extends ParameterBase> ServiceBuilder withCreator(boolean rootCreator,
+    private <P extends ParameterBase> ServiceBuilder withCreator(boolean rootCreator,
                                                                 Creator<?, P> creator,
                                                                 P defaultParameter) {
         Class<?> createdClass = creator.getCreatedClass();

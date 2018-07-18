@@ -4,15 +4,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
+import net.igsoft.sdi.testclasses.RWithDefaultCreatorsCreator;
+import net.igsoft.sdi.testclasses.RWithDefaultCreatorsCreatorParams;
 import net.igsoft.sdi.testclasses.Stepper;
-import net.igsoft.sdi.testclasses.WithDefaultCreatorsCreator;
-import net.igsoft.sdi.testclasses.WithDefaultCreatorsCreatorParams;
 
 class DefaultCreatorTest {
 
-    private static final WithDefaultCreatorsCreator CREATOR = new WithDefaultCreatorsCreator();
-    private static final WithDefaultCreatorsCreatorParams CREATOR_PARAMETER =
-            new WithDefaultCreatorsCreatorParams("name", "surname");
+    private static final RWithDefaultCreatorsCreator CREATOR = new RWithDefaultCreatorsCreator();
+    private static final RWithDefaultCreatorsCreatorParams CREATOR_PARAMETER =
+            new RWithDefaultCreatorsCreatorParams("name", "surname");
 
     @Test
     void assertThatAllCreatorsCanBeExtractedFromDefaultCreators() {
