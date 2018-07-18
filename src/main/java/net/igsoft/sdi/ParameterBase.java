@@ -1,5 +1,8 @@
 package net.igsoft.sdi;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 public abstract class ParameterBase {
     private final boolean manualStartAndStop;
     private String serialized;
@@ -17,6 +20,10 @@ public abstract class ParameterBase {
     }
 
     public abstract String uniqueId();
+
+    protected final String concatenate(String... parts) {
+        return Arrays.stream(parts).collect(Collectors.joining("_"));
+    }
 
     //Single threaded
     public String cachedUniqueId() {

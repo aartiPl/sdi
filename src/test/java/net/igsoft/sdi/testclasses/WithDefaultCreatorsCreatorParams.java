@@ -2,12 +2,12 @@ package net.igsoft.sdi.testclasses;
 
 import net.igsoft.sdi.ParameterBase;
 
-public final class ParametrizedWithDefaultCreatorsCreatorParams extends ParameterBase {
+public final class WithDefaultCreatorsCreatorParams extends ParameterBase {
 
     private final String name;
     private final String surname;
 
-    public ParametrizedWithDefaultCreatorsCreatorParams(String name, String surname) {
+    public WithDefaultCreatorsCreatorParams(String name, String surname) {
         this.name = name;
         this.surname = surname;
     }
@@ -22,6 +22,6 @@ public final class ParametrizedWithDefaultCreatorsCreatorParams extends Paramete
 
     @Override
     public String uniqueId() {
-        return name + surname;
+        return concatenate(name, surname);
     }
 }

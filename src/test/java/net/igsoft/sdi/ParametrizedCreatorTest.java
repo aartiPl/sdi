@@ -5,9 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import net.igsoft.sdi.testclasses.ParametrizedCreator1;
 import net.igsoft.sdi.testclasses.ParametrizedCreator2;
 import net.igsoft.sdi.testclasses.ParametrizedCreator2Params;
-import net.igsoft.sdi.testclasses.ParametrizedCreator1;
 import net.igsoft.sdi.testclasses.Stepper;
 
 public class ParametrizedCreatorTest {
@@ -16,7 +16,8 @@ public class ParametrizedCreatorTest {
     @BeforeEach
     public void setUp() {
         service = Service.builder()
-                         .withRootCreator(new ParametrizedCreator2(), new ParametrizedCreator2Params(false, "id"))
+                         .withRootCreator(new ParametrizedCreator2(),
+                                          new ParametrizedCreator2Params(false, "id"))
                          .withCreator(new ParametrizedCreator1())
                          .withCreator(new AutoCreator<>(Stepper.class))
                          .build();

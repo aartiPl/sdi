@@ -10,8 +10,8 @@ import net.igsoft.sdi.testclasses.BCreator;
 import net.igsoft.sdi.testclasses.CCreator;
 import net.igsoft.sdi.testclasses.DCreator;
 import net.igsoft.sdi.testclasses.ECreator;
-import net.igsoft.sdi.testclasses.ParametrizedCreator2;
 import net.igsoft.sdi.testclasses.ParametrizedCreator1;
+import net.igsoft.sdi.testclasses.ParametrizedCreator2;
 import net.igsoft.sdi.testclasses.Stepper;
 
 public class ServiceLifecycleTest {

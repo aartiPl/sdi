@@ -22,6 +22,6 @@ public final class ParametrizedCreator1Params extends ParameterBase {
 
     @Override
     public String uniqueId() {
-        return name + surname;
+        return concatenate(name, surname);
     }
 }

@@ -8,11 +8,10 @@ import net.igsoft.sdi.AutoCreator;
 import net.igsoft.sdi.Creator;
 import net.igsoft.sdi.InstanceCreator;
 
-public class ParametrizedWithDefaultCreatorsCreator
-        extends Creator<R, ParametrizedWithDefaultCreatorsCreatorParams> {
+public class WithDefaultCreatorsCreator extends Creator<R, WithDefaultCreatorsCreatorParams> {
     @Override
     public R create(InstanceCreator instanceCreator,
-                    ParametrizedWithDefaultCreatorsCreatorParams parametrizedCreatorParams) {
+                    WithDefaultCreatorsCreatorParams parametrizedCreatorParams) {
         //Test that C, D and E are available
         D d = instanceCreator.getOrCreate(D.class);
 

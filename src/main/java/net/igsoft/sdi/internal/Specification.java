@@ -5,25 +5,14 @@ import java.util.Set;
 
 import com.google.common.collect.Sets;
 
-import net.igsoft.sdi.Creator;
-import net.igsoft.sdi.ParameterBase;
-
 public class Specification {
 
-    private Creator<?, ?> creator;
-    private Creator<?, ?> defaultCreator;
-    private ParameterBase defaultParameter;
-    private boolean rootCreator;
     private Object value;
     private int level;
     private boolean manualStartAndStop;
     private final Set<String> dependencies;
 
     public Specification() {
-        this.creator = null;
-        this.defaultCreator = null;
-        this.defaultParameter = null;
-        this.rootCreator = false;
         this.value = null;
         this.level = 0;
         this.manualStartAndStop = false;
@@ -96,41 +85,5 @@ public class Specification {
                                                   .append(dependencies)
                                                   .append('}')
                                                   .toString();
-    }
-
-    public Creator<?, ?> getCreator() {
-        return creator;
-    }
-
-    public void setCreator(Creator<?, ?> creator) {
-        this.creator = creator;
-    }
-
-    public Creator<?, ?> getEffectiveCreator() {
-        return creator != null ? creator : defaultCreator;
-    }
-
-    public boolean isRootCreator() {
-        return rootCreator;
-    }
-
-    public void setRootCreator(boolean rootCreator) {
-        this.rootCreator = rootCreator;
-    }
-
-    public ParameterBase getDefaultParameter() {
-        return defaultParameter;
-    }
-
-    public void setDefaultParameter(ParameterBase defaultParameter) {
-        this.defaultParameter = defaultParameter;
-    }
-
-    public Creator<?, ?> getDefaultCreator() {
-        return defaultCreator;
-    }
-
-    public void setDefaultCreator(Creator<?, ?> defaultCreator) {
-        this.defaultCreator = defaultCreator;
     }
 }
