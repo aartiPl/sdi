@@ -13,6 +13,14 @@ repositories {
     mavenCentral()
 }
 
+sourceSets {
+    example {
+        java {
+            srcDirs 'src/example/java'
+        }
+    }
+}
+
 task javadocJar(type: Jar) {
     classifier = 'javadoc'
     from javadoc

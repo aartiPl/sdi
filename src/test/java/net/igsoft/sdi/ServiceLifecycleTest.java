@@ -54,11 +54,12 @@ public class ServiceLifecycleTest {
     }
 
     @Test
-    public void assertThatStartingServiceWithoutInitDoesntWork() {
+    public void assertThatStartingServiceWithoutInitIsProperlyInitialized() {
         service.start();
 
         assertThat(service.get(Stepper.class).toString()).isEqualTo(
-                "E:ctor D:ctor R:ctor(name surname) P:ctor(id r) B:ctor A:ctor C:ctor");
+                "E:ctor D:ctor R:ctor(name surname) P:ctor(id r) B:ctor A:ctor C:ctor D:init B:init A:init C:init " +
+                "D:start B:start A:start C:start");
     }
 
     @Test

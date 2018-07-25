@@ -44,14 +44,16 @@ class ServiceLifecycleTest {
   @Test def assertThatStartingServiceWithoutInitDoesntWork(): Unit = {
     service.start()
     assertThat(service.get(classOf[Stepper]).toString)
-    .isEqualTo("E:ctor D:ctor R:ctor(name surname) P:ctor(id r) B:ctor A:ctor C:ctor")
+      .isEqualTo("E:ctor D:ctor R:ctor(name surname) P:ctor(id r) B:ctor A:ctor C:ctor D:init B:init A:init C:init "
+        + "D:start B:start A:start C:start")
   }
 
   @Test def assertThatStartingServiceWorks(): Unit = {
     service.init()
     service.start()
     assertThat(service.get(classOf[Stepper]).toString)
-    .isEqualTo("E:ctor D:ctor R:ctor(name surname) P:ctor(id r) B:ctor A:ctor C:ctor D:init B:init A:init C:init " + "D:start B:start A:start C:start")
+    .isEqualTo("E:ctor D:ctor R:ctor(name surname) P:ctor(id r) B:ctor A:ctor C:ctor D:init B:init A:init C:init "
+      + "D:start B:start A:start C:start")
   }
 
   @Test def assertThatClosingServiceWhichIsNotStartedDoesntWork(): Unit = {

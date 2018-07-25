@@ -68,6 +68,8 @@ public class Service implements Manageable {
 
     @Override
     public void start() {
+        init();
+
         applyOperation(Manageable.class, Lists.reverse(sortedLevels),
                        Lists.newArrayList(ManageableState.INITIALIZED, ManageableState.STOPPED),
                        ManageableState.STARTED, Manageable::start);
