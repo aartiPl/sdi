@@ -236,7 +236,12 @@ and returning from it instances of creators.
 [source, java]
 .DefaultCreatorsExample.java
 ----
-include::src/example/java/net/igsoft/sdi/DefaultCreatorsExample.java[tags=default_creators]
+ifdef::env-github,backend-html5[]
+  <<src/example/java/net/igsoft/sdi/DefaultCreatorsExample.java#default_creators, Default Creators>>
+endif::[]
+ifndef::env-github,backend-html5[]
+  include::src/example/java/net/igsoft/sdi/DefaultCreatorsExample.java[tags=default_creators]
+endif::[]
 ----
 
 That way we do not have to provide above creators during Service construction. When SDI finds that there is no
