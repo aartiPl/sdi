@@ -61,6 +61,8 @@ public class LifecycleExample {
     public static void main(String[] args) {
         Service service = Service.builder()
                                  .withRootCreator(new AppCreator())
+                                 .withCreator(new ConfigCreator())
+                                 .withCreator(new MqListenerCreator())
                                  .build();
 
         Runtime.getRuntime().addShutdownHook(new Thread(service::close));

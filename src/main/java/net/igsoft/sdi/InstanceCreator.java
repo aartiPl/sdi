@@ -44,12 +44,16 @@ public class InstanceCreator {
         this.stack = new ArrayDeque<>();
     }
 
-    public <R> R getOrCreate(Class<?> clazz) {
+    public <R> R getOrCreate(Class<R> clazz) {
         return getOrCreate(clazz, defaultParameters.get(clazz));
     }
 
-    public <P extends ParameterBase, R> R getOrCreate(Class<?> clazz, P params) {
+    public <P extends ParameterBase, R> R getOrCreate(Class<R> clazz, P params) {
         checkArgument(clazz != null);
+
+        Creator<R, P> creator = findCreator(clazz);
+
+        checkState(creator != null, "No creator has been found for class: " + clazz.getName());
         checkArgument(params != null, new IllegalArgumentException(
                 format("There is no parameter provided for creator neither explicitly nor through default parameters of creator of the class %s",
                        clazz)));
@@ -66,7 +70,9 @@ public class InstanceCreator {
 
         if (specification.getLevel() == 0) {
             //It's just freshly created runtimeSpecification...
-            specification.setValue(calculateInstanceValue(clazz, params));
+            unusedCreators.remove(clazz);
+
+            specification.setValue(creator.create(this, params));
             specification.setLevel(stack.size());
         }
 
@@ -98,10 +104,8 @@ public class InstanceCreator {
     }
 
     @SuppressWarnings("unchecked")
-    private <P extends ParameterBase, R> R calculateInstanceValue(Class<?> clazz, P params) {
+    private <P extends ParameterBase, R> Creator<R, P> findCreator(Class<?> clazz) {
         Creator<R, P> creator = (Creator<R, P>) creators.get(clazz);
-
-        unusedCreators.remove(clazz);
 
         if (creator == null) {
             LOGGER.info(
@@ -113,9 +117,7 @@ public class InstanceCreator {
             LOGGER.info("Default creator for class {} has {}been found", clazz.getName(),
                         creator == null ? "not " : "");
         }
-
-        checkState(creator != null, "No creator has been found for class: " + clazz.getName());
-        return creator.create(this, params);
+        return creator;
     }
 
     private void pushDown(Specification specification, int levelDistance) {

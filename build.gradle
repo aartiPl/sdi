@@ -18,6 +18,10 @@ sourceSets {
         java {
             srcDirs 'src/example/java'
         }
+
+        scala {
+            srcDirs 'src/example/scala'
+        }
     }
 }
 

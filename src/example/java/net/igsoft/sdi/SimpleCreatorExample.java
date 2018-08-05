@@ -33,6 +33,7 @@ public class SimpleCreatorExample {
     public static void main(String[] args) {
         Service service = Service.builder()
                                  .withRootCreator(new AppCreator())
+                                 .withCreator(new ConfigCreator())
                                  .build();
 
         Runtime.getRuntime().addShutdownHook(new Thread(service::close));

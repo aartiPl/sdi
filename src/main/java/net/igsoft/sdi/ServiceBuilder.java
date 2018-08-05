@@ -90,6 +90,10 @@ public class ServiceBuilder {
 
             if (defaultParameters.containsKey(key)) {
                 instanceCreator.getOrCreate(key, defaultParameters.get(key));
+            } else {
+                throw new IllegalStateException(format("Creator '%s' (for class '%s') does not have " +
+                                                       "a required parameter of type '%s'", entry.getValue().getClass().getSimpleName(),
+                                                       key.getSimpleName(), entry.getValue().getParameterClass().getSimpleName()));
             }
         }
 

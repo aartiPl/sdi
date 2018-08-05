@@ -49,6 +49,7 @@ automatization.
 In the simplest case, class and its creator can look like below:
 
 [source, java]
+.SimpleCreatorExample.java
 ----
 include::src/example/java/net/igsoft/sdi/SimpleCreatorExample.java[tags=config]
 ----
@@ -59,6 +60,7 @@ we have more complicated classes.
 Let's say that we have a class App which has a class Config as a dependency.
 
 [source, java]
+.SimpleCreatorExample.java
 ----
 include::src/example/java/net/igsoft/sdi/SimpleCreatorExample.java[tags=app]
 ----
@@ -72,6 +74,7 @@ But how we can use such classes?
 Very simple: let's just create service which will keep information about all available instances:
 
 [source, java]
+.SimpleCreatorExample.java
 ----
 include::src/example/java/net/igsoft/sdi/SimpleCreatorExample.java[tags=main]
 ----
@@ -79,6 +82,18 @@ include::src/example/java/net/igsoft/sdi/SimpleCreatorExample.java[tags=main]
 That way we can get any instance of a class from the class hierarchy of App without worrying about
 dependencies.
 
+You might notice a different way in which creators are added to the Service - application creator is
+added by using .withRootCreator() method, but configuration creator is added with .withCreator() method.
+What is the difference? Basically you can use only .withCreator() method to add all creators to the service.
+All class hierarchy roots will be find automatically and everything will work as expected. The drawback
+of such an approach is that all classes will be created, even if their creators are there only by mistake.
+In such a case it is just not possible to find out that some creators are in service just because they were
+added by mistake. In case of marking root creators as such during instantiation you will get a message that
+some of creators are not used during that process. It is possible because when the Service() instance is build
+all the instances are already created and it is clear which creators were used during initialization and which
+are not. Another advantage of using explicit root creators is for code readability: it is then imediatelly
+visible which classes should be analyzed first, when trying to understand application. Notice that sometimes
+it is necessary to add a few root creators, which is possible and necessary if you want to have them all instantiated.
 
 == Initialization of services
 
@@ -95,6 +110,7 @@ additionally two methods: start() and stop().
 Let's see how it will work for another class: MqListener.
 
 [source, java]
+.LifecycleExample.java
 ----
 include::src/example/java/net/igsoft/sdi/LifecycleExample.java[tags=classes]
 ----
@@ -102,6 +118,7 @@ include::src/example/java/net/igsoft/sdi/LifecycleExample.java[tags=classes]
 Now we can start an application from our main class:
 
 [source, java]
+.LifecycleExample.java
 ----
 include::src/example/java/net/igsoft/sdi/LifecycleExample.java[tags=main]
 ----
@@ -115,7 +132,7 @@ App constructor. In such a case very helpful are automatic creators, which, as t
 doesn't have to be implemented. How to use them? Below is above example rewritten with automatic
 creators:
 
-[source, java]
+[source, java,role="primary"]
 .AutoCreatorExample.java
 ----
 include::src/example/java/net/igsoft/sdi/AutoCreatorExample.java[]
@@ -134,56 +151,81 @@ it can be used with different topics. Of course, we can add a dependency to conf
 but then it will be difficult to reuse this creator in other application. That's why creators can be parametrized.
 
 [source, java]
+.ParametrizedCreatorExample.java
 ----
-class ConfigCreatorParams extends ParametersBase {
-    private final File file;
-
-    public ConfigCreatorParams(File file) {
-        super(false);
-        this.file = file;
-    }
-
-    public File getFile() {
-        return file;
-    }
-
-    @Override
-    public String uniqueId() {
-        return file.getName();
-    }
-}
-
-class ConfigCreator extends Creator<Config, ConfigCreatorParams> {
-    @Override
-    public Config create(InstanceCreator instanceCreator, ConfigCreatorParams params) {
-        File file = params.getFile();
-        config = Config.createFromFile(fileName);
-        return config;
-    }
-}
+include::src/example/java/net/igsoft/sdi/ParametrizedCreatorExample.java[tags=config]
 ----
 
 On the call side we use it like this:
 
 [source, java]
+.ParametrizedCreatorExample.java
 ----
-class AppCreator extends Creator<App, LaunchType> {
-    @Override
-    public App create(InstanceCreator instanceCreator, LaunchType launchType) {
-        ConfigCreatorParams params = new ConfigCreatorParams(new File("~/config.init"));
-        Config config = instanceCreator.getOrCreate(Config.class, params);
-        MqListener mqListener = instanceCreator.getOrCreate(MqListener.class);
-        return new App(config, mqListener);
-    }
+include::src/example/java/net/igsoft/sdi/ParametrizedCreatorExample.java[tags=app]
+----
+
+When definining a parameter bean it must extend ParameterBase and implement a method:
+[source, java]
+----
+String uniqueId()
+----
+
+This method returns unique identifier of creator parameters - it is used to differentiate
+instances of target classes as it is assumed that different creator parameters creates
+a different instance of some specific class. For simple implementation it is possible to
+use method:
+[source, java]
+----
+String concatenate(String... parts)
+----
+which just concatenates different Strings together.
+
+[source, java]
+.Example implementation of uniqueId() method
+----
+String uniqueId() {
+  return concatenate(name, surname, Integer.toString(age));
 }
 ----
+
+Creator parameter class always extends ParameterBase class. In that class, besides of
+uniqueId() method, is also defined property:
+[source, java]
+----
+boolean manualStartAndStop
+----
+
+This is the single parameter to all creators which is always required. This property defines
+if the instance of some specific class should be automatically started. If it is set to 'true'
+then this DI micro framework will not automatically start instance of this specific class, although
+initialization, stoping and termination of this instance will work as usuall. It might be sometimes
+useful to have more control over the starting of the instance of the class. This parameter of creator is
+required, but you don't have to pass it explicitly - it will be assumed that all instances should be
+started automatically. That's what for is LaunchType creator parameter - it deafults to LaunchType.AUTOMATIC
+and is passed automatically to creators when no other explicit argument is given.
+
+== Creator default parameters
+
+As mentioned above there is one default creator parameter type which SDI applies whenever user does not provide
+other defaults. But it is possible to provide default creator's parameter explicitly. It is done when providing
+creators in ServiceBuilder:
+
+[source, java]
+.ParametrizedCreatorExample.java
+----
+include::src/example/java/net/igsoft/sdi/ParametrizedCreatorExample.java[tags=main]
+----
+
+Default parameters will be applied whenever there is a need to provide parameter during instance creation and
+there is no explicit parameter provided.
 
 == Default creators
 
 Each creator can provide a set of default creators which can be used to create its dependencies.
 
-For example if App creator needs for its work classes A, B and C, you can provide in it default creators for
-some or all of mentioned classes. It is accomplished by overriding method:
+For example if MqListener creator needs for its work class MqListenerWorker, you can provide its
+creator in MqListener. It is accomplished by overriding method:
+
 [source, java]
 ----
 List<Creator<?, ?>> defaultCreators()
@@ -192,26 +234,14 @@ List<Creator<?, ?>> defaultCreators()
 and returning from it instances of creators.
 
 [source, java]
+.DefaultCreatorsExample.java
 ----
-class AppCreator extends Creator<App, LaunchType> {
-    @Override
-    public App create(InstanceCreator instanceCreator, LaunchType launchType) {
-        A a = instanceCreator.getOrCreate(A.class);
-        B b = instanceCreator.getOrCreate(B.class);
-        C c = instanceCreator.getOrCreate(C.class);
-
-        return new App(a, b, c);
-    }
-
-    @Override
-    public List<Creator<?, ?>> defaultCreators() {
-        return Lists.newArrayList(new ACreator(), new BCreator());
-    }
-}
+include::src/example/java/net/igsoft/sdi/DefaultCreatorsExample.java[tags=default_creators]
 ----
 
 That way we do not have to provide above creators during Service construction. When SDI finds that there is no
-explicit creator, then it will take a default one.
+explicit creator, then it will take a default one. You can provide all or only some of dependant creators
+in defaultCreators() method.
 
 Please notice that it is still possible to override default creator by setting different one
 on Service setting level.
