@@ -3,7 +3,7 @@ package net.igsoft.sdi
 object LifecycleScalaExample {
 
   // tag::classes[]
-  private[sdi] class Config {}
+  private[sdi] class Config
 
   private[sdi] class ConfigCreator extends Creator[Config, LaunchType] {
     override def create(instanceCreator: InstanceCreator, launchType: LaunchType) = new Config

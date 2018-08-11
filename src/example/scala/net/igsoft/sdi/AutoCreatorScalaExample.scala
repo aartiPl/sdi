@@ -2,7 +2,7 @@ package net.igsoft.sdi
 
 object AutoCreatorScalaExample {
 
-  private[sdi] class Config {}
+  private[sdi] class Config
 
   private[sdi] class MqListener extends Manageable {
     override def init(): Unit = {
@@ -22,8 +22,7 @@ object AutoCreatorScalaExample {
     }
   }
 
-  private[sdi] class App(val e: Config, val mqListner: MqListener) {
-  }
+  private[sdi] class App(val e: Config, val mqListner: MqListener)
 
   def main(args: Array[String]): Unit = {
     val service = Service.builder.withRootCreator(new AutoCreator[App, ParameterBase](classOf[App]))

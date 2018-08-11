@@ -1,7 +1,8 @@
 package net.igsoft.sdi
 
 object SimpleCreatorScalaExample { // tag::config[]
-private[sdi] class Config {}
+
+  private[sdi] class Config
 
   private[sdi] class ConfigCreator extends Creator[Config, LaunchType] {
     override def create(instanceCreator: InstanceCreator, launchType: LaunchType) = new Config
@@ -9,8 +10,7 @@ private[sdi] class Config {}
 
   // tag::app[]
   // end::config[]
-  private[sdi] class App(val e: Config) {
-  }
+  private[sdi] class App(val e: Config)
 
   private[sdi] class AppCreator extends Creator[App, LaunchType] {
     override def create(instanceCreator: InstanceCreator, launchType: LaunchType): App = {
@@ -28,6 +28,7 @@ private[sdi] class Config {}
     sys.ShutdownHookThread {
       service.close()
     }
+
     service.start()
   }
 

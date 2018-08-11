@@ -5,9 +5,7 @@ import java.io.File
 object ParametrizedCreatorScalaExample {
 
   // tag::config[]
-  private[sdi] class ConfigCreatorParam(val file: File) extends ParameterBase(false) {
-    def getFile: File = file
-
+  private[sdi] case class ConfigCreatorParam(val file: File) extends ParameterBase(false) {
     override def uniqueId: String = file.getName
   }
 
@@ -19,7 +17,7 @@ object ParametrizedCreatorScalaExample {
 
   private[sdi] class ConfigCreator extends Creator[Config, ConfigCreatorParam] {
     override def create(instanceCreator: InstanceCreator, params: ConfigCreatorParam): Config = {
-      val file = params.getFile
+      val file = params.file
       Config.createFromFile(file)
     }
   }
@@ -32,8 +30,7 @@ object ParametrizedCreatorScalaExample {
     override def uniqueId: String = name
   }
 
-  private[sdi] class App(val e: Config, val mqListener: MqListener) {
-  }
+  private[sdi] class App(val e: Config, val mqListener: MqListener)
 
   private[sdi] class AppCreator extends Creator[App, AppEnvironment] {
     override def create(instanceCreator: InstanceCreator, appEnvironment: AppEnvironment): App = {

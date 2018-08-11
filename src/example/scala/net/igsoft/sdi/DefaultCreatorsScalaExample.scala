@@ -6,10 +6,10 @@ import com.google.common.collect.Lists
 
 object DefaultCreatorsScalaExample {
 
-  private[sdi] class Config {}
+  private[sdi] class Config
 
   // tag::default_creators[]
-  private[sdi] class MqListenerWorker {}
+  private[sdi] class MqListenerWorker
 
   private[sdi] class MqListenerCreator extends Creator[MqListener, LaunchType] {
     override def create(instanceCreator: InstanceCreator, params: LaunchType): MqListener = {
