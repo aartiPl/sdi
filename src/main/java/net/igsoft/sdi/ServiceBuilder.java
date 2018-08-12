@@ -1,9 +1,10 @@
 package net.igsoft.sdi;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 
-import java.lang.reflect.ParameterizedType;
+import java.util.ArrayDeque;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,70 +12,95 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
-import net.igsoft.sdi.internal.Instance;
-import net.igsoft.sdi.internal.LoggingUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import net.igsoft.sdi.internal.LoggingUtils;
+import net.igsoft.sdi.internal.Specification;
 
 public class ServiceBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceBuilder.class);
 
-    private final Map<Class<?>, Creator<?>> creators = new HashMap<>();
+    private final Map<Class<?>, Creator<?, ?>> creators = new HashMap<>();
+    private final Map<Class<?>, Creator<?, ?>> defaultCreators = new HashMap<>();
+    private final Map<Class<?>, Creator<?, ?>> rootCreators = new HashMap<>();
+    private final Map<Class<?>, ParameterBase> defaultParameters = new HashMap<>();
 
-    private Class<?> mainClass;
-    private CreatorParams params;
-    private boolean manualStartAndStop;
-
-    public ServiceBuilder withMainClass(Class<?> mainClass) {
-        this.mainClass = mainClass;
-        this.params = CreatorParams.EMPTY_PARAMS;
-        this.manualStartAndStop = false;
-        return this;
+    public ServiceBuilder withRootCreator(Creator<?, ?> creator) {
+        return withCreator(true, creator, null);
     }
 
-    public ServiceBuilder withMainClass(Class<?> mainClass, CreatorParams params) {
-        this.mainClass = mainClass;
-        this.params = params;
-        this.manualStartAndStop = false;
-        return this;
+    public <P extends ParameterBase> ServiceBuilder withRootCreator(Creator<?, P> creator,
+                                                                    P defaultParameter) {
+        return withCreator(true, creator, defaultParameter);
     }
 
-    public ServiceBuilder withMainClass(Class<?> mainClass, CreatorParams params,
-                                        boolean manualStartAndStop) {
-        this.mainClass = mainClass;
-        this.params = params;
-        this.manualStartAndStop = manualStartAndStop;
-        return this;
+    public ServiceBuilder withCreator(Creator<?, ?> creator) {
+        return withCreator(false, creator, null);
     }
 
-    public ServiceBuilder withCreator(Creator<?> creator) {
-        Class<?> createdClass = getCreatedClass(creator);
+    public <P extends ParameterBase> ServiceBuilder withCreator(Creator<?, P> creator,
+                                                                P defaultParameter) {
+        return withCreator(false, creator, defaultParameter);
+    }
+
+    private <P extends ParameterBase> ServiceBuilder withCreator(boolean rootCreator,
+                                                                Creator<?, P> creator,
+                                                                P defaultParameter) {
+        Class<?> createdClass = creator.getCreatedClass();
 
         if (creators.containsKey(createdClass)) {
             throw new IllegalArgumentException(
-                    "Duplicated creator given in 'withCreator' method:\n" +
-                    creator.getClass().getSimpleName() +
-                    " (for class: " +
-                    createdClass.getSimpleName() +
-                    ")");
+                    format("Duplicated creator given in 'withCreator' method:\n%s (for class: %s)",
+                           creator.getClass().getSimpleName(), createdClass.getSimpleName()));
         }
 
         creators.put(createdClass, creator);
+
+        if (rootCreator) {
+            rootCreators.put(createdClass, creator);
+        }
+
+        if (defaultParameter != null) {
+            defaultParameters.put(createdClass, defaultParameter);
+        }
+
         return this;
     }
 
     public Service build() {
-        checkNotNull(mainClass);
+        Deque<Creator<?, ?>> stack = new ArrayDeque<>(creators.values());
 
-        Map<Class<?>, Creator<?>> defaultCreators = extractDefaultCreators(creators);
-        InstanceCreator instanceCreator = new InstanceCreator(creators, defaultCreators,
-                                                              this::getInstanceKey);
-        instanceCreator.getOrCreate(mainClass, params, manualStartAndStop);
+        while (!stack.isEmpty()) {
+            Map<Class<?>, Creator<?, ?>> discoveredDefaultCreators =
+                    discoverDefaultCreators(stack.pop());
+            stack.addAll(discoveredDefaultCreators.values());
+        }
+
+        InstanceCreator instanceCreator =
+                new InstanceCreator(creators, defaultCreators, defaultParameters,
+                                    this::getInstanceKey);
+
+        Map<Class<?>, Creator<?, ?>> instancesToInitiate =
+                !rootCreators.isEmpty() ? rootCreators : creators;
+
+        for (Map.Entry<Class<?>, Creator<?, ?>> entry : instancesToInitiate.entrySet()) {
+            Class<?> key = entry.getKey();
+
+            if (defaultParameters.containsKey(key)) {
+                instanceCreator.getOrCreate(key, defaultParameters.get(key));
+            } else {
+                throw new IllegalStateException(format("Creator '%s' (for class '%s') does not have " +
+                                                       "a required parameter of type '%s'", entry.getValue().getClass().getSimpleName(),
+                                                       key.getSimpleName(), entry.getValue().getParameterClass().getSimpleName()));
+            }
+        }
 
         Multimap<Integer, String> instancesByLevel = TreeMultimap.create();
 
-        for (Map.Entry<String, Instance> entry : instanceCreator.getInstances().entrySet()) {
+        for (Map.Entry<String, Specification> entry : instanceCreator.getRuntimeSpecification()
+                                                                     .entrySet()) {
             instancesByLevel.put(entry.getValue().getLevel(), entry.getKey());
         }
 
@@ -88,8 +114,13 @@ public class ServiceBuilder {
                                                                 .map(instancesByLevel::get)
                                                                 .collect(Collectors.toList());
 
+        LOGGER.info("\nDependencies by level:\n{}",
+                    LoggingUtils.dependenciesByLevel(instancesByLevel));
+
+        LOGGER.info("\nRoot classes:\n{}", instancesByLevel.get(1));
+
         LOGGER.info("\nDependencies by class:\n{}",
-                    LoggingUtils.dependenciesByClass(instanceCreator.getInstances()));
+                    LoggingUtils.dependenciesByClass(instanceCreator.getRuntimeSpecification()));
 
         if (!instanceCreator.getUnusedCreators().isEmpty()) {
             LOGGER.warn("\nSome creators were not used during service construction. " +
@@ -100,31 +131,35 @@ public class ServiceBuilder {
         return new Service(this::getInstanceKey, instanceCreator.getInstances(), sortedLevels);
     }
 
-    private Map<Class<?>, Creator<?>> extractDefaultCreators(Map<Class<?>, Creator<?>> creators) {
-        Map<Class<?>, Creator<?>> defaultCreators = new HashMap<>();
-
-        for (Creator<?> creator : creators.values()) {
-            for (Creator<?> defaultCreator : creator.defaultCreators()) {
-                Class<?> createdClass = getCreatedClass(defaultCreator);
-
-                if (defaultCreators.containsKey(createdClass) &&
-                    !creators.containsKey(createdClass)) {
-                    throw new IllegalStateException("Found duplicated default creators (c1: " +
-                                                    defaultCreator.getClass().getSimpleName() +
-                                                    ", c2: " +
-                                                    defaultCreators.get(createdClass)
-                                                                   .getClass()
-                                                                   .getSimpleName() +
-                                                    "), but no explicit creator for class '" +
-                                                    createdClass.getSimpleName() +
-                                                    "' was given.");
-                }
-
-                defaultCreators.put(createdClass, defaultCreator);
-            }
+    private Map<Class<?>, Creator<?, ?>> discoverDefaultCreators(Creator<?, ?> creator) {
+        //Apply defaults
+        if (defaultParameters.get(creator.getCreatedClass()) == null &&
+            creator.getParameterClass().equals(LaunchType.class)) {
+            defaultParameters.put(creator.getCreatedClass(), LaunchType.AUTOMATIC);
         }
 
-        return defaultCreators;
+        //Discover default creators
+        Map<Class<?>, Creator<?, ?>> discoveredCreators = new HashMap<>();
+        for (Creator<?, ?> defaultCreator : creator.defaultCreators()) {
+            Class<?> createdClass = defaultCreator.getCreatedClass();
+
+            if (!defaultCreators.containsKey(createdClass)) {
+                defaultCreators.put(createdClass, defaultCreator);
+                discoveredCreators.put(createdClass, defaultCreator);
+                continue;
+            }
+
+            if (!defaultCreators.get(createdClass).getClass().equals(defaultCreator.getClass()) &&
+                !creators.containsKey(createdClass)) {
+                throw new IllegalStateException(
+                        format("Found duplicated default creators (c1: %s, c2: %s)" +
+                               ", but no explicit creator for class '%s' was given.",
+                               defaultCreator.getClass().getSimpleName(),
+                               defaultCreators.get(createdClass).getClass().getSimpleName(),
+                               createdClass.getSimpleName()));
+            }
+        }
+        return discoveredCreators;
     }
 
     private <T> String getInstanceKey(Class<T> clazz, String serializedParameters) {
@@ -135,26 +170,5 @@ public class ServiceBuilder {
         }
 
         return id;
-    }
-
-    private Class<?> getCreatedClass(Creator<?> creator) {
-        String typeName = ((ParameterizedType) creator.getClass()
-                                                      .getGenericSuperclass()).getActualTypeArguments()[0]
-                .getTypeName();
-        int typeParametersIndex = typeName.indexOf('<');
-
-        if (typeParametersIndex != -1) {
-            typeName = typeName.substring(0, typeParametersIndex);
-        }
-
-        Class<?> clazz;
-
-        try {
-            clazz = Class.forName(typeName);
-        } catch (ClassNotFoundException e) {
-            throw new IllegalStateException("Can not find a Class for '" + typeName + "'.", e);
-        }
-
-        return clazz;
     }
 }

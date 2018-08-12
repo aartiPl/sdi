@@ -1,4 +1,7 @@
 * Parallel init/start/stop/close of classes
 * More tests
 * Test / break circular dependencies
-* Optionally remove dependency on Apache Commons / Guava
+* Optionally remove dependency on Guava
+* Scala examples
+* Automatic creation of uniqueId for Creator parameters (eg. serialization with MessagePack or by iterating all fields of Parameter class)
+* Make AutoCreator work recursively?

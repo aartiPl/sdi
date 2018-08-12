@@ -1,14 +1,12 @@
-package net.igsoft.sdi;
+package net.igsoft.sdi.testclasses;
 
-public class C implements Manageable {
+import net.igsoft.sdi.Manageable;
 
-    private final A a;
-    private final B b;
+public class B implements Manageable {
+
     private final Stepper stepper;
 
-    public C(A a, B b, Stepper stepper) {
-        this.a = a;
-        this.b = b;
+    public B(D d, P p, Stepper stepper) {
         this.stepper = stepper;
         stepper.addStep(this.getClass(), "ctor");
     }

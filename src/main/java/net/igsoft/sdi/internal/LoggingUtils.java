@@ -3,6 +3,7 @@ package net.igsoft.sdi.internal;
 import java.util.Map;
 
 import com.google.common.collect.Multimap;
+
 import net.igsoft.sdi.Creator;
 
 public final class LoggingUtils {
@@ -20,10 +21,10 @@ public final class LoggingUtils {
         return sb.toString();
     }
 
-    public static String dependenciesByClass(Map<String, Instance> instances) {
+    public static String dependenciesByClass(Map<String, Specification> instances) {
         StringBuilder sb = new StringBuilder();
 
-        for (Map.Entry<String, Instance> entry : instances.entrySet()) {
+        for (Map.Entry<String, Specification> entry : instances.entrySet()) {
             sb.append("Class '")
               .append(entry.getKey())
               .append("': ")
@@ -33,10 +34,10 @@ public final class LoggingUtils {
         return sb.toString();
     }
 
-    public static String unusedCreators(Map<Class<?>, Creator<?>> unusedCreators) {
+    public static String unusedCreators(Map<Class<?>, Creator<?, ?>> unusedCreators) {
         StringBuilder sb = new StringBuilder();
 
-        for (Map.Entry<Class<?>, Creator<?>> entry : unusedCreators.entrySet()) {
+        for (Map.Entry<Class<?>, Creator<?, ?>> entry : unusedCreators.entrySet()) {
             sb.append(entry.getValue().getClass().getSimpleName())
               .append(" (for class: ")
               .append(entry.getKey().getSimpleName())

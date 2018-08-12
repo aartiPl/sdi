@@ -1,59 +1,22 @@
 package net.igsoft.sdi.internal;
 
-import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class Instance {
+    private final Object value;
+    private final boolean manualStartAndStop;
 
-    private Object value;
-    private int level;
-    private boolean manualStartAndStop;
-    private Set<String> dependencies;
-
-    public Instance() {
-        this.value = null;
-        this.level = 0;
-        this.manualStartAndStop = false;
-        this.dependencies = Sets.newHashSet();
+    public Instance(Object value, boolean manualStartAndStop) {
+        this.value = value;
+        this.manualStartAndStop = manualStartAndStop;
     }
 
     public Object getValue() {
         return value;
     }
 
-    public void setValue(Object value) {
-        this.value = value;
-    }
-
-    public int getLevel() {
-        return level;
-    }
-
-    public void setLevel(int level) {
-        this.level = level;
-    }
-
     public boolean isManualStartAndStop() {
         return manualStartAndStop;
-    }
-
-    public void manualStartAndStop(boolean manualStartAndStop) {
-        //NOTE: if at least once it is requested to start/stop manually
-        //then other settings to false doesn't matter
-        this.manualStartAndStop = this.manualStartAndStop || manualStartAndStop;
-    }
-
-    public Set<String> getDependencies() {
-        return dependencies;
-    }
-
-    public void addDependency(String instanceId) {
-        dependencies.add(instanceId);
     }
 
     @Override
@@ -65,23 +28,17 @@ public class Instance {
             return false;
         }
         Instance instance = (Instance) o;
-        return level == instance.level &&
-               manualStartAndStop == instance.manualStartAndStop &&
-               Objects.equals(value, instance.value) &&
-               Objects.equals(dependencies, instance.dependencies);
+        return manualStartAndStop == instance.manualStartAndStop &&
+               Objects.equals(value, instance.value);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(value, level, manualStartAndStop, dependencies);
+        return Objects.hash(value, manualStartAndStop);
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this).append("value", value)
-                                        .append("level", level)
-                                        .append("manualStartAndStop", manualStartAndStop)
-                                        .append("dependencies", dependencies)
-                                        .toString();
+        return "Instance{" + "value=" + value + ", manualStartAndStop=" + manualStartAndStop + '}';
     }
 }

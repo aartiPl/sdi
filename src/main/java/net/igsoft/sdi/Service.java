@@ -1,5 +1,8 @@
 package net.igsoft.sdi;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.lang.String.format;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -7,11 +10,12 @@ import java.util.function.Consumer;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.igsoft.sdi.internal.Instance;
 import net.igsoft.sdi.internal.KeyGenerator;
 import net.igsoft.sdi.internal.ManageableState;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Service implements Manageable {
 
@@ -30,14 +34,29 @@ public class Service implements Manageable {
         this.states = Maps.newHashMap();
     }
 
-    public <T> T get(Class<T> clazz) {
-        return get(clazz, CreatorParams.EMPTY_PARAMS);
+    public static ServiceBuilder builder() {
+        return new ServiceBuilder();
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T get(Class<T> clazz, CreatorParams params) {
-        return (T) instances.get(keyGenerator.generate(clazz, params.getSerializedParameters()))
-                            .getValue();
+    public <T, P extends ParameterBase> T get(Class<T> clazz, P params) {
+        checkArgument(clazz != null);
+        checkArgument(params != null);
+        Instance instance = instances.get(keyGenerator.generate(clazz, params.cachedUniqueId()));
+        checkArgument(instance != null, new IllegalArgumentException(
+                format("There is no instance of class %s with parameters %s available in Service",
+                       clazz.getSimpleName(), params)));
+        return (T) instance.getValue();
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T, P extends ParameterBase> T get(Class<T> clazz) {
+        checkArgument(clazz != null);
+        Instance instance = instances.get(keyGenerator.generate(clazz, ""));
+        checkArgument(instance != null, new IllegalArgumentException(
+                format("There is no instance of class %s available in Service",
+                       clazz.getSimpleName())));
+        return (T) instance.getValue();
     }
 
     @Override
@@ -49,6 +68,8 @@ public class Service implements Manageable {
 
     @Override
     public void start() {
+        init();
+
         applyOperation(Manageable.class, Lists.reverse(sortedLevels),
                        Lists.newArrayList(ManageableState.INITIALIZED, ManageableState.STOPPED),
                        ManageableState.STARTED, Manageable::start);
@@ -95,9 +116,5 @@ public class Service implements Manageable {
                 }
             }
         }
-    }
-
-    public static ServiceBuilder builder() {
-        return new ServiceBuilder();
     }
 }
