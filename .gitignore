@@ -3,7 +3,7 @@
 *.ctxt
 .mtj.tmp/
 *.jar
-!./gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.jar
 *.war
 *.ear
 *.zip
@@ -11,6 +11,7 @@
 *.rar
 *.iml
 hs_err_pid*
+.DS_Store
 
 .gradle/
 .idea/

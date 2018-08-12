@@ -2,14 +2,17 @@ package net.igsoft.sdi;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import net.igsoft.sdi.classes.ACreator;
-import net.igsoft.sdi.classes.BCreator;
-import net.igsoft.sdi.classes.C;
-import net.igsoft.sdi.classes.CCreator;
-import net.igsoft.sdi.classes.DCreator;
-import net.igsoft.sdi.classes.ECreator;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import net.igsoft.sdi.testclasses.ACreator;
+import net.igsoft.sdi.testclasses.BCreator;
+import net.igsoft.sdi.testclasses.CCreator;
+import net.igsoft.sdi.testclasses.DCreator;
+import net.igsoft.sdi.testclasses.ECreator;
+import net.igsoft.sdi.testclasses.RParametrizedCreator;
+import net.igsoft.sdi.testclasses.PParametrizedCreator;
+import net.igsoft.sdi.testclasses.Stepper;
 
 public class ServiceLifecycleTest {
 
@@ -20,25 +23,25 @@ public class ServiceLifecycleTest {
           2.        A  \
                    /    \
           3.      B      B
-                 |       |
-          4.     D       D
-                 |       |
-          5.     E       E
+                 |  \     | \
+          4.     D   P    D  P
+                 |     \   |   \
+          5.     E     R    E    R
      */
 
-    private Stepper stepper;
     private Service service;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        stepper = new Stepper();
         service = Service.builder()
-                         .withMainClass(C.class)
-                         .withCreator(new ACreator(stepper))
-                         .withCreator(new BCreator(stepper))
-                         .withCreator(new CCreator(stepper))
-                         .withCreator(new DCreator(stepper))
-                         .withCreator(new ECreator(stepper))
+                         .withRootCreator(new CCreator())
+                         .withCreator(new ACreator())
+                         .withCreator(new BCreator())
+                         .withCreator(new DCreator())
+                         .withCreator(new ECreator())
+                         .withCreator(new PParametrizedCreator())
+                         .withCreator(new RParametrizedCreator())
+                         .withCreator(new AutoCreator<>(Stepper.class))
                          .build();
     }
 
@@ -46,15 +49,17 @@ public class ServiceLifecycleTest {
     public void assertThatClassesAreBuildAndInitIsCalledForManagedClasses() {
         service.init();
 
-        assertThat(stepper.toString()).isEqualTo(
-                "E:ctor D:ctor B:ctor A:ctor C:ctor D:init B:init A:init C:init");
+        assertThat(service.get(Stepper.class).toString()).isEqualTo(
+                "E:ctor D:ctor R:ctor(name surname) P:ctor(id r) B:ctor A:ctor C:ctor D:init B:init A:init C:init");
     }
 
     @Test
-    public void assertThatStartingServiceWithoutInitDoesntWork() {
+    public void assertThatStartingServiceWithoutInitIsProperlyInitialized() {
         service.start();
 
-        assertThat(stepper.toString()).isEqualTo("E:ctor D:ctor B:ctor A:ctor C:ctor");
+        assertThat(service.get(Stepper.class).toString()).isEqualTo(
+                "E:ctor D:ctor R:ctor(name surname) P:ctor(id r) B:ctor A:ctor C:ctor D:init B:init A:init C:init " +
+                "D:start B:start A:start C:start");
     }
 
     @Test
@@ -62,15 +67,17 @@ public class ServiceLifecycleTest {
         service.init();
         service.start();
 
-        assertThat(stepper.toString()).isEqualTo(
-                "E:ctor D:ctor B:ctor A:ctor C:ctor D:init B:init A:init C:init D:start B:start A:start C:start");
+        assertThat(service.get(Stepper.class).toString()).isEqualTo(
+                "E:ctor D:ctor R:ctor(name surname) P:ctor(id r) B:ctor A:ctor C:ctor D:init B:init A:init C:init " +
+                "D:start B:start A:start C:start");
     }
 
     @Test
     public void assertThatClosingServiceWhichIsNotStartedDoesntWork() {
         service.close();
 
-        assertThat(stepper.toString()).isEqualTo("E:ctor D:ctor B:ctor A:ctor C:ctor");
+        assertThat(service.get(Stepper.class).toString()).isEqualTo(
+                "E:ctor D:ctor R:ctor(name surname) P:ctor(id r) B:ctor A:ctor C:ctor");
     }
 
     @Test
@@ -79,7 +86,8 @@ public class ServiceLifecycleTest {
         service.start();
         service.close();
 
-        assertThat(stepper.toString()).isEqualTo(
-                "E:ctor D:ctor B:ctor A:ctor C:ctor D:init B:init A:init C:init D:start B:start A:start C:start C:stop A:stop B:stop D:stop C:close A:close B:close D:close");
+        assertThat(service.get(Stepper.class).toString()).isEqualTo(
+                "E:ctor D:ctor R:ctor(name surname) P:ctor(id r) B:ctor A:ctor C:ctor D:init B:init A:init C:init " +
+                "D:start B:start A:start C:start C:stop A:stop B:stop D:stop C:close A:close B:close D:close");
     }
 }

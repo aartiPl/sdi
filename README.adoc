@@ -1,3 +1,5 @@
+:sdi-version: 0.9
+
 = Simple Dependency Injection
 
 SDI allows to extensively use Dependency Injection pattern in your application.
@@ -5,7 +7,7 @@ It achieves it without using annotations or reflections - just simple Java code.
 Additionally, you can manage your service/application life cycle just by calling methods:
 init(), start(), stop() and close() also by just calling these method on parent service.
 You don't have any "configuration" for wiring up all classes - it is done in code.
-All that takes less than 300 LOC of code in micro-framework implementation.
+All that takes about 600 lines of code.
 
 Please let me know if you have any comments or suggestions about this project.
 
@@ -13,190 +15,300 @@ Please let me know if you have any comments or suggestions about this project.
 
 Add dependency on SDI framework in your build file:
 
+=== Gradle
+
+[source,gradle,subs="attributes+"]
+----
+dependencies {
+    compile 'net.igsoft:sdi:{sdi-version}'
+}
+----
+
 === Maven
 
-[source,xml]
+[source,xml,subs="attributes+"]
 ----
 <dependency>
     <groupId>net.igsoft</groupId>
     <artifactId>sdi</artifactId>
-    <version>0.8.1</version>
+    <version>{sdi-version}</version>
 </dependency>
 ----
 
-=== Gradle
-
-[source,gradle]
-----
-dependencies {
-    compile 'net.igsoft:sdi:0.8.1'
-}
-----
-
-SDI has only dependency on Guava, Apache Commons Lang and Logback.
-They are not critical, so I will consider to remove them.
+SDI has only dependency on Guava and Logback.
+Dependency on Guava is not critical, so I will consider to remove it.
 
 == Concept and simple usage
 
 The general concept is that for all classes which you want to put into this smallish DI framework
 you prepare creator. Creator for some specific class has to inherit from abstract class Creator<>.
+If the creation of the class is simple because that class only depends on other available classes,
+it is possible to use AutoCreator<> but it is still the same concept, but a little bit more
+automatization.
 
 In the simplest case, class and its creator can look like below:
 
 [source, java]
+.SimpleCreatorExample.java
 ----
-public class Config {
-}
+ifndef::env-github[]
+include::src/example/java/net/igsoft/sdi/SimpleCreatorExample.java[tags=config]
+endif::[]
 
-class ConfigCreator extends Creator<Config> {
-    @Override
-    public Config create(InstanceCreator instanceCreator) {
-        return new Config();
+ifdef::env-github[]
+    static class Config {}
+
+    static class ConfigCreator extends Creator<Config, LaunchType> {
+        @Override
+        public Config create(InstanceCreator instanceCreator, LaunchType launchType) {
+            return new Config();
+        }
     }
-}
+endif::[]
 ----
 
 Right now it's not very interesting - just a little bit more code to write. The fun part starts when
 we have more complicated classes.
 
-Let's say that we have class App which has class Config as a dependency.
+Let's say that we have a class App which has a class Config as a dependency.
 
 [source, java]
+.SimpleCreatorExample.java
 ----
-public class App {
-    public App(Config e) {
-    }
-}
+ifndef::env-github[]
+include::src/example/java/net/igsoft/sdi/SimpleCreatorExample.java[tags=app]
+endif::[]
 
-class AppCreator extends Creator<App> {
-    @Override
-    public App create(InstanceCreator instanceCreator) {
-        Config config = instanceCreator.getOrCreate(Config.class);
-        return new App(config);
+ifdef::env-github[]
+    static class App {
+        public App(Config e) {}
     }
-}
+
+    static class AppCreator extends Creator<App, LaunchType> {
+        @Override
+        public App create(InstanceCreator instanceCreator, LaunchType launchType) {
+            Config config = instanceCreator.getOrCreate(Config.class);
+            return new App(config);
+        }
+    }
+endif::[]
 ----
 
 That way we have just applied dependency injection pattern in the simple case of two classes.
-We have just delegated the work to InstanceCreator, which is responsible for finding the correct creator.
+We have just delegated the work to InstanceCreator, which is responsible for finding the correct
+creator.
 
 But how we can use such classes?
 
-Very simple: let's just create service which will keep information about classes:
+Very simple: let's just create service which will keep information about all available instances:
 
 [source, java]
+.SimpleCreatorExample.java
 ----
-public static void main(String[] args) {
-    Service service = Service.builder()
-        .withMainClass(App.class)
-        .withCreator(new AppCreator())
-        .withCreator(new ConfigCreator())
-        .build();
+ifndef::env-github[]
+include::src/example/java/net/igsoft/sdi/SimpleCreatorExample.java[tags=main]
+endif::[]
 
-    App app = service.get(App.class);
-}
+ifdef::env-github[]
+    public static void main(String[] args) {
+        Service service = Service.builder()
+                                 .withRootCreator(new AppCreator())
+                                 .withCreator(new ConfigCreator())
+                                 .build();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(service::close));
+
+        service.start();
+    }
+endif::[]
 ----
 
-That way we can get any instance of a class from the class hierarchy of App without worrying about dependencies.
+That way we can get any instance of a class from the class hierarchy of App without worrying about
+dependencies.
 
+You might notice a different way in which creators are added to the Service - application creator is
+added by using .withRootCreator() method, but configuration creator is added with .withCreator() method.
+What is the difference? Basically you can use only .withCreator() method to add all creators to the service.
+All class hierarchy roots will be find automatically and everything will work as expected. The drawback
+of such an approach is that all classes will be created, even if their creators are there only by mistake.
+In such a case it is just not possible to find out that some creators are in service just because they were
+added by mistake. In case of marking root creators as such during instantiation you will get a message that
+some of creators are not used during that process. It is possible because when the Service() instance is build
+all the instances are already created and it is clear which creators were used during initialization and which
+are not. Another advantage of using explicit root creators is for code readability: it is then imediatelly
+visible which classes should be analyzed first, when trying to understand application. Notice that sometimes
+it is necessary to add a few root creators, which is possible and necessary if you want to have them all instantiated.
 
 == Initialization of services
 
-That's nice, but very often we need to initialize and later start at least some of the classes in order to start our application.
-And when finishing application, we need to stop e.g. working threads and finally release resources.
-That's still a lot of manual work.
+That's nice, but very often we need to initialize and later start at least some of the classes
+in order to start our application. And when finishing application, we need to stop e.g. working
+threads and finally release resources. That's still a lot of manual work.
 
 Fortunately, there is a simple solution to this problem in SDI. It's just necessary to mark classes,
 which should be initialized/started/stopped/closed with one of the two interfaces:
-Manageable or ManageableBasic. ManageableBasic has two methods init() and close(). In many cases, it is enough
-to initialize and shutdown instance of the class. In Manageable we can find additionally two methods:
-start() and stop().
+Manageable or ManageableBasic. ManageableBasic has two methods init() and close(). In many cases,
+it is enough to initialize and shutdown instance of the class. In Manageable we can find
+additionally two methods: start() and stop().
 
-Let's see how it will work for another class MqListener.
+Let's see how it will work for another class: MqListener.
 
 [source, java]
+.LifecycleExample.java
 ----
-public class Config {
-}
+ifndef::env-github[]
+include::src/example/java/net/igsoft/sdi/LifecycleExample.java[tags=classes]
+endif::[]
 
-class ConfigCreator extends Creator<Config> {
-    @Override
-    public Config create(InstanceCreator instanceCreator) {
-        return new Config();
-    }
-}
+ifdef::env-github[]
+    static class Config {}
 
-public class MqListener implements Manageable {
-    @Override
-    public void init() {
-        //Initialize class
+    static class ConfigCreator extends Creator<Config, LaunchType> {
+        @Override
+        public Config create(InstanceCreator instanceCreator, LaunchType launchType) {
+            return new Config();
+        }
     }
 
-    @Override
-    public void start() {
-        //Start class
+    static class MqListener implements Manageable {
+        @Override
+        public void init() {
+            //Initialize class
+        }
+
+        @Override
+        public void start() {
+            //Start class
+        }
+
+        @Override
+        public void stop() {
+            //Stop class (with ability to start it again)
+        }
+
+        @Override
+        public void close() {
+            //Destruct class
+        }
     }
 
-    @Override
-    public void stop() {
-        //Stop class (with ability to start it again)
+    static class MqListenerCreator extends Creator<MqListener, LaunchType> {
+        @Override
+        public MqListener create(InstanceCreator instanceCreator, LaunchType launchType) {
+            return new MqListener();
+        }
     }
 
-    @Override
-    public void close() {
-        //Destruct class
+    static class App {
+        public App(Config e, MqListener mqListner) {}
     }
-}
 
-class MqListenerCreator extends Creator<MqListener> {
-    @Override
-    public MqListener create(InstanceCreator instanceCreator) {
-        return new MqListener();
+    static class AppCreator extends Creator<App, LaunchType> {
+        @Override
+        public App create(InstanceCreator instanceCreator, LaunchType launchType) {
+            Config config = instanceCreator.getOrCreate(Config.class);
+            MqListener mqListener = instanceCreator.getOrCreate(MqListener.class);
+            return new App(config, mqListener);
+        }
     }
-}
-
-public class App {
-    public App(Config e, MqListener mqListner) {
-    }
-}
-
-class AppCreator extends Creator<App> {
-    @Override
-    public App create(InstanceCreator instanceCreator) {
-        Config config = instanceCreator.getOrCreate(Config.class);
-        MqListener mqListener = instanceCreator.getOrCreate(MqListener.class);
-        return new App(config, mqListener);
-    }
-}
+endif::[]
 ----
 
 Now we can start an application from our main class:
 
 [source, java]
+.LifecycleExample.java
 ----
-class Main {
+ifndef::env-github[]
+include::src/example/java/net/igsoft/sdi/LifecycleExample.java[tags=main]
+endif::[]
+
+ifdef::env-github[]
     public static void main(String[] args) {
-        final Service service = Service.builder()
-            .withMainClass(App.class)
-            .withCreator(new AppCreator())
-            .withCreator(new ConfigCreator())
-            .withCreator(new MqListenerCreator())
-            .build();
+        Service service = Service.builder()
+                                 .withRootCreator(new AppCreator())
+                                 .withCreator(new ConfigCreator())
+                                 .withCreator(new MqListenerCreator())
+                                 .build();
 
-        //It's before init() and start() to allow clean shutdown in case init() or start() throw exception.
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            service.stop();
-            service.close();
-        }));
+        Runtime.getRuntime().addShutdownHook(new Thread(service::close));
 
-        service.init();
         service.start();
-
     }
-}
+endif::[]
 ----
 
 That way you have full control over application lifecycle.
+
+== Automatic creators
+In the above example we were creating App instance. In such a simple case coding creator is
+quite a big overhead: you don't do anything interesting there - just passing other instances to the
+App constructor. In such a case very helpful are automatic creators, which, as the name implies,
+doesn't have to be implemented. How to use them? Below is above example rewritten with automatic
+creators:
+
+[source, java,role="primary"]
+.AutoCreatorExample.java
+----
+ifndef::env-github[]
+include::src/example/java/net/igsoft/sdi/AutoCreatorExample.java[]
+endif::[]
+
+ifdef::env-github[]
+package net.igsoft.sdi;
+
+public class AutoCreatorExample {
+
+    static class Config {
+    }
+
+    static class MqListener implements Manageable {
+        @Override
+        public void init() {
+            //Initialize class
+        }
+
+        @Override
+        public void start() {
+            //Start class
+        }
+
+        @Override
+        public void stop() {
+            //Stop class (with ability to start it again)
+        }
+
+        @Override
+        public void close() {
+            //Destruct class
+        }
+    }
+
+    static class App {
+        public App(Config e, MqListener mqListner) {
+        }
+    }
+
+    public static void main(String[] args) {
+        Service service = Service.builder()
+                                       .withRootCreator(new AutoCreator<>(App.class))
+                                       .withCreator(new AutoCreator<>(Config.class))
+                                       .withCreator(new AutoCreator<>(MqListener.class))
+                                       .build();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(service::close));
+
+        service.start();
+    }
+}
+endif::[]
+----
+
+There is much less code, but you have still simplicity and configurability of a solution.
+If you use auto creators you have to take into consideration that not every class can be instantiated
+using auto creators. Notable exception are classes with many constructors or constructors not taking
+only other known to the framework classes as a parameters. Also you can not pass creator parameters
+to automatic creators.
 
 == Parametrized creators
 
@@ -205,71 +317,215 @@ it can be used with different topics. Of course, we can add a dependency to conf
 but then it will be difficult to reuse this creator in other application. That's why creators can be parametrized.
 
 [source, java]
+.ParametrizedCreatorExample.java
 ----
-class ConfigCreator extends Creator<Config> {
-    @Override
-    public Config create(InstanceCreator instanceCreator, CreatorParams params) {
-        String fileName = params.get("fileName");
+ifndef::env-github[]
+include::src/example/java/net/igsoft/sdi/ParametrizedCreatorExample.java[tags=config]
+endif::[]
 
-        config = Config.createFromFile(fileName);
+ifdef::env-github[]
+    static class ConfigCreatorParam extends ParameterBase {
+        private final File file;
 
-        return config;
+        public ConfigCreatorParam(File file) {
+            super(false);
+            this.file = file;
+        }
+
+        public File getFile() {
+            return file;
+        }
+
+        @Override
+        public String uniqueId() {
+            return file.getName();
+        }
     }
-}
+
+    static class Config {
+        static Config createFromFile(File file) {
+            return new Config();
+        }
+    }
+
+    static class ConfigCreator extends Creator<Config, ConfigCreatorParam> {
+        @Override
+        public Config create(InstanceCreator instanceCreator, ConfigCreatorParam params) {
+            File file = params.getFile();
+            return Config.createFromFile(file);
+        }
+    }
+endif::[]
 ----
 
 On the call side we use it like this:
 
 [source, java]
+.ParametrizedCreatorExample.java
 ----
-class AppCreator extends Creator<App> {
-    @Override
-    public App create(InstanceCreator instanceCreator) {
-        CreatorParams params = CreatorParams.builder()
-                                .parameter("fileName", "~/config.init")
-                                .build();
+ifndef::env-github[]
+include::src/example/java/net/igsoft/sdi/ParametrizedCreatorExample.java[tags=app]
+endif::[]
 
-        Config config = instanceCreator.getOrCreate(Config.class, params);
-        MqListener mqListener = instanceCreator.getOrCreate(MqListener.class);
-        return new App(config, mqListener);
+ifdef::env-github[]
+    static class AppEnvironment extends ParameterBase {
+        private final String name;
+
+        public AppEnvironment(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String uniqueId() {
+            return name;
+        }
     }
+
+    static class App {
+        public App(Config e, MqListener mqListener) {
+        }
+    }
+
+    static class AppCreator extends Creator<App, AppEnvironment> {
+        @Override
+        public App create(InstanceCreator instanceCreator, AppEnvironment appEnvironment) {
+            ConfigCreatorParam params = new ConfigCreatorParam(new File("~/config.init"));
+            Config config = instanceCreator.getOrCreate(Config.class, params);
+            MqListener mqListener = instanceCreator.getOrCreate(MqListener.class);
+
+            if (appEnvironment.getName().equals("PROD")) {
+                System.out.println("Warning! Creating PROD version of application!");
+            }
+
+            return new App(config, mqListener);
+        }
+    }
+endif::[]
+----
+
+When definining a parameter bean it must extend ParameterBase and implement a method:
+[source, java]
+----
+String uniqueId()
+----
+
+This method returns unique identifier of creator parameters - it is used to differentiate
+instances of target classes as it is assumed that different creator parameters creates
+a different instance of some specific class. For simple implementation it is possible to
+use method:
+[source, java]
+----
+String concatenate(String... parts)
+----
+which just concatenates different Strings together.
+
+[source, java]
+.Example implementation of uniqueId() method
+----
+String uniqueId() {
+  return concatenate(name, surname, Integer.toString(age));
 }
 ----
+
+Creator parameter class always extends ParameterBase class. In that class, besides of
+uniqueId() method, is also defined property:
+[source, java]
+----
+boolean manualStartAndStop
+----
+
+This is the single parameter to all creators which is always required. This property defines
+if the instance of some specific class should be automatically started. If it is set to 'true'
+then this DI micro framework will not automatically start instance of this specific class, although
+initialization, stoping and termination of this instance will work as usuall. It might be sometimes
+useful to have more control over the starting of the instance of the class. This parameter of creator is
+required, but you don't have to pass it explicitly - it will be assumed that all instances should be
+started automatically. That's what for is LaunchType creator parameter - it deafults to LaunchType.AUTOMATIC
+and is passed automatically to creators when no other explicit argument is given.
+
+== Creator default parameters
+
+As mentioned above there is one default creator parameter type which SDI applies whenever user does not provide
+other defaults. But it is possible to provide default creator's parameter explicitly. It is done when providing
+creators in ServiceBuilder:
+
+[source, java]
+.ParametrizedCreatorExample.java
+----
+ifndef::env-github[]
+include::src/example/java/net/igsoft/sdi/ParametrizedCreatorExample.java[tags=main]
+endif::[]
+
+ifdef::env-github[]
+    public static void main(String[] args) {
+        Service service = Service.builder()
+                                 .withRootCreator(new AppCreator(), new AppEnvironment("PROD"))
+                                 .withCreator(new ConfigCreator(), new ConfigCreatorParam(new File(".")))
+                                 .withCreator(new AutoCreator<>(MqListener.class))
+                                 .build();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(service::close));
+
+        service.start();
+    }
+endif::[]
+----
+
+Default parameters will be applied whenever there is a need to provide parameter during instance creation and
+there is no explicit parameter provided.
 
 == Default creators
 
 Each creator can provide a set of default creators which can be used to create its dependencies.
 
-For example if App creator needs for its work classes A, B and C, you can provide in it default creators for
-some or all of mentioned classes. It is accomplished by overriding method:
+For example if MqListener creator needs for its work class MqListenerWorker, you can provide its
+creator in MqListener. It is accomplished by overriding method:
+
 [source, java]
 ----
-List<Creator<?>> defaultCreators()
+List<Creator<?, ?>> defaultCreators()
 ----
 
 and returning from it instances of creators.
 
 [source, java]
+.DefaultCreatorsExample.java
 ----
-class AppCreator extends Creator<App> {
-    @Override
-    public App create(InstanceCreator instanceCreator) {
-        A a = instanceCreator.getOrCreate(A.class);
-        B b = instanceCreator.getOrCreate(B.class);
-        C c = instanceCreator.getOrCreate(C.class);
+ifndef::env-github[]
+include::src/example/java/net/igsoft/sdi/DefaultCreatorsExample.java[tags=default_creators]
+endif::[]
 
-        return new App(a, b, c);
-    }
+ifdef::env-github[]
+  static class MqListenerWorker {
+      }
 
-    @Override
-    public List<Creator<?>> defaultCreators() {
-        return Lists.newArrayList(new ACreator(), new BCreator());
-    }
-}
+      static class MqListenerCreator extends Creator<MqListener, LaunchType> {
+          @Override
+          public MqListener create(InstanceCreator instanceCreator, LaunchType params) {
+              MqListenerWorker mqListenerWorker = instanceCreator.getOrCreate(MqListenerWorker.class);
+              return new MqListener(mqListenerWorker);
+          }
+
+          @Override
+          public List<Creator<?, ?>> defaultCreators() {
+              return Lists.newArrayList(new AutoCreator<>(MqListenerWorker.class));
+          }
+      }
+
+      static class MqListener {
+          public MqListener(MqListenerWorker mqListenerWorker) {
+          }
+      }
+endif::[]
 ----
 
 That way we do not have to provide above creators during Service construction. When SDI finds that there is no
-explicit creator, then it will take a default one.
+explicit creator, then it will take a default one. You can provide all or only some of dependant creators
+in defaultCreators() method.
 
 Please notice that it is still possible to override default creator by setting different one
 on Service setting level.
