@@ -4,23 +4,23 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
-import net.igsoft.sdi.AutoCreator;
-import net.igsoft.sdi.Creator;
-import net.igsoft.sdi.InstanceCreator;
+import net.igsoft.sdi.creator.AutoCreator;
+import net.igsoft.sdi.creator.CreatorBase;
+import net.igsoft.sdi.engine.InstanceProvider;
 
-public class RWithDefaultCreatorsCreator extends Creator<R, RWithDefaultCreatorsCreatorParams> {
+public class RWithDefaultCreatorsCreator extends CreatorBase<R, RWithDefaultCreatorsCreatorParams> {
     @Override
-    public R create(InstanceCreator instanceCreator,
+    public R create(InstanceProvider instanceProvider,
                     RWithDefaultCreatorsCreatorParams parametrizedCreatorParams) {
         //Test that C, D and E are available
-        D d = instanceCreator.getOrCreate(D.class);
+        D d = instanceProvider.getOrCreate(D.class);
 
-        return new R(instanceCreator.getOrCreate(Stepper.class),
+        return new R(instanceProvider.getOrCreate(Stepper.class),
                      parametrizedCreatorParams.getName(), parametrizedCreatorParams.getSurname());
     }
 
     @Override
-    public List<Creator<?, ?>> defaultCreators() {
+    public List<CreatorBase<?, ?>> defaultCreators() {
         return Lists.newArrayList(new DCreator(), new AutoCreator(Stepper.class));
     }
 }

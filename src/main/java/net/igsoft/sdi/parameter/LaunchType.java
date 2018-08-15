@@ -1,4 +1,4 @@
-package net.igsoft.sdi;
+package net.igsoft.sdi.parameter;
 
 public final class LaunchType extends ParameterBase {
 

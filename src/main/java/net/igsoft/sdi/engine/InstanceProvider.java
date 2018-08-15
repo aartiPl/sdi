@@ -1,4 +1,4 @@
-package net.igsoft.sdi;
+package net.igsoft.sdi.engine;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
@@ -13,27 +13,26 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.igsoft.sdi.internal.Instance;
-import net.igsoft.sdi.internal.KeyGenerator;
-import net.igsoft.sdi.internal.Specification;
+import net.igsoft.sdi.creator.CreatorBase;
+import net.igsoft.sdi.parameter.ParameterBase;
 
-public class InstanceCreator {
+public class InstanceProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(InstanceCreator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(InstanceProvider.class);
 
-    private final Map<Class<?>, Creator<?, ?>> creators;
-    private final Map<Class<?>, Creator<?, ?>> defaultCreators;
+    private final Map<Class<?>, CreatorBase<?, ?>> creators;
+    private final Map<Class<?>, CreatorBase<?, ?>> defaultCreators;
     private final Map<Class<?>, ParameterBase> defaultParameters;
     private final KeyGenerator keyGenerator;
 
-    private final Map<Class<?>, Creator<?, ?>> unusedCreators;
+    private final Map<Class<?>, CreatorBase<?, ?>> unusedCreators;
     private final Map<String, Specification> runtimeSpecification;
     private final Deque<Specification> stack;
 
-    public InstanceCreator(Map<Class<?>, Creator<?, ?>> creators,
-                           Map<Class<?>, Creator<?, ?>> defaultCreators,
-                           Map<Class<?>, ParameterBase> defaultParameters,
-                           KeyGenerator keyGenerator) {
+    public InstanceProvider(Map<Class<?>, CreatorBase<?, ?>> creators,
+                            Map<Class<?>, CreatorBase<?, ?>> defaultCreators,
+                            Map<Class<?>, ParameterBase> defaultParameters,
+                            KeyGenerator keyGenerator) {
         this.creators = creators;
         this.defaultCreators = defaultCreators;
         this.defaultParameters = defaultParameters;
@@ -51,7 +50,7 @@ public class InstanceCreator {
     public <P extends ParameterBase, R> R getOrCreate(Class<R> clazz, P params) {
         checkArgument(clazz != null);
 
-        Creator<R, P> creator = findCreator(clazz);
+        CreatorBase<R, P> creator = findCreator(clazz);
 
         checkState(creator != null, "No creator has been found for class: " + clazz.getName());
         checkArgument(params != null, new IllegalArgumentException(
@@ -87,7 +86,7 @@ public class InstanceCreator {
         return (R) specification.getValue();
     }
 
-    public Map<Class<?>, Creator<?, ?>> getUnusedCreators() {
+    public Map<Class<?>, CreatorBase<?, ?>> getUnusedCreators() {
         return unusedCreators;
     }
 
@@ -95,24 +94,24 @@ public class InstanceCreator {
         return runtimeSpecification;
     }
 
-    public Map<String, Instance> getInstances() {
+    public Map<String, InstanceDescriptor> getInstances() {
         return runtimeSpecification.entrySet()
                                    .stream()
-                                   .collect(Collectors.toMap(Map.Entry::getKey, e -> new Instance(
+                                   .collect(Collectors.toMap(Map.Entry::getKey, e -> new InstanceDescriptor(
                                            e.getValue().getValue(),
                                            e.getValue().isManualStartAndStop())));
     }
 
     @SuppressWarnings("unchecked")
-    private <P extends ParameterBase, R> Creator<R, P> findCreator(Class<?> clazz) {
-        Creator<R, P> creator = (Creator<R, P>) creators.get(clazz);
+    private <P extends ParameterBase, R> CreatorBase<R, P> findCreator(Class<?> clazz) {
+        CreatorBase<R, P> creator = (CreatorBase<R, P>) creators.get(clazz);
 
         if (creator == null) {
             LOGGER.info(
                     "No explicit creator has been found for class: {}. Looking in default creators...",
                     clazz.getName());
 
-            creator = (Creator<R, P>) defaultCreators.get(clazz);
+            creator = (CreatorBase<R, P>) defaultCreators.get(clazz);
 
             LOGGER.info("Default creator for class {} has {}been found", clazz.getName(),
                         creator == null ? "not " : "");

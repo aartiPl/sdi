@@ -1,10 +1,11 @@
-package net.igsoft.sdi.internal;
+package net.igsoft.sdi.utils;
 
 import java.util.Map;
 
 import com.google.common.collect.Multimap;
 
-import net.igsoft.sdi.Creator;
+import net.igsoft.sdi.creator.CreatorBase;
+import net.igsoft.sdi.engine.Specification;
 
 public final class LoggingUtils {
 
@@ -34,10 +35,10 @@ public final class LoggingUtils {
         return sb.toString();
     }
 
-    public static String unusedCreators(Map<Class<?>, Creator<?, ?>> unusedCreators) {
+    public static String unusedCreators(Map<Class<?>, CreatorBase<?, ?>> unusedCreators) {
         StringBuilder sb = new StringBuilder();
 
-        for (Map.Entry<Class<?>, Creator<?, ?>> entry : unusedCreators.entrySet()) {
+        for (Map.Entry<Class<?>, CreatorBase<?, ?>> entry : unusedCreators.entrySet()) {
             sb.append(entry.getValue().getClass().getSimpleName())
               .append(" (for class: ")
               .append(entry.getKey().getSimpleName())
