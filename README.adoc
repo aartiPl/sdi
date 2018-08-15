@@ -56,9 +56,9 @@ include::src/example/java/net/igsoft/sdi/SimpleCreatorExample.java[tags=config]
 endif::[]
 
 ifdef::env-github[]
-    static class Config {}
+    public static class Config {}
 
-    static class ConfigCreator extends CreatorBase<Config, LaunchType> {
+    public static class ConfigCreator extends CreatorBase<Config, LaunchType> {
         @Override
         public Config create(InstanceProvider instanceProvider, LaunchType launchType) {
             return new Config();
