@@ -2,6 +2,11 @@ package net.igsoft.sdi;
 
 import java.io.File;
 
+import net.igsoft.sdi.creator.AutoCreator;
+import net.igsoft.sdi.creator.CreatorBase;
+import net.igsoft.sdi.internal.InstanceProvider;
+import net.igsoft.sdi.parameter.ParameterBase;
+
 public class ParametrizedCreatorExample {
 
     // tag::config[]
@@ -29,9 +34,9 @@ public class ParametrizedCreatorExample {
         }
     }
 
-    static class ConfigCreator extends Creator<Config, ConfigCreatorParam> {
+    static class ConfigCreator extends CreatorBase<Config, ConfigCreatorParam> {
         @Override
-        public Config create(InstanceCreator instanceCreator, ConfigCreatorParam params) {
+        public Config create(InstanceProvider instanceProvider, ConfigCreatorParam params) {
             File file = params.getFile();
             return Config.createFromFile(file);
         }
@@ -65,12 +70,12 @@ public class ParametrizedCreatorExample {
         }
     }
 
-    static class AppCreator extends Creator<App, AppEnvironment> {
+    static class AppCreator extends CreatorBase<App, AppEnvironment> {
         @Override
-        public App create(InstanceCreator instanceCreator, AppEnvironment appEnvironment) {
+        public App create(InstanceProvider instanceProvider, AppEnvironment appEnvironment) {
             ConfigCreatorParam params = new ConfigCreatorParam(new File("~/config.init"));
-            Config config = instanceCreator.getOrCreate(Config.class, params);
-            MqListener mqListener = instanceCreator.getOrCreate(MqListener.class);
+            Config config = instanceProvider.getOrCreate(Config.class, params);
+            MqListener mqListener = instanceProvider.getOrCreate(MqListener.class);
 
             if (appEnvironment.getName().equals("PROD")) {
                 System.out.println("Warning! Creating PROD version of application!");

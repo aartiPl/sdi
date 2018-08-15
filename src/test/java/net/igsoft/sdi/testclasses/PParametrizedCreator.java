@@ -1,16 +1,16 @@
 package net.igsoft.sdi.testclasses;
 
-import net.igsoft.sdi.Creator;
-import net.igsoft.sdi.InstanceCreator;
+import net.igsoft.sdi.creator.CreatorBase;
+import net.igsoft.sdi.internal.InstanceProvider;
 
-public class PParametrizedCreator extends Creator<P, PParametrizedCreatorParams> {
+public class PParametrizedCreator extends CreatorBase<P, PParametrizedCreatorParams> {
     @Override
-    public P create(InstanceCreator instanceCreator,
+    public P create(InstanceProvider instanceProvider,
                     PParametrizedCreatorParams PParametrizedCreatorParams) {
-        R r = instanceCreator.getOrCreate(R.class,
+        R r = instanceProvider.getOrCreate(R.class,
                                           new RParametrizedCreatorParams("name", "surname"));
 
-        return new P(instanceCreator.getOrCreate(Stepper.class), PParametrizedCreatorParams.getId(),
+        return new P(instanceProvider.getOrCreate(Stepper.class), PParametrizedCreatorParams.getId(),
                      r);
     }
 }

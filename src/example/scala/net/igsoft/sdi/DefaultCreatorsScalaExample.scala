@@ -1,8 +1,9 @@
 package net.igsoft.sdi
 
-import java.util
-
 import com.google.common.collect.Lists
+import net.igsoft.sdi.creator.{AutoCreator, CreatorBase}
+import net.igsoft.sdi.internal.InstanceProvider
+import net.igsoft.sdi.parameter.{LaunchType, ParameterBase}
 
 object DefaultCreatorsScalaExample {
 
@@ -11,14 +12,14 @@ object DefaultCreatorsScalaExample {
   // tag::default_creators[]
   private[sdi] class MqListenerWorker
 
-  private[sdi] class MqListenerCreator extends Creator[MqListener, LaunchType] {
-    override def create(instanceCreator: InstanceCreator, params: LaunchType): MqListener = {
-      val mqListenerWorker = instanceCreator.getOrCreate(classOf[MqListenerWorker])
+  private[sdi] class MqListenerCreator extends CreatorBase[MqListener, LaunchType] {
+    override def create(instanceProvider: InstanceProvider, params: LaunchType): MqListener = {
+      val mqListenerWorker = instanceProvider.getOrCreate(classOf[MqListenerWorker])
       new MqListener(mqListenerWorker)
     }
 
-    override def defaultCreators: util.List[Creator[_, _ <: ParameterBase]] = Lists
-                                                                              .newArrayList(new AutoCreator[MqListenerWorker, ParameterBase](classOf[MqListenerWorker]))
+    override def defaultCreators: java.util.List[CreatorBase[_, _ <: ParameterBase]] = Lists
+                                                                                  .newArrayList(new AutoCreator[MqListenerWorker, ParameterBase](classOf[MqListenerWorker]))
   }
 
   private[sdi] class MqListener(val mqListenerWorker: MqListenerWorker) {

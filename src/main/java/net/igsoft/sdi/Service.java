@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import net.igsoft.sdi.internal.Instance;
 import net.igsoft.sdi.internal.KeyGenerator;
 import net.igsoft.sdi.internal.ManageableState;
+import net.igsoft.sdi.parameter.ParameterBase;
 
 public class Service implements Manageable {
 

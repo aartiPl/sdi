@@ -1,13 +1,13 @@
 package net.igsoft.sdi.testclasses;
 
-import net.igsoft.sdi.Creator;
-import net.igsoft.sdi.InstanceCreator;
+import net.igsoft.sdi.creator.CreatorBase;
+import net.igsoft.sdi.internal.InstanceProvider;
 
-public class RParametrizedCreator extends Creator<R, RParametrizedCreatorParams> {
+public class RParametrizedCreator extends CreatorBase<R, RParametrizedCreatorParams> {
     @Override
-    public R create(InstanceCreator instanceCreator,
+    public R create(InstanceProvider instanceProvider,
                     RParametrizedCreatorParams RParametrizedCreatorParams) {
-        return new R(instanceCreator.getOrCreate(Stepper.class),
+        return new R(instanceProvider.getOrCreate(Stepper.class),
                      RParametrizedCreatorParams.getName(), RParametrizedCreatorParams.getSurname());
     }
 }

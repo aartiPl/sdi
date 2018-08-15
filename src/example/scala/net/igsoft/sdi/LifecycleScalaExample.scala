@@ -1,12 +1,16 @@
 package net.igsoft.sdi
 
+import net.igsoft.sdi.creator.CreatorBase
+import net.igsoft.sdi.internal.InstanceProvider
+import net.igsoft.sdi.parameter.LaunchType
+
 object LifecycleScalaExample {
 
   // tag::classes[]
   private[sdi] class Config
 
-  private[sdi] class ConfigCreator extends Creator[Config, LaunchType] {
-    override def create(instanceCreator: InstanceCreator, launchType: LaunchType) = new Config
+  private[sdi] class ConfigCreator extends CreatorBase[Config, LaunchType] {
+    override def create(instanceProvider: InstanceProvider, launchType: LaunchType) = new Config
   }
 
   private[sdi] class MqListener extends Manageable {
@@ -27,17 +31,17 @@ object LifecycleScalaExample {
     }
   }
 
-  private[sdi] class MqListenerCreator extends Creator[MqListener, LaunchType] {
-    override def create(instanceCreator: InstanceCreator, launchType: LaunchType) = new MqListener
+  private[sdi] class MqListenerCreator extends CreatorBase[MqListener, LaunchType] {
+    override def create(instanceProvider: InstanceProvider, launchType: LaunchType) = new MqListener
   }
 
   private[sdi] class App(val e: Config, val mqListner: MqListener) {
   }
 
-  private[sdi] class AppCreator extends Creator[App, LaunchType] {
-    override def create(instanceCreator: InstanceCreator, launchType: LaunchType): App = {
-      val config = instanceCreator.getOrCreate(classOf[Config])
-      val mqListener = instanceCreator.getOrCreate(classOf[MqListener])
+  private[sdi] class AppCreator extends CreatorBase[App, LaunchType] {
+    override def create(instanceProvider: InstanceProvider, launchType: LaunchType): App = {
+      val config = instanceProvider.getOrCreate(classOf[Config])
+      val mqListener = instanceProvider.getOrCreate(classOf[MqListener])
       new App(config, mqListener)
     }
   }

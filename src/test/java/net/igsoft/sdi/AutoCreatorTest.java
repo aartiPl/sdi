@@ -3,9 +3,9 @@ package net.igsoft.sdi;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import net.igsoft.sdi.creator.AutoCreator;
 import net.igsoft.sdi.testclasses.F;
 import net.igsoft.sdi.testclasses.G;
 import net.igsoft.sdi.testclasses.H;

@@ -2,6 +2,10 @@ package net.igsoft.sdi
 
 import java.io.File
 
+import net.igsoft.sdi.creator.{AutoCreator, CreatorBase}
+import net.igsoft.sdi.internal.InstanceProvider
+import net.igsoft.sdi.parameter.ParameterBase
+
 object ParametrizedCreatorScalaExample {
 
   // tag::config[]
@@ -15,8 +19,8 @@ object ParametrizedCreatorScalaExample {
 
   private[sdi] class Config {}
 
-  private[sdi] class ConfigCreator extends Creator[Config, ConfigCreatorParam] {
-    override def create(instanceCreator: InstanceCreator, params: ConfigCreatorParam): Config = {
+  private[sdi] class ConfigCreator extends CreatorBase[Config, ConfigCreatorParam] {
+    override def create(instanceProvider: InstanceProvider, params: ConfigCreatorParam): Config = {
       val file = params.file
       Config.createFromFile(file)
     }
@@ -32,11 +36,11 @@ object ParametrizedCreatorScalaExample {
 
   private[sdi] class App(val e: Config, val mqListener: MqListener)
 
-  private[sdi] class AppCreator extends Creator[App, AppEnvironment] {
-    override def create(instanceCreator: InstanceCreator, appEnvironment: AppEnvironment): App = {
+  private[sdi] class AppCreator extends CreatorBase[App, AppEnvironment] {
+    override def create(instanceProvider: InstanceProvider, appEnvironment: AppEnvironment): App = {
       val params = new ConfigCreatorParam(new File("~/config.init"))
-      val config = instanceCreator.getOrCreate(classOf[Config], params)
-      val mqListener = instanceCreator.getOrCreate(classOf[MqListener])
+      val config = instanceProvider.getOrCreate(classOf[Config], params)
+      val mqListener = instanceProvider.getOrCreate(classOf[MqListener])
 
       if (appEnvironment.name == "PROD") println("Warning! Creating PROD version of application!")
 

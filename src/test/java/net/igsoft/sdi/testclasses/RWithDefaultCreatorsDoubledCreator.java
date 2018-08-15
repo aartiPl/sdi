@@ -4,21 +4,21 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
-import net.igsoft.sdi.AutoCreator;
-import net.igsoft.sdi.Creator;
-import net.igsoft.sdi.InstanceCreator;
-import net.igsoft.sdi.LaunchType;
+import net.igsoft.sdi.creator.AutoCreator;
+import net.igsoft.sdi.creator.CreatorBase;
+import net.igsoft.sdi.internal.InstanceProvider;
+import net.igsoft.sdi.parameter.LaunchType;
 
-public class RWithDefaultCreatorsDoubledCreator extends Creator<R, LaunchType> {
+public class RWithDefaultCreatorsDoubledCreator extends CreatorBase<R, LaunchType> {
     @Override
-    public R create(InstanceCreator instanceCreator, LaunchType launchType) {
-        D d = instanceCreator.getOrCreate(D.class);
+    public R create(InstanceProvider instanceProvider, LaunchType launchType) {
+        D d = instanceProvider.getOrCreate(D.class);
 
-        return new R(instanceCreator.getOrCreate(Stepper.class), "a", "b");
+        return new R(instanceProvider.getOrCreate(Stepper.class), "a", "b");
     }
 
     @Override
-    public List<Creator<?, ?>> defaultCreators() {
+    public List<CreatorBase<?, ?>> defaultCreators() {
         return Lists.newArrayList(new DDoubledCreator(), new AutoCreator(Stepper.class));
     }
 }

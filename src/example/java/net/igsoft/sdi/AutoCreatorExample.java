@@ -1,5 +1,7 @@
 package net.igsoft.sdi;
 
+import net.igsoft.sdi.creator.AutoCreator;
+
 public class AutoCreatorExample {
 
     static class Config {

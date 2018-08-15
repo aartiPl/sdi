@@ -5,6 +5,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
 
 import org.junit.jupiter.api.Test;
 
+import net.igsoft.sdi.creator.AutoCreator;
 import net.igsoft.sdi.testclasses.B;
 import net.igsoft.sdi.testclasses.BCreator;
 import net.igsoft.sdi.testclasses.E1Creator;
