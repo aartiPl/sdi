@@ -11,14 +11,14 @@ import net.igsoft.sdi.parameter.LaunchType;
 
 public class DefaultCreatorsExample {
 
-    static class Config {
+    public static class Config {
     }
 
     // tag::default_creators[]
-    static class MqListenerWorker {
+    public static class MqListenerWorker {
     }
 
-    static class MqListenerCreator extends CreatorBase<MqListener, LaunchType> {
+    public static class MqListenerCreator extends CreatorBase<MqListener, LaunchType> {
         @Override
         public MqListener create(InstanceProvider instanceProvider, LaunchType params) {
             MqListenerWorker mqListenerWorker = instanceProvider.getOrCreate(MqListenerWorker.class);
@@ -31,14 +31,14 @@ public class DefaultCreatorsExample {
         }
     }
 
-    static class MqListener {
+    public static class MqListener {
         public MqListener(MqListenerWorker mqListenerWorker) {
         }
     }
 
     // end::default_creators[]
 
-    static class App {
+    public static class App {
         public App(Config e, MqListener mqListener) {
         }
     }

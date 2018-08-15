@@ -7,10 +7,10 @@ import net.igsoft.sdi.parameter.LaunchType;
 public class SimpleCreatorExample {
 
     // tag::config[]
-    static class Config {
+    public static class Config {
     }
 
-    static class ConfigCreator extends CreatorBase<Config, LaunchType> {
+    public static class ConfigCreator extends CreatorBase<Config, LaunchType> {
         @Override
         public Config create(InstanceProvider instanceProvider, LaunchType launchType) {
             return new Config();
@@ -19,12 +19,12 @@ public class SimpleCreatorExample {
     // end::config[]
 
     // tag::app[]
-    static class App {
+    public static class App {
         public App(Config e) {
         }
     }
 
-    static class AppCreator extends CreatorBase<App, LaunchType> {
+    public static class AppCreator extends CreatorBase<App, LaunchType> {
         @Override
         public App create(InstanceProvider instanceProvider, LaunchType launchType) {
             Config config = instanceProvider.getOrCreate(Config.class);

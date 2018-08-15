@@ -10,7 +10,7 @@ import net.igsoft.sdi.parameter.ParameterBase;
 public class ParametrizedCreatorExample {
 
     // tag::config[]
-    static class ConfigCreatorParam extends ParameterBase {
+    public static class ConfigCreatorParam extends ParameterBase {
         private final File file;
 
         public ConfigCreatorParam(File file) {
@@ -28,13 +28,13 @@ public class ParametrizedCreatorExample {
         }
     }
 
-    static class Config {
+    public static class Config {
         static Config createFromFile(File file) {
             return new Config();
         }
     }
 
-    static class ConfigCreator extends CreatorBase<Config, ConfigCreatorParam> {
+    public static class ConfigCreator extends CreatorBase<Config, ConfigCreatorParam> {
         @Override
         public Config create(InstanceProvider instanceProvider, ConfigCreatorParam params) {
             File file = params.getFile();
@@ -44,7 +44,7 @@ public class ParametrizedCreatorExample {
 
     // end::config[]
 
-    static class MqListener {
+    public static class MqListener {
     }
 
     // tag::app[]

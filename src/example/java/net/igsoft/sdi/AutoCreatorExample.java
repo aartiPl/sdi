@@ -4,10 +4,10 @@ import net.igsoft.sdi.creator.AutoCreator;
 
 public class AutoCreatorExample {
 
-    static class Config {
+    public static class Config {
     }
 
-    static class MqListener implements Manageable {
+    public static class MqListener implements Manageable {
         @Override
         public void init() {
             //Initialize class
@@ -29,7 +29,7 @@ public class AutoCreatorExample {
         }
     }
 
-    static class App {
+    public static class App {
         public App(Config e, MqListener mqListner) {
         }
     }
