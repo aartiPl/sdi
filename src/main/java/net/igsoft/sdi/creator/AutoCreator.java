@@ -1,17 +1,21 @@
-package net.igsoft.sdi;
+package net.igsoft.sdi.creator;
 
 import static java.lang.String.format;
 
 import java.lang.reflect.Constructor;
 
-public class AutoCreator<T, P extends ParameterBase> extends Creator<T, P> {
+import net.igsoft.sdi.engine.InstanceProvider;
+import net.igsoft.sdi.parameter.LaunchType;
+import net.igsoft.sdi.parameter.ParameterBase;
+
+public class AutoCreator<T, P extends ParameterBase> extends CreatorBase<T, P> {
 
     public AutoCreator(Class<T> myClazz) {
         super(myClazz, (Class<P>) LaunchType.class);
     }
 
     @Override
-    public T create(InstanceCreator instanceCreator, P params) {
+    public T create(InstanceProvider instanceProvider, P params) {
 
         if (!params.getClass().equals(LaunchType.class)) {
             throw new IllegalStateException(
@@ -44,7 +48,7 @@ public class AutoCreator<T, P extends ParameterBase> extends Creator<T, P> {
         Object[] values = new Object[constructor.getParameterCount()];
 
         for (int i = 0; i < constructor.getParameterCount(); i++) {
-            values[i] = instanceCreator.getOrCreate(constructor.getParameterTypes()[i]);
+            values[i] = instanceProvider.getOrCreate(constructor.getParameterTypes()[i]);
         }
 
         T instance;

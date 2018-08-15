@@ -1,29 +1,33 @@
 package net.igsoft.sdi;
 
+import net.igsoft.sdi.creator.CreatorBase;
+import net.igsoft.sdi.engine.InstanceProvider;
+import net.igsoft.sdi.parameter.LaunchType;
+
 public class SimpleCreatorExample {
 
     // tag::config[]
-    static class Config {
+    public static class Config {
     }
 
-    static class ConfigCreator extends Creator<Config, LaunchType> {
+    public static class ConfigCreator extends CreatorBase<Config, LaunchType> {
         @Override
-        public Config create(InstanceCreator instanceCreator, LaunchType launchType) {
+        public Config create(InstanceProvider instanceProvider, LaunchType launchType) {
             return new Config();
         }
     }
     // end::config[]
 
     // tag::app[]
-    static class App {
+    public static class App {
         public App(Config e) {
         }
     }
 
-    static class AppCreator extends Creator<App, LaunchType> {
+    public static class AppCreator extends CreatorBase<App, LaunchType> {
         @Override
-        public App create(InstanceCreator instanceCreator, LaunchType launchType) {
-            Config config = instanceCreator.getOrCreate(Config.class);
+        public App create(InstanceProvider instanceProvider, LaunchType launchType) {
+            Config config = instanceProvider.getOrCreate(Config.class);
             return new App(config);
         }
     }

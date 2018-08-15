@@ -15,38 +15,42 @@ import com.google.common.collect.TreeMultimap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.igsoft.sdi.internal.LoggingUtils;
-import net.igsoft.sdi.internal.Specification;
+import net.igsoft.sdi.creator.CreatorBase;
+import net.igsoft.sdi.engine.InstanceProvider;
+import net.igsoft.sdi.utils.LoggingUtils;
+import net.igsoft.sdi.engine.Specification;
+import net.igsoft.sdi.parameter.LaunchType;
+import net.igsoft.sdi.parameter.ParameterBase;
 
 public class ServiceBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceBuilder.class);
 
-    private final Map<Class<?>, Creator<?, ?>> creators = new HashMap<>();
-    private final Map<Class<?>, Creator<?, ?>> defaultCreators = new HashMap<>();
-    private final Map<Class<?>, Creator<?, ?>> rootCreators = new HashMap<>();
+    private final Map<Class<?>, CreatorBase<?, ?>> creators = new HashMap<>();
+    private final Map<Class<?>, CreatorBase<?, ?>> defaultCreators = new HashMap<>();
+    private final Map<Class<?>, CreatorBase<?, ?>> rootCreators = new HashMap<>();
     private final Map<Class<?>, ParameterBase> defaultParameters = new HashMap<>();
 
-    public ServiceBuilder withRootCreator(Creator<?, ?> creator) {
+    public ServiceBuilder withRootCreator(CreatorBase<?, ?> creator) {
         return withCreator(true, creator, null);
     }
 
-    public <P extends ParameterBase> ServiceBuilder withRootCreator(Creator<?, P> creator,
+    public <P extends ParameterBase> ServiceBuilder withRootCreator(CreatorBase<?, P> creator,
                                                                     P defaultParameter) {
         return withCreator(true, creator, defaultParameter);
     }
 
-    public ServiceBuilder withCreator(Creator<?, ?> creator) {
+    public ServiceBuilder withCreator(CreatorBase<?, ?> creator) {
         return withCreator(false, creator, null);
     }
 
-    public <P extends ParameterBase> ServiceBuilder withCreator(Creator<?, P> creator,
+    public <P extends ParameterBase> ServiceBuilder withCreator(CreatorBase<?, P> creator,
                                                                 P defaultParameter) {
         return withCreator(false, creator, defaultParameter);
     }
 
     private <P extends ParameterBase> ServiceBuilder withCreator(boolean rootCreator,
-                                                                Creator<?, P> creator,
+                                                                CreatorBase<?, P> creator,
                                                                 P defaultParameter) {
         Class<?> createdClass = creator.getCreatedClass();
 
@@ -70,26 +74,26 @@ public class ServiceBuilder {
     }
 
     public Service build() {
-        Deque<Creator<?, ?>> stack = new ArrayDeque<>(creators.values());
+        Deque<CreatorBase<?, ?>> stack = new ArrayDeque<>(creators.values());
 
         while (!stack.isEmpty()) {
-            Map<Class<?>, Creator<?, ?>> discoveredDefaultCreators =
+            Map<Class<?>, CreatorBase<?, ?>> discoveredDefaultCreators =
                     discoverDefaultCreators(stack.pop());
             stack.addAll(discoveredDefaultCreators.values());
         }
 
-        InstanceCreator instanceCreator =
-                new InstanceCreator(creators, defaultCreators, defaultParameters,
-                                    this::getInstanceKey);
+        InstanceProvider instanceProvider =
+                new InstanceProvider(creators, defaultCreators, defaultParameters,
+                                     this::getInstanceKey);
 
-        Map<Class<?>, Creator<?, ?>> instancesToInitiate =
+        Map<Class<?>, CreatorBase<?, ?>> instancesToInitiate =
                 !rootCreators.isEmpty() ? rootCreators : creators;
 
-        for (Map.Entry<Class<?>, Creator<?, ?>> entry : instancesToInitiate.entrySet()) {
+        for (Map.Entry<Class<?>, CreatorBase<?, ?>> entry : instancesToInitiate.entrySet()) {
             Class<?> key = entry.getKey();
 
             if (defaultParameters.containsKey(key)) {
-                instanceCreator.getOrCreate(key, defaultParameters.get(key));
+                instanceProvider.getOrCreate(key, defaultParameters.get(key));
             } else {
                 throw new IllegalStateException(format("Creator '%s' (for class '%s') does not have " +
                                                        "a required parameter of type '%s'", entry.getValue().getClass().getSimpleName(),
@@ -99,7 +103,7 @@ public class ServiceBuilder {
 
         Multimap<Integer, String> instancesByLevel = TreeMultimap.create();
 
-        for (Map.Entry<String, Specification> entry : instanceCreator.getRuntimeSpecification()
+        for (Map.Entry<String, Specification> entry : instanceProvider.getRuntimeSpecification()
                                                                      .entrySet()) {
             instancesByLevel.put(entry.getValue().getLevel(), entry.getKey());
         }
@@ -114,24 +118,21 @@ public class ServiceBuilder {
                                                                 .map(instancesByLevel::get)
                                                                 .collect(Collectors.toList());
 
-        LOGGER.info("\nDependencies by level:\n{}",
-                    LoggingUtils.dependenciesByLevel(instancesByLevel));
+        LOGGER.info("\nDependencies by class:\n{}",
+                    LoggingUtils.dependenciesByClass(instanceProvider.getRuntimeSpecification()));
 
         LOGGER.info("\nRoot classes:\n{}", instancesByLevel.get(1));
 
-        LOGGER.info("\nDependencies by class:\n{}",
-                    LoggingUtils.dependenciesByClass(instanceCreator.getRuntimeSpecification()));
-
-        if (!instanceCreator.getUnusedCreators().isEmpty()) {
+        if (!instanceProvider.getUnusedCreators().isEmpty()) {
             LOGGER.warn("\nSome creators were not used during service construction. " +
                         "Consider removing them from creator list:\n{}",
-                        LoggingUtils.unusedCreators(instanceCreator.getUnusedCreators()));
+                        LoggingUtils.unusedCreators(instanceProvider.getUnusedCreators()));
         }
 
-        return new Service(this::getInstanceKey, instanceCreator.getInstances(), sortedLevels);
+        return new Service(this::getInstanceKey, instanceProvider.getInstances(), sortedLevels);
     }
 
-    private Map<Class<?>, Creator<?, ?>> discoverDefaultCreators(Creator<?, ?> creator) {
+    private Map<Class<?>, CreatorBase<?, ?>> discoverDefaultCreators(CreatorBase<?, ?> creator) {
         //Apply defaults
         if (defaultParameters.get(creator.getCreatedClass()) == null &&
             creator.getParameterClass().equals(LaunchType.class)) {
@@ -139,8 +140,8 @@ public class ServiceBuilder {
         }
 
         //Discover default creators
-        Map<Class<?>, Creator<?, ?>> discoveredCreators = new HashMap<>();
-        for (Creator<?, ?> defaultCreator : creator.defaultCreators()) {
+        Map<Class<?>, CreatorBase<?, ?>> discoveredCreators = new HashMap<>();
+        for (CreatorBase<?, ?> defaultCreator : creator.defaultCreators()) {
             Class<?> createdClass = defaultCreator.getCreatedClass();
 
             if (!defaultCreators.containsKey(createdClass)) {

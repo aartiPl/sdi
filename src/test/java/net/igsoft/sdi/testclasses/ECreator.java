@@ -1,16 +1,12 @@
 package net.igsoft.sdi.testclasses;
 
-import java.util.List;
+import net.igsoft.sdi.creator.CreatorBase;
+import net.igsoft.sdi.engine.InstanceProvider;
+import net.igsoft.sdi.parameter.LaunchType;
 
-import com.google.common.collect.Lists;
-
-import net.igsoft.sdi.Creator;
-import net.igsoft.sdi.InstanceCreator;
-import net.igsoft.sdi.LaunchType;
-
-public class ECreator extends Creator<E, LaunchType> {
+public class ECreator extends CreatorBase<E, LaunchType> {
     @Override
-    public E create(InstanceCreator instanceCreator, LaunchType launchType) {
-        return new E(instanceCreator.getOrCreate(Stepper.class));
+    public E create(InstanceProvider instanceProvider, LaunchType launchType) {
+        return new E(instanceProvider.getOrCreate(Stepper.class));
     }
 }

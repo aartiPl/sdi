@@ -1,20 +1,24 @@
 package net.igsoft.sdi
 
+import net.igsoft.sdi.creator.CreatorBase
+import net.igsoft.sdi.engine.InstanceProvider
+import net.igsoft.sdi.parameter.LaunchType
+
 object SimpleCreatorScalaExample { // tag::config[]
 
   private[sdi] class Config
 
-  private[sdi] class ConfigCreator extends Creator[Config, LaunchType] {
-    override def create(instanceCreator: InstanceCreator, launchType: LaunchType) = new Config
+  private[sdi] class ConfigCreator extends CreatorBase[Config, LaunchType] {
+    override def create(instanceProvider: InstanceProvider, launchType: LaunchType) = new Config
   }
 
   // tag::app[]
   // end::config[]
   private[sdi] class App(val e: Config)
 
-  private[sdi] class AppCreator extends Creator[App, LaunchType] {
-    override def create(instanceCreator: InstanceCreator, launchType: LaunchType): App = {
-      val config = instanceCreator.getOrCreate(classOf[Config])
+  private[sdi] class AppCreator extends CreatorBase[App, LaunchType] {
+    override def create(instanceProvider: InstanceProvider, launchType: LaunchType): App = {
+      val config = instanceProvider.getOrCreate(classOf[Config])
       new App(config)
     }
   }

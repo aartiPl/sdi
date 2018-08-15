@@ -1,19 +1,23 @@
 package net.igsoft.sdi;
 
+import net.igsoft.sdi.creator.CreatorBase;
+import net.igsoft.sdi.engine.InstanceProvider;
+import net.igsoft.sdi.parameter.LaunchType;
+
 public class LifecycleExample {
 
     // tag::classes[]
-    static class Config {
+    public static class Config {
     }
 
-    static class ConfigCreator extends Creator<Config, LaunchType> {
+    public static class ConfigCreator extends CreatorBase<Config, LaunchType> {
         @Override
-        public Config create(InstanceCreator instanceCreator, LaunchType launchType) {
+        public Config create(InstanceProvider instanceProvider, LaunchType launchType) {
             return new Config();
         }
     }
 
-    static class MqListener implements Manageable {
+    public static class MqListener implements Manageable {
         @Override
         public void init() {
             //Initialize class
@@ -35,23 +39,23 @@ public class LifecycleExample {
         }
     }
 
-    static class MqListenerCreator extends Creator<MqListener, LaunchType> {
+    public static class MqListenerCreator extends CreatorBase<MqListener, LaunchType> {
         @Override
-        public MqListener create(InstanceCreator instanceCreator, LaunchType launchType) {
+        public MqListener create(InstanceProvider instanceProvider, LaunchType launchType) {
             return new MqListener();
         }
     }
 
-    static class App {
+    public static class App {
         public App(Config e, MqListener mqListner) {
         }
     }
 
-    static class AppCreator extends Creator<App, LaunchType> {
+    public static class AppCreator extends CreatorBase<App, LaunchType> {
         @Override
-        public App create(InstanceCreator instanceCreator, LaunchType launchType) {
-            Config config = instanceCreator.getOrCreate(Config.class);
-            MqListener mqListener = instanceCreator.getOrCreate(MqListener.class);
+        public App create(InstanceProvider instanceProvider, LaunchType launchType) {
+            Config config = instanceProvider.getOrCreate(Config.class);
+            MqListener mqListener = instanceProvider.getOrCreate(MqListener.class);
             return new App(config, mqListener);
         }
     }

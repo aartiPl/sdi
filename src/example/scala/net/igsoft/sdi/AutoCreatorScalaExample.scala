@@ -1,5 +1,8 @@
 package net.igsoft.sdi
 
+import net.igsoft.sdi.creator.AutoCreator
+import net.igsoft.sdi.parameter.ParameterBase
+
 object AutoCreatorScalaExample {
 
   private[sdi] class Config

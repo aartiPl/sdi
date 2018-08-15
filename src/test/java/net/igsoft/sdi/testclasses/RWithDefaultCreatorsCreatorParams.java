@@ -1,6 +1,6 @@
 package net.igsoft.sdi.testclasses;
 
-import net.igsoft.sdi.ParameterBase;
+import net.igsoft.sdi.parameter.ParameterBase;
 
 public final class RWithDefaultCreatorsCreatorParams extends ParameterBase {
 

@@ -4,19 +4,19 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
-import net.igsoft.sdi.Creator;
-import net.igsoft.sdi.InstanceCreator;
-import net.igsoft.sdi.LaunchType;
+import net.igsoft.sdi.creator.CreatorBase;
+import net.igsoft.sdi.engine.InstanceProvider;
+import net.igsoft.sdi.parameter.LaunchType;
 
-public class DCreator extends Creator<D, LaunchType> {
+public class DCreator extends CreatorBase<D, LaunchType> {
     @Override
-    public D create(InstanceCreator instanceCreator, LaunchType launchType) {
-        E e = instanceCreator.getOrCreate(E.class, launchType);
-        return new D(e, instanceCreator.getOrCreate(Stepper.class));
+    public D create(InstanceProvider instanceProvider, LaunchType launchType) {
+        E e = instanceProvider.getOrCreate(E.class, launchType);
+        return new D(e, instanceProvider.getOrCreate(Stepper.class));
     }
 
     @Override
-    public List<Creator<?, ?>> defaultCreators() {
+    public List<CreatorBase<?, ?>> defaultCreators() {
         return Lists.newArrayList(new ECreator());
     }
 }
