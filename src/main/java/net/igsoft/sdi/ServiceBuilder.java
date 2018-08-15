@@ -16,9 +16,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.igsoft.sdi.creator.CreatorBase;
-import net.igsoft.sdi.internal.InstanceProvider;
+import net.igsoft.sdi.engine.InstanceProvider;
 import net.igsoft.sdi.utils.LoggingUtils;
-import net.igsoft.sdi.internal.Specification;
+import net.igsoft.sdi.engine.Specification;
 import net.igsoft.sdi.parameter.LaunchType;
 import net.igsoft.sdi.parameter.ParameterBase;
 

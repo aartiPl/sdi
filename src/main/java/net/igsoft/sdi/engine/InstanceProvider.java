@@ -1,4 +1,4 @@
-package net.igsoft.sdi.internal;
+package net.igsoft.sdi.engine;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
@@ -94,10 +94,10 @@ public class InstanceProvider {
         return runtimeSpecification;
     }
 
-    public Map<String, Instance> getInstances() {
+    public Map<String, InstanceDescriptor> getInstances() {
         return runtimeSpecification.entrySet()
                                    .stream()
-                                   .collect(Collectors.toMap(Map.Entry::getKey, e -> new Instance(
+                                   .collect(Collectors.toMap(Map.Entry::getKey, e -> new InstanceDescriptor(
                                            e.getValue().getValue(),
                                            e.getValue().isManualStartAndStop())));
     }

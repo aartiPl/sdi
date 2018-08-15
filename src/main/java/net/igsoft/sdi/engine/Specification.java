@@ -1,4 +1,4 @@
-package net.igsoft.sdi.internal;
+package net.igsoft.sdi.engine;
 
 import java.util.Objects;
 import java.util.Set;

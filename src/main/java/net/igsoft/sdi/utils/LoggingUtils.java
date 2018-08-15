@@ -5,7 +5,7 @@ import java.util.Map;
 import com.google.common.collect.Multimap;
 
 import net.igsoft.sdi.creator.CreatorBase;
-import net.igsoft.sdi.internal.Specification;
+import net.igsoft.sdi.engine.Specification;
 
 public final class LoggingUtils {
 

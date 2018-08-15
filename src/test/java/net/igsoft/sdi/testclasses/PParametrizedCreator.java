@@ -1,7 +1,7 @@
 package net.igsoft.sdi.testclasses;
 
 import net.igsoft.sdi.creator.CreatorBase;
-import net.igsoft.sdi.internal.InstanceProvider;
+import net.igsoft.sdi.engine.InstanceProvider;
 
 public class PParametrizedCreator extends CreatorBase<P, PParametrizedCreatorParams> {
     @Override

@@ -2,7 +2,7 @@ package net.igsoft.sdi
 
 import com.google.common.collect.Lists
 import net.igsoft.sdi.creator.{AutoCreator, CreatorBase}
-import net.igsoft.sdi.internal.InstanceProvider
+import net.igsoft.sdi.engine.InstanceProvider
 import net.igsoft.sdi.parameter.{LaunchType, ParameterBase}
 
 object DefaultCreatorsScalaExample {

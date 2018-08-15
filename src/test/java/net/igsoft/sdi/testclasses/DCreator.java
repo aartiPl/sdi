@@ -5,7 +5,7 @@ import java.util.List;
 import com.google.common.collect.Lists;
 
 import net.igsoft.sdi.creator.CreatorBase;
-import net.igsoft.sdi.internal.InstanceProvider;
+import net.igsoft.sdi.engine.InstanceProvider;
 import net.igsoft.sdi.parameter.LaunchType;
 
 public class DCreator extends CreatorBase<D, LaunchType> {

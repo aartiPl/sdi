@@ -4,7 +4,7 @@ import static java.lang.String.format;
 
 import java.lang.reflect.Constructor;
 
-import net.igsoft.sdi.internal.InstanceProvider;
+import net.igsoft.sdi.engine.InstanceProvider;
 import net.igsoft.sdi.parameter.LaunchType;
 import net.igsoft.sdi.parameter.ParameterBase;
 

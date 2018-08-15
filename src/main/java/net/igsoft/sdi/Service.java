@@ -13,9 +13,9 @@ import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.igsoft.sdi.internal.Instance;
-import net.igsoft.sdi.internal.KeyGenerator;
-import net.igsoft.sdi.internal.ManageableState;
+import net.igsoft.sdi.engine.InstanceDescriptor;
+import net.igsoft.sdi.engine.KeyGenerator;
+import net.igsoft.sdi.engine.ManageableState;
 import net.igsoft.sdi.parameter.ParameterBase;
 
 public class Service implements Manageable {
@@ -24,10 +24,10 @@ public class Service implements Manageable {
 
     private final Map<String, ManageableState> states;
     private final KeyGenerator keyGenerator;
-    private final Map<String, Instance> instances;
+    private final Map<String, InstanceDescriptor> instances;
     private final List<Collection<String>> sortedLevels;
 
-    Service(KeyGenerator keyGenerator, Map<String, Instance> instances,
+    Service(KeyGenerator keyGenerator, Map<String, InstanceDescriptor> instances,
             List<Collection<String>> sortedLevels) {
         this.keyGenerator = keyGenerator;
         this.instances = instances;
@@ -43,7 +43,7 @@ public class Service implements Manageable {
     public <T, P extends ParameterBase> T get(Class<T> clazz, P params) {
         checkArgument(clazz != null);
         checkArgument(params != null);
-        Instance instance = instances.get(keyGenerator.generate(clazz, params.cachedUniqueId()));
+        InstanceDescriptor instance = instances.get(keyGenerator.generate(clazz, params.cachedUniqueId()));
         checkArgument(instance != null, new IllegalArgumentException(
                 format("There is no instance of class %s with parameters %s available in Service",
                        clazz.getSimpleName(), params)));
@@ -53,7 +53,7 @@ public class Service implements Manageable {
     @SuppressWarnings("unchecked")
     public <T, P extends ParameterBase> T get(Class<T> clazz) {
         checkArgument(clazz != null);
-        Instance instance = instances.get(keyGenerator.generate(clazz, ""));
+        InstanceDescriptor instance = instances.get(keyGenerator.generate(clazz, ""));
         checkArgument(instance != null, new IllegalArgumentException(
                 format("There is no instance of class %s available in Service",
                        clazz.getSimpleName())));
@@ -98,7 +98,7 @@ public class Service implements Manageable {
                                                             Consumer<T> operation) {
         for (Collection<String> ids : levels) {
             for (String id : ids) {
-                Instance instance = instances.get(id);
+                InstanceDescriptor instance = instances.get(id);
                 Object instanceValue = instance.getValue();
 
                 boolean isSubclassOfClazz = clazz.isAssignableFrom(instanceValue.getClass());

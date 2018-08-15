@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
-import net.igsoft.sdi.internal.InstanceProvider;
+import net.igsoft.sdi.engine.InstanceProvider;
 import net.igsoft.sdi.parameter.ParameterBase;
 
 //NOTE: This class has to be abstract class and not the interface to allow

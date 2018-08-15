@@ -1,4 +1,4 @@
-:sdi-version: 0.9
+:sdi-version: 0.9.1
 
 = Simple Dependency Injection
 
@@ -41,7 +41,7 @@ Dependency on Guava is not critical, so I will consider to remove it.
 == Concept and simple usage
 
 The general concept is that for all classes which you want to put into this smallish DI framework
-you prepare creator. Creator for some specific class has to inherit from abstract class Creator<>.
+you prepare creator. Creator for some specific class has to inherit from abstract class CreatorBase<>.
 If the creation of the class is simple because that class only depends on other available classes,
 it is possible to use AutoCreator<> but it is still the same concept, but a little bit more
 automatization.
@@ -58,9 +58,9 @@ endif::[]
 ifdef::env-github[]
     static class Config {}
 
-    static class ConfigCreator extends Creator<Config, LaunchType> {
+    static class ConfigCreator extends CreatorBase<Config, LaunchType> {
         @Override
-        public Config create(InstanceCreator instanceCreator, LaunchType launchType) {
+        public Config create(InstanceProvider instanceProvider, LaunchType launchType) {
             return new Config();
         }
     }
@@ -84,10 +84,10 @@ ifdef::env-github[]
         public App(Config e) {}
     }
 
-    static class AppCreator extends Creator<App, LaunchType> {
+    static class AppCreator extends CreatorBase<App, LaunchType> {
         @Override
-        public App create(InstanceCreator instanceCreator, LaunchType launchType) {
-            Config config = instanceCreator.getOrCreate(Config.class);
+        public App create(InstanceProvider instanceProvider, LaunchType launchType) {
+            Config config = instanceProvider.getOrCreate(Config.class);
             return new App(config);
         }
     }
@@ -95,7 +95,7 @@ endif::[]
 ----
 
 That way we have just applied dependency injection pattern in the simple case of two classes.
-We have just delegated the work to InstanceCreator, which is responsible for finding the correct
+We have just delegated the work to InstanceProvider, which is responsible for finding the correct
 creator.
 
 But how we can use such classes?
@@ -163,9 +163,9 @@ endif::[]
 ifdef::env-github[]
     static class Config {}
 
-    static class ConfigCreator extends Creator<Config, LaunchType> {
+    static class ConfigCreator extends CreatorBase<Config, LaunchType> {
         @Override
-        public Config create(InstanceCreator instanceCreator, LaunchType launchType) {
+        public Config create(InstanceProvider instanceProvider, LaunchType launchType) {
             return new Config();
         }
     }
@@ -192,9 +192,9 @@ ifdef::env-github[]
         }
     }
 
-    static class MqListenerCreator extends Creator<MqListener, LaunchType> {
+    static class MqListenerCreator extends CreatorBase<MqListener, LaunchType> {
         @Override
-        public MqListener create(InstanceCreator instanceCreator, LaunchType launchType) {
+        public MqListener create(InstanceProvider instanceProvider, LaunchType launchType) {
             return new MqListener();
         }
     }
@@ -203,11 +203,11 @@ ifdef::env-github[]
         public App(Config e, MqListener mqListner) {}
     }
 
-    static class AppCreator extends Creator<App, LaunchType> {
+    static class AppCreator extends CreatorBase<App, LaunchType> {
         @Override
-        public App create(InstanceCreator instanceCreator, LaunchType launchType) {
-            Config config = instanceCreator.getOrCreate(Config.class);
-            MqListener mqListener = instanceCreator.getOrCreate(MqListener.class);
+        public App create(InstanceProvider instanceProvider, LaunchType launchType) {
+            Config config = instanceProvider.getOrCreate(Config.class);
+            MqListener mqListener = instanceProvider.getOrCreate(MqListener.class);
             return new App(config, mqListener);
         }
     }
@@ -348,9 +348,9 @@ ifdef::env-github[]
         }
     }
 
-    static class ConfigCreator extends Creator<Config, ConfigCreatorParam> {
+    static class ConfigCreator extends CreatorBase<Config, ConfigCreatorParam> {
         @Override
-        public Config create(InstanceCreator instanceCreator, ConfigCreatorParam params) {
+        public Config create(InstanceProvider instanceProvider, ConfigCreatorParam params) {
             File file = params.getFile();
             return Config.createFromFile(file);
         }
@@ -390,12 +390,12 @@ ifdef::env-github[]
         }
     }
 
-    static class AppCreator extends Creator<App, AppEnvironment> {
+    static class AppCreator extends CreatorBase<App, AppEnvironment> {
         @Override
-        public App create(InstanceCreator instanceCreator, AppEnvironment appEnvironment) {
+        public App create(InstanceProvider instanceProvider, AppEnvironment appEnvironment) {
             ConfigCreatorParam params = new ConfigCreatorParam(new File("~/config.init"));
-            Config config = instanceCreator.getOrCreate(Config.class, params);
-            MqListener mqListener = instanceCreator.getOrCreate(MqListener.class);
+            Config config = instanceProvider.getOrCreate(Config.class, params);
+            MqListener mqListener = instanceProvider.getOrCreate(MqListener.class);
 
             if (appEnvironment.getName().equals("PROD")) {
                 System.out.println("Warning! Creating PROD version of application!");
@@ -503,10 +503,10 @@ ifdef::env-github[]
   static class MqListenerWorker {
       }
 
-      static class MqListenerCreator extends Creator<MqListener, LaunchType> {
+      static class MqListenerCreator extends CreatorBase<MqListener, LaunchType> {
           @Override
-          public MqListener create(InstanceCreator instanceCreator, LaunchType params) {
-              MqListenerWorker mqListenerWorker = instanceCreator.getOrCreate(MqListenerWorker.class);
+          public MqListener create(InstanceProvider instanceProvider, LaunchType params) {
+              MqListenerWorker mqListenerWorker = instanceProvider.getOrCreate(MqListenerWorker.class);
               return new MqListener(mqListenerWorker);
           }
 

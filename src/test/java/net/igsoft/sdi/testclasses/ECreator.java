@@ -1,7 +1,7 @@
 package net.igsoft.sdi.testclasses;
 
 import net.igsoft.sdi.creator.CreatorBase;
-import net.igsoft.sdi.internal.InstanceProvider;
+import net.igsoft.sdi.engine.InstanceProvider;
 import net.igsoft.sdi.parameter.LaunchType;
 
 public class ECreator extends CreatorBase<E, LaunchType> {

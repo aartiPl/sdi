@@ -6,7 +6,7 @@ import com.google.common.collect.Lists;
 
 import net.igsoft.sdi.creator.AutoCreator;
 import net.igsoft.sdi.creator.CreatorBase;
-import net.igsoft.sdi.internal.InstanceProvider;
+import net.igsoft.sdi.engine.InstanceProvider;
 
 public class RWithDefaultCreatorsCreator extends CreatorBase<R, RWithDefaultCreatorsCreatorParams> {
     @Override

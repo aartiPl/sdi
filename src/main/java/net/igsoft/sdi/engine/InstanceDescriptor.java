@@ -1,12 +1,12 @@
-package net.igsoft.sdi.internal;
+package net.igsoft.sdi.engine;
 
 import java.util.Objects;
 
-public class Instance {
+public class InstanceDescriptor {
     private final Object value;
     private final boolean manualStartAndStop;
 
-    public Instance(Object value, boolean manualStartAndStop) {
+    public InstanceDescriptor(Object value, boolean manualStartAndStop) {
         this.value = value;
         this.manualStartAndStop = manualStartAndStop;
     }
@@ -24,10 +24,10 @@ public class Instance {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || !getClass().equals(o.getClass())) {
             return false;
         }
-        Instance instance = (Instance) o;
+        InstanceDescriptor instance = (InstanceDescriptor) o;
         return manualStartAndStop == instance.manualStartAndStop &&
                Objects.equals(value, instance.value);
     }
@@ -39,6 +39,6 @@ public class Instance {
 
     @Override
     public String toString() {
-        return "Instance{" + "value=" + value + ", manualStartAndStop=" + manualStartAndStop + '}';
+        return "InstanceDescriptor{" + "value=" + value + ", manualStartAndStop=" + manualStartAndStop + '}';
     }
 }
