@@ -33,7 +33,7 @@ public class AutoCreator<T, P extends ParameterBase> extends CreatorBase<T, P> {
         if (constructors.length == 0 || constructors[0].getParameterCount() == 0) {
             T instance;
             try {
-                instance = getCreatedClass().newInstance();
+                instance = getCreatedClass().getDeclaredConstructor().newInstance();
             } catch (Exception e) {
                 throw new IllegalStateException(format("Can not automatically create class '%s'",
                                                        getCreatedClass().getSimpleName()), e);

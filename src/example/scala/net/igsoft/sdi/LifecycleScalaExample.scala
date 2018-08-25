@@ -49,14 +49,17 @@ object LifecycleScalaExample {
   // tag::main[]
   // end::classes[]
   def main(args: Array[String]): Unit = {
-    val service = Service.builder.withRootCreator(new AppCreator).withCreator(new ConfigCreator)
-                  .withCreator(new MqListenerCreator).build
+    val service = Service.builder
+                  .withRootCreator(new AppCreator)
+                  .withCreator(new ConfigCreator)
+                  .withCreator(new MqListenerCreator)
+                  .build
 
     sys.ShutdownHookThread {
       service.close()
     }
+
     service.start()
   }
-
   // end::main[]
 }
