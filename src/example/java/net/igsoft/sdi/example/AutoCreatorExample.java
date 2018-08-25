@@ -1,5 +1,7 @@
-package net.igsoft.sdi;
+package net.igsoft.sdi.example;
 
+import net.igsoft.sdi.Manageable;
+import net.igsoft.sdi.Service;
 import net.igsoft.sdi.creator.AutoCreator;
 
 public class AutoCreatorExample {
@@ -36,10 +38,10 @@ public class AutoCreatorExample {
 
     public static void main(String[] args) {
         Service service = Service.builder()
-                                       .withRootCreator(new AutoCreator<>(App.class))
-                                       .withCreator(new AutoCreator<>(Config.class))
-                                       .withCreator(new AutoCreator<>(MqListener.class))
-                                       .build();
+                                 .withRootCreator(new AutoCreator<>(App.class))
+                                 .withCreator(new AutoCreator<>(Config.class))
+                                 .withCreator(new AutoCreator<>(MqListener.class))
+                                 .build();
 
         Runtime.getRuntime().addShutdownHook(new Thread(service::close));
 

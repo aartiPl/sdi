@@ -52,7 +52,7 @@ In the simplest case, class and its creator can look like below:
 .SimpleCreatorExample.java
 ----
 ifndef::env-github[]
-include::src/example/java/net/igsoft/sdi/SimpleCreatorExample.java[tags=config]
+include::src/example/java/net/igsoft/sdi/example/SimpleCreatorExample.java[tags=config]
 endif::[]
 
 ifdef::env-github[]
@@ -76,7 +76,7 @@ Let's say that we have a class App which has a class Config as a dependency.
 .SimpleCreatorExample.java
 ----
 ifndef::env-github[]
-include::src/example/java/net/igsoft/sdi/SimpleCreatorExample.java[tags=app]
+include::src/example/java/net/igsoft/sdi/example/SimpleCreatorExample.java[tags=app]
 endif::[]
 
 ifdef::env-github[]
@@ -106,7 +106,7 @@ Very simple: let's just create service which will keep information about all ava
 .SimpleCreatorExample.java
 ----
 ifndef::env-github[]
-include::src/example/java/net/igsoft/sdi/SimpleCreatorExample.java[tags=main]
+include::src/example/java/net/igsoft/sdi/example/SimpleCreatorExample.java[tags=main]
 endif::[]
 
 ifdef::env-github[]
@@ -157,7 +157,7 @@ Let's see how it will work for another class: MqListener.
 .LifecycleExample.java
 ----
 ifndef::env-github[]
-include::src/example/java/net/igsoft/sdi/LifecycleExample.java[tags=classes]
+include::src/example/java/net/igsoft/sdi/example/LifecycleExample.java[tags=classes]
 endif::[]
 
 ifdef::env-github[]
@@ -220,7 +220,7 @@ Now we can start an application from our main class:
 .LifecycleExample.java
 ----
 ifndef::env-github[]
-include::src/example/java/net/igsoft/sdi/LifecycleExample.java[tags=main]
+include::src/example/java/net/igsoft/sdi/example/LifecycleExample.java[tags=main]
 endif::[]
 
 ifdef::env-github[]
@@ -251,7 +251,7 @@ creators:
 .AutoCreatorExample.java
 ----
 ifndef::env-github[]
-include::src/example/java/net/igsoft/sdi/AutoCreatorExample.java[]
+include::src/example/java/net/igsoft/sdi/example/AutoCreatorExample.java[]
 endif::[]
 
 ifdef::env-github[]
@@ -320,7 +320,7 @@ but then it will be difficult to reuse this creator in other application. That's
 .ParametrizedCreatorExample.java
 ----
 ifndef::env-github[]
-include::src/example/java/net/igsoft/sdi/ParametrizedCreatorExample.java[tags=config]
+include::src/example/java/net/igsoft/sdi/example/ParametrizedCreatorExample.java[tags=config]
 endif::[]
 
 ifdef::env-github[]
@@ -364,7 +364,7 @@ On the call side we use it like this:
 .ParametrizedCreatorExample.java
 ----
 ifndef::env-github[]
-include::src/example/java/net/igsoft/sdi/ParametrizedCreatorExample.java[tags=app]
+include::src/example/java/net/igsoft/sdi/example/ParametrizedCreatorExample.java[tags=app]
 endif::[]
 
 ifdef::env-github[]
@@ -457,7 +457,7 @@ creators in ServiceBuilder:
 .ParametrizedCreatorExample.java
 ----
 ifndef::env-github[]
-include::src/example/java/net/igsoft/sdi/ParametrizedCreatorExample.java[tags=main]
+include::src/example/java/net/igsoft/sdi/example/ParametrizedCreatorExample.java[tags=main]
 endif::[]
 
 ifdef::env-github[]
@@ -496,7 +496,7 @@ and returning from it instances of creators.
 .DefaultCreatorsExample.java
 ----
 ifndef::env-github[]
-include::src/example/java/net/igsoft/sdi/DefaultCreatorsExample.java[tags=default_creators]
+include::src/example/java/net/igsoft/sdi/example/DefaultCreatorsExample.java[tags=default_creators]
 endif::[]
 
 ifdef::env-github[]

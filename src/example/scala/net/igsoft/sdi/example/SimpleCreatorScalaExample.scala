@@ -1,5 +1,6 @@
-package net.igsoft.sdi
+package net.igsoft.sdi.example
 
+import net.igsoft.sdi.Service
 import net.igsoft.sdi.creator.CreatorBase
 import net.igsoft.sdi.engine.InstanceProvider
 import net.igsoft.sdi.parameter.LaunchType

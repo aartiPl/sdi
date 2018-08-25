@@ -1,7 +1,7 @@
-package net.igsoft.sdi
+package net.igsoft.sdi.example
 
 import net.igsoft.sdi.creator.AutoCreator
-import net.igsoft.sdi.parameter.ParameterBase
+import net.igsoft.sdi.{Manageable, Service}
 
 object AutoCreatorScalaExample {
 

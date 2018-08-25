@@ -15,14 +15,16 @@ repositories {
 
 sourceSets {
     example {
-        java {
-            srcDirs 'src/example/java'
-        }
-
-        scala {
-            srcDirs 'src/example/scala'
-        }
+        java.srcDir(file('src/example/java'))
+        scala.srcDir(file('src/example/scala'))
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
     }
+}
+
+configurations {
+    exampleImplementation.extendsFrom implementation
+    exampleRuntimeOnly.extendsFrom runtimeOnly
 }
 
 task javadocJar(type: Jar) {
@@ -91,7 +93,8 @@ uploadArchives {
 dependencies {
     compile 'com.google.guava:guava:23.5-jre'
     compile 'ch.qos.logback:logback-classic:1.2.3'
-    compile 'org.scala-lang:scala-library:2.12.6'
+
+    exampleCompile 'org.scala-lang:scala-library:2.12.6'
 
     testRuntime 'org.junit.jupiter:junit-jupiter-engine:5.2.0'
     testCompile 'org.junit.jupiter:junit-jupiter-api:5.2.0'

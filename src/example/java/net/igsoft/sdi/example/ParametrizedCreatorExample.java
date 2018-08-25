@@ -1,7 +1,8 @@
-package net.igsoft.sdi;
+package net.igsoft.sdi.example;
 
 import java.io.File;
 
+import net.igsoft.sdi.Service;
 import net.igsoft.sdi.creator.AutoCreator;
 import net.igsoft.sdi.creator.CreatorBase;
 import net.igsoft.sdi.engine.InstanceProvider;
