@@ -61,7 +61,7 @@ class CreationFailuresTest {
 
         //Then
         assertThat(throwable).isExactlyInstanceOf(IllegalArgumentException.class)
-                             .hasMessage("java.lang.IllegalArgumentException: There is no instance of class B available in Service");
+                             .hasMessageStartingWith("java.lang.IllegalArgumentException: There is no instance of class B");
         //TODO: add check logger output
     }
 }
