@@ -139,7 +139,7 @@ are not. Another advantage of using explicit root creators is for code readabili
 visible which classes should be analyzed first, when trying to understand application. Notice that sometimes
 it is necessary to add a few root creators, which is possible and necessary if you want to have them all instantiated.
 
-== Initialization of services
+== Initialization of class instances
 
 That's nice, but very often we need to initialize and later start at least some of the classes
 in order to start our application. And when finishing application, we need to stop e.g. working

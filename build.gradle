@@ -99,7 +99,6 @@ dependencies {
     testRuntime 'org.junit.jupiter:junit-jupiter-engine:5.2.0'
     testCompile 'org.junit.jupiter:junit-jupiter-api:5.2.0'
     testCompile 'org.assertj:assertj-core:3.10.0'
-    testCompile 'org.scalatest:scalatest_2.12:3.2.0-SNAP10'
 }
 
 test {
