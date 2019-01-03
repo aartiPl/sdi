@@ -2,17 +2,13 @@ package net.igsoft.sdi.testclasses;
 
 import net.igsoft.sdi.Manageable;
 
-class A implements Manageable {
+public class BClass implements Manageable {
+
     private final Stepper stepper;
 
-    public A(B b, Stepper stepper) {
+    public BClass(DClass d, PClass p, Stepper stepper) {
         this.stepper = stepper;
         stepper.addStep(this.getClass(), "ctor");
-    }
-
-    public String hello() {
-        stepper.addStep(this.getClass(), "hello");
-        return "Hello World";
     }
 
     @Override

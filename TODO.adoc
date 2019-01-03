@@ -6,4 +6,3 @@
 * Automatic creation of uniqueId for Creator parameters (eg. serialization with MessagePack or by iterating all fields of Parameter class)
 * AutoCreator: created class must be public (e.g. in examples removing public modifier breaks the example)
 * Test creation of non static inner classes
-* Dependency on Scala library should be necessary only for examples

@@ -4,14 +4,14 @@ import net.igsoft.sdi.creator.CreatorBase;
 import net.igsoft.sdi.engine.InstanceProvider;
 import net.igsoft.sdi.parameter.ParameterBase;
 
-public class PParametrizedCreator extends CreatorBase<P, PParametrizedCreator.Params> {
+public class PParametrizedCreator extends CreatorBase<PClass, PParametrizedCreator.Params> {
 
     @Override
-    public P create(InstanceProvider instanceProvider, Params params) {
-        R r = instanceProvider.getOrCreate(R.class,
-                                           new RParametrizedCreator.Params("name", "surname"));
+    public PClass create(InstanceProvider instanceProvider, Params params) {
+        RClass r = instanceProvider.getOrCreate(RClass.class,
+                                                new RParametrizedCreator.Params("name", "surname"));
 
-        return new P(instanceProvider.getOrCreate(Stepper.class), params.getId(), r);
+        return new PClass(instanceProvider.getOrCreate(Stepper.class), params.getId(), r);
     }
 
     public static final class Params extends ParameterBase {

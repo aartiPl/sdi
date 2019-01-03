@@ -94,7 +94,7 @@ public class ServiceBuilder {
 
             if (isRootCreatorsMode && !defaultParameters.containsKey(key)) {
                 throw new IllegalStateException(format("Creator '%s' (for class '%s') does not have " +
-                                                       "a required parameter of type '%s'", entry.getValue().getClass().getSimpleName(),
+                                                       "a required parameter of type '%s'.", entry.getValue().getClass().getSimpleName(),
                                                        key.getSimpleName(), entry.getValue().getParameterClass().getSimpleName()));
             }
 
@@ -104,7 +104,8 @@ public class ServiceBuilder {
         }
 
         if (instanceProvider.getRuntimeSpecification().isEmpty()) {
-            throw new IllegalStateException(format("No classes could be instantiated during class graph creation. Check if creators have required parameters during construction."));
+            throw new IllegalStateException(
+                    "No classes could be instantiated during class graph creation. Check if the creators are provided and if they have required parameters.");
         }
 
         Multimap<Integer, String> instancesByLevel = TreeMultimap.create();

@@ -6,26 +6,26 @@ import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
 import org.junit.jupiter.api.Test;
 
 import net.igsoft.sdi.creator.AutoCreator;
-import net.igsoft.sdi.testclasses.F;
-import net.igsoft.sdi.testclasses.G;
-import net.igsoft.sdi.testclasses.H;
-import net.igsoft.sdi.testclasses.Q;
+import net.igsoft.sdi.testclasses.FClass;
+import net.igsoft.sdi.testclasses.GClass;
+import net.igsoft.sdi.testclasses.HClass;
+import net.igsoft.sdi.testclasses.QClass;
 import net.igsoft.sdi.testclasses.Stepper;
 
-public class AutoCreatorTest {
+class AutoCreatorTest {
 
     @Test
-    public void assertThatServiceIsBuiltCorrectly() {
+    void assertThatServiceIsBuiltCorrectly() {
         //Given
         Service service = Service.builder()
-                         .withRootCreator(new AutoCreator<>(F.class))
-                         .withCreator(new AutoCreator<>(Stepper.class))
-                         .withCreator(new AutoCreator<>(G.class))
-                         .withCreator(new AutoCreator<>(H.class))
-                         .build();
+                                 .withRootCreator(new AutoCreator<>(FClass.class))
+                                 .withCreator(new AutoCreator<>(Stepper.class))
+                                 .withCreator(new AutoCreator<>(GClass.class))
+                                 .withCreator(new AutoCreator<>(HClass.class))
+                                 .build();
 
         //When-Then
-        assertThat(service.get(Stepper.class).toString()).isEqualTo("G:ctor H:ctor F:ctor");
+        assertThat(service.get(Stepper.class).toString()).isEqualTo("GClass:ctor HClass:ctor FClass:ctor");
     }
 
     @Test
@@ -33,13 +33,30 @@ public class AutoCreatorTest {
         //Given-When
         Throwable thrown = catchThrowable(() -> {
             Service.builder()
-                   .withCreator(new AutoCreator<>(Q.class))
+                   .withCreator(new AutoCreator<>(QClass.class))
                    .withCreator(new AutoCreator<>(Stepper.class))
                    .build();
         });
 
         //Then
         assertThat(thrown).isExactlyInstanceOf(IllegalStateException.class)
-                          .hasMessageStartingWith("Class 'Q' has more than one public constructor.");
+                          .hasMessageStartingWith(
+                                  "Class 'QClass' has more than one public constructor.");
+    }
+
+    @Test
+    void assertThatUsingAutoCreatorWithParametersThrowsException() {
+        //Given-When
+        Throwable thrown = catchThrowable(() -> {
+            Service.builder()
+                   .withCreator(new AutoCreator<>(QClass.class))
+                   .withCreator(new AutoCreator<>(Stepper.class))
+                   .build();
+        });
+
+        //Then
+        assertThat(thrown).isExactlyInstanceOf(IllegalStateException.class)
+                          .hasMessageStartingWith(
+                                  "Class 'QClass' has more than one public constructor.");
     }
 }

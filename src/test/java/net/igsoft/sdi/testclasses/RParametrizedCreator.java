@@ -4,12 +4,12 @@ import net.igsoft.sdi.creator.CreatorBase;
 import net.igsoft.sdi.engine.InstanceProvider;
 import net.igsoft.sdi.parameter.ParameterBase;
 
-public class RParametrizedCreator extends CreatorBase<R, RParametrizedCreator.Params> {
+public class RParametrizedCreator extends CreatorBase<RClass, RParametrizedCreator.Params> {
 
     @Override
-    public R create(InstanceProvider instanceProvider, Params params) {
-        return new R(instanceProvider.getOrCreate(Stepper.class), params.getName(),
-                     params.getSurname());
+    public RClass create(InstanceProvider instanceProvider, Params params) {
+        return new RClass(instanceProvider.getOrCreate(Stepper.class), params.getName(),
+                          params.getSurname());
     }
 
     public static final class Params extends ParameterBase {

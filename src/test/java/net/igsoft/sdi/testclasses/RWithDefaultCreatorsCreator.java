@@ -10,15 +10,15 @@ import net.igsoft.sdi.engine.InstanceProvider;
 import net.igsoft.sdi.parameter.ParameterBase;
 
 public class RWithDefaultCreatorsCreator
-        extends CreatorBase<R, RWithDefaultCreatorsCreator.Params> {
+        extends CreatorBase<RClass, RWithDefaultCreatorsCreator.Params> {
 
     @Override
-    public R create(InstanceProvider instanceProvider, Params params) {
-        //Test that C, D and E are available
-        D d = instanceProvider.getOrCreate(D.class);
+    public RClass create(InstanceProvider instanceProvider, Params params) {
+        //Test that CClass, DClass and EClass are available
+        DClass d = instanceProvider.getOrCreate(DClass.class);
 
-        return new R(instanceProvider.getOrCreate(Stepper.class), params.getName(),
-                     params.getSurname());
+        return new RClass(instanceProvider.getOrCreate(Stepper.class), params.getName(),
+                          params.getSurname());
     }
 
     @Override

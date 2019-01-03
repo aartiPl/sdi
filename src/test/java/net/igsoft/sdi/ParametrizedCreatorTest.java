@@ -26,6 +26,6 @@ public class ParametrizedCreatorTest {
     @Test
     public void assertThatServiceIsBuiltCorrectly() {
         assertThat(service.get(Stepper.class).toString()).isEqualTo(
-                "R:ctor(name surname) P:ctor(id r)");
+                "RClass:ctor(name surname) PClass:ctor(id r)");
     }
 }
