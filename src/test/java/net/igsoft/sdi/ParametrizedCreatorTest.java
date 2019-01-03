@@ -6,9 +6,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import net.igsoft.sdi.creator.AutoCreator;
-import net.igsoft.sdi.testclasses.RParametrizedCreator;
 import net.igsoft.sdi.testclasses.PParametrizedCreator;
-import net.igsoft.sdi.testclasses.PParametrizedCreatorParams;
+import net.igsoft.sdi.testclasses.RParametrizedCreator;
 import net.igsoft.sdi.testclasses.Stepper;
 
 public class ParametrizedCreatorTest {
@@ -18,7 +17,7 @@ public class ParametrizedCreatorTest {
     public void setUp() {
         service = Service.builder()
                          .withRootCreator(new PParametrizedCreator(),
-                                          new PParametrizedCreatorParams(false, "id"))
+                                          new PParametrizedCreator.Params(false, "id"))
                          .withCreator(new RParametrizedCreator())
                          .withCreator(new AutoCreator<>(Stepper.class))
                          .build();

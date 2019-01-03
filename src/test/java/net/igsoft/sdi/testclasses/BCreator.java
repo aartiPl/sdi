@@ -12,7 +12,7 @@ public class BCreator extends CreatorBase<B, LaunchType> {
     @Override
     public B create(InstanceProvider instanceProvider, LaunchType launchType) {
         D d = instanceProvider.getOrCreate(D.class, launchType);
-        P p = instanceProvider.getOrCreate(P.class, new PParametrizedCreatorParams(false, "id"));
+        P p = instanceProvider.getOrCreate(P.class, new PParametrizedCreator.Params(false, "id"));
 
         return new B(d, p, instanceProvider.getOrCreate(Stepper.class));
     }
