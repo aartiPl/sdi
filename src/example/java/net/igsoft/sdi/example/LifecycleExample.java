@@ -49,7 +49,7 @@ public class LifecycleExample {
     }
 
     public static class App {
-        public App(Config e, MqListener mqListner) {
+        public App(Config e, MqListener mqListener) {
         }
     }
 

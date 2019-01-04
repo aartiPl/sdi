@@ -31,7 +31,7 @@ object ParametrizedCreatorScalaExample {
   private[sdi] class MqListener {}
 
   // tag::app[]
-  private[sdi] case class AppEnvironment(val name: String) extends ParameterBase {
+  private[sdi] case class AppEnvironment(name: String) extends ParameterBase {
     override def uniqueId: String = name
   }
 
