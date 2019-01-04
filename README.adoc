@@ -324,37 +324,37 @@ include::src/example/java/net/igsoft/sdi/example/ParametrizedCreatorExample.java
 endif::[]
 
 ifdef::env-github[]
-    public static class ConfigCreatorParam extends ParameterBase {
-        private final File file;
-
-        public ConfigCreatorParam(File file) {
-            super(false);
-            this.file = file;
-        }
-
-        public File getFile() {
-            return file;
-        }
-
-        @Override
-        public String uniqueId() {
-            return file.getName();
-        }
-    }
-
     public static class Config {
-        static Config createFromFile(File file) {
-            return new Config();
+            static Config createFromFile(File file) {
+                return new Config();
+            }
         }
-    }
 
-    public static class ConfigCreator extends CreatorBase<Config, ConfigCreatorParam> {
-        @Override
-        public Config create(InstanceProvider instanceProvider, ConfigCreatorParam params) {
-            File file = params.getFile();
-            return Config.createFromFile(file);
+        public static class ConfigCreator extends CreatorBase<Config, ConfigCreator.Params> {
+            @Override
+            public Config create(InstanceProvider instanceProvider, ConfigCreator.Params params) {
+                File file = params.getFile();
+                return Config.createFromFile(file);
+            }
+
+            public static class Params extends ParameterBase {
+                private final File file;
+
+                public Params(File file) {
+                    super(false);
+                    this.file = file;
+                }
+
+                public File getFile() {
+                    return file;
+                }
+
+                @Override
+                public String uniqueId() {
+                    return file.getName();
+                }
+            }
         }
-    }
 endif::[]
 ----
 
@@ -368,42 +368,42 @@ include::src/example/java/net/igsoft/sdi/example/ParametrizedCreatorExample.java
 endif::[]
 
 ifdef::env-github[]
-    public static class AppEnvironment extends ParameterBase {
-        private final String name;
+    static class AppEnvironment extends ParameterBase {
+            private final String name;
 
-        public AppEnvironment(String name) {
-            this.name = name;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        @Override
-        public String uniqueId() {
-            return name;
-        }
-    }
-
-    public static class App {
-        public App(Config e, MqListener mqListener) {
-        }
-    }
-
-    public static class AppCreator extends CreatorBase<App, AppEnvironment> {
-        @Override
-        public App create(InstanceProvider instanceProvider, AppEnvironment appEnvironment) {
-            ConfigCreatorParam params = new ConfigCreatorParam(new File("~/config.init"));
-            Config config = instanceProvider.getOrCreate(Config.class, params);
-            MqListener mqListener = instanceProvider.getOrCreate(MqListener.class);
-
-            if (appEnvironment.getName().equals("PROD")) {
-                System.out.println("Warning! Creating PROD version of application!");
+            public AppEnvironment(String name) {
+                this.name = name;
             }
 
-            return new App(config, mqListener);
+            public String getName() {
+                return name;
+            }
+
+            @Override
+            public String uniqueId() {
+                return name;
+            }
         }
-    }
+
+        static class App {
+            public App(Config e, MqListener mqListener) {
+            }
+        }
+
+        static class AppCreator extends CreatorBase<App, AppEnvironment> {
+            @Override
+            public App create(InstanceProvider instanceProvider, AppEnvironment appEnvironment) {
+                ConfigCreator.Params params = new ConfigCreator.Params(new File("~/config.init"));
+                Config config = instanceProvider.getOrCreate(Config.class, params);
+                MqListener mqListener = instanceProvider.getOrCreate(MqListener.class);
+
+                if ("PROD".equals(appEnvironment.getName())) {
+                    System.out.println("Warning! Creating PROD version of application!");
+                }
+
+                return new App(config, mqListener);
+            }
+        }
 endif::[]
 ----
 
