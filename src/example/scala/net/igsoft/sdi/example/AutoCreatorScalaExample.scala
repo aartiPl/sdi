@@ -28,11 +28,9 @@ object AutoCreatorScalaExample {
   private[sdi] class App(val e: Config, val mqListener: MqListener)
 
   def main(args: Array[String]): Unit = {
-    val service = Service.builder
-                  .withRootCreator(new AutoCreator(classOf[App]))
+    val service = Service.builder.withRootCreator(new AutoCreator(classOf[App]))
                   .withCreator(new AutoCreator(classOf[Config]))
-                  .withCreator(new AutoCreator(classOf[MqListener]))
-                  .build
+                  .withCreator(new AutoCreator(classOf[MqListener])).build
 
     sys.ShutdownHookThread {
       service.close()

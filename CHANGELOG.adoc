@@ -2,6 +2,7 @@
 
 * Increased code coverage
 * Simplified code
+* Renamed test classes (distinguish them from generics parameters)
 
 0.9.1
 
