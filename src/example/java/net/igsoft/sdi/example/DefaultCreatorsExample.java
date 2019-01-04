@@ -1,9 +1,10 @@
-package net.igsoft.sdi;
+package net.igsoft.sdi.example;
 
 import java.util.List;
 
 import com.google.common.collect.Lists;
 
+import net.igsoft.sdi.Service;
 import net.igsoft.sdi.creator.AutoCreator;
 import net.igsoft.sdi.creator.CreatorBase;
 import net.igsoft.sdi.engine.InstanceProvider;

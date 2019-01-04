@@ -1,19 +1,21 @@
-package net.igsoft.sdi
+package net.igsoft.sdi.example
 
+import net.igsoft.sdi.Service
 import net.igsoft.sdi.creator.CreatorBase
 import net.igsoft.sdi.engine.InstanceProvider
 import net.igsoft.sdi.parameter.LaunchType
 
-object SimpleCreatorScalaExample { // tag::config[]
+object SimpleCreatorScalaExample {
 
+  // tag::config[]
   private[sdi] class Config
 
   private[sdi] class ConfigCreator extends CreatorBase[Config, LaunchType] {
     override def create(instanceProvider: InstanceProvider, launchType: LaunchType) = new Config
   }
+  // end::config[]
 
   // tag::app[]
-  // end::config[]
   private[sdi] class App(val e: Config)
 
   private[sdi] class AppCreator extends CreatorBase[App, LaunchType] {
@@ -22,11 +24,13 @@ object SimpleCreatorScalaExample { // tag::config[]
       new App(config)
     }
   }
+  // end::app[]
 
   // tag::main[]
-  // end::app[]
   def main(args: Array[String]): Unit = {
-    val service = Service.builder.withRootCreator(new AppCreator).withCreator(new ConfigCreator)
+    val service = Service.builder
+                  .withRootCreator(new AppCreator)
+                  .withCreator(new ConfigCreator)
                   .build
 
     sys.ShutdownHookThread {
@@ -35,6 +39,5 @@ object SimpleCreatorScalaExample { // tag::config[]
 
     service.start()
   }
-
   // end::main[]
 }

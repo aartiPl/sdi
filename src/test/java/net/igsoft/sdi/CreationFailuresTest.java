@@ -6,10 +6,11 @@ import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
 import org.junit.jupiter.api.Test;
 
 import net.igsoft.sdi.creator.AutoCreator;
-import net.igsoft.sdi.testclasses.B;
+import net.igsoft.sdi.testclasses.BClass;
 import net.igsoft.sdi.testclasses.BCreator;
 import net.igsoft.sdi.testclasses.E1Creator;
 import net.igsoft.sdi.testclasses.ECreator;
+import net.igsoft.sdi.testclasses.PParametrizedCreator;
 import net.igsoft.sdi.testclasses.RWithDefaultCreatorsCreator;
 import net.igsoft.sdi.testclasses.Stepper;
 
@@ -57,11 +58,31 @@ class CreationFailuresTest {
                                  .build();
 
         //When
-        Throwable throwable = catchThrowable(() -> service.get(B.class));
+        Throwable throwable = catchThrowable(() -> service.get(BClass.class));
 
         //Then
         assertThat(throwable).isExactlyInstanceOf(IllegalArgumentException.class)
-                             .hasMessage("java.lang.IllegalArgumentException: There is no instance of class B available in Service");
+                             .hasMessageStartingWith("java.lang.IllegalArgumentException: There is no instance of class BClass");
         //TODO: add check logger output
+    }
+
+    @Test
+    void assertThatNotBeingAbleToCreateGraphCausesException() {
+        //Given-When
+        Throwable throwable = catchThrowable(() -> Service.builder().build());
+
+        //Then
+        assertThat(throwable).isExactlyInstanceOf(IllegalStateException.class)
+                             .hasMessageStartingWith("No classes could be instantiated during class graph creation. Check if the creators are provided and if they have required parameters.");
+    }
+
+    @Test
+    void assertThatNotProvidingParameterForRootCreatorCausesException() {
+        //Given-When
+        Throwable throwable = catchThrowable(() -> Service.builder().withRootCreator(new PParametrizedCreator()).build());
+
+        //Then
+        assertThat(throwable).isExactlyInstanceOf(IllegalStateException.class)
+                             .hasMessageStartingWith("Creator 'PParametrizedCreator' (for class 'PClass') does not have a required parameter of type 'Params'.");
     }
 }

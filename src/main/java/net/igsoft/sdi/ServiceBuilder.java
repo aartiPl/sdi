@@ -78,7 +78,7 @@ public class ServiceBuilder {
 
         while (!stack.isEmpty()) {
             Map<Class<?>, CreatorBase<?, ?>> discoveredDefaultCreators =
-                    discoverDefaultCreators(stack.pop());
+                    discoverDefaultCreatorsAndParameters(stack.pop());
             stack.addAll(discoveredDefaultCreators.values());
         }
 
@@ -86,19 +86,26 @@ public class ServiceBuilder {
                 new InstanceProvider(creators, defaultCreators, defaultParameters,
                                      this::getInstanceKey);
 
-        Map<Class<?>, CreatorBase<?, ?>> instancesToInitiate =
-                !rootCreators.isEmpty() ? rootCreators : creators;
+        boolean isRootCreatorsMode = !rootCreators.isEmpty();
+        Map<Class<?>, CreatorBase<?, ?>> instancesToInitiate = isRootCreatorsMode ? rootCreators : creators;
 
         for (Map.Entry<Class<?>, CreatorBase<?, ?>> entry : instancesToInitiate.entrySet()) {
             Class<?> key = entry.getKey();
 
-            if (defaultParameters.containsKey(key)) {
-                instanceProvider.getOrCreate(key, defaultParameters.get(key));
-            } else {
+            if (isRootCreatorsMode && !defaultParameters.containsKey(key)) {
                 throw new IllegalStateException(format("Creator '%s' (for class '%s') does not have " +
-                                                       "a required parameter of type '%s'", entry.getValue().getClass().getSimpleName(),
+                                                       "a required parameter of type '%s'.", entry.getValue().getClass().getSimpleName(),
                                                        key.getSimpleName(), entry.getValue().getParameterClass().getSimpleName()));
             }
+
+            if (isRootCreatorsMode || defaultParameters.containsKey(key)) {
+                instanceProvider.getOrCreate(key, defaultParameters.get(key));
+            }
+        }
+
+        if (instanceProvider.getRuntimeSpecification().isEmpty()) {
+            throw new IllegalStateException(
+                    "No classes could be instantiated during class graph creation. Check if the creators are provided and if they have required parameters.");
         }
 
         Multimap<Integer, String> instancesByLevel = TreeMultimap.create();
@@ -132,7 +139,7 @@ public class ServiceBuilder {
         return new Service(this::getInstanceKey, instanceProvider.getInstances(), sortedLevels);
     }
 
-    private Map<Class<?>, CreatorBase<?, ?>> discoverDefaultCreators(CreatorBase<?, ?> creator) {
+    private Map<Class<?>, CreatorBase<?, ?>> discoverDefaultCreatorsAndParameters(CreatorBase<?, ?> creator) {
         //Apply defaults
         if (defaultParameters.get(creator.getCreatedClass()) == null &&
             creator.getParameterClass().equals(LaunchType.class)) {

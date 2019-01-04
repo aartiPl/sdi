@@ -1,5 +1,5 @@
 group 'net.igsoft'
-version '0.9.1'
+version '0.9.2'
 
 apply plugin: 'java'
 apply plugin: 'maven'
@@ -15,14 +15,16 @@ repositories {
 
 sourceSets {
     example {
-        java {
-            srcDirs 'src/example/java'
-        }
-
-        scala {
-            srcDirs 'src/example/scala'
-        }
+        java.srcDir(file('src/example/java'))
+        scala.srcDir(file('src/example/scala'))
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
     }
+}
+
+configurations {
+    exampleImplementation.extendsFrom implementation
+    exampleRuntimeOnly.extendsFrom runtimeOnly
 }
 
 task javadocJar(type: Jar) {
@@ -89,14 +91,16 @@ uploadArchives {
 }
 
 dependencies {
-    compile 'com.google.guava:guava:23.5-jre'
-    compile 'ch.qos.logback:logback-classic:1.2.3'
-    compile 'org.scala-lang:scala-library:2.12.6'
+    implementation 'com.google.guava:guava:23.5-jre'
+    implementation 'ch.qos.logback:logback-classic:1.2.3'
 
-    testRuntime 'org.junit.jupiter:junit-jupiter-engine:5.2.0'
-    testCompile 'org.junit.jupiter:junit-jupiter-api:5.2.0'
-    testCompile 'org.assertj:assertj-core:3.10.0'
-    testCompile 'org.scalatest:scalatest_2.12:3.2.0-SNAP10'
+    exampleImplementation 'org.scala-lang:scala-library:2.12.6'
+
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.2.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.2.0'
+    testImplementation 'org.assertj:assertj-core:3.11.1'
+    testImplementation 'com.openpojo:openpojo:0.8.10'
+    testImplementation 'nl.jqno.equalsverifier:equalsverifier:3.1.4'
 }
 
 test {

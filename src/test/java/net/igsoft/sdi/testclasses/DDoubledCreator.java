@@ -8,11 +8,11 @@ import net.igsoft.sdi.creator.CreatorBase;
 import net.igsoft.sdi.engine.InstanceProvider;
 import net.igsoft.sdi.parameter.LaunchType;
 
-public class DDoubledCreator extends CreatorBase<D, LaunchType> {
+public class DDoubledCreator extends CreatorBase<DClass, LaunchType> {
     @Override
-    public D create(InstanceProvider instanceProvider, LaunchType launchType) {
-        E e = instanceProvider.getOrCreate(E.class, launchType);
-        return new D(e, instanceProvider.getOrCreate(Stepper.class));
+    public DClass create(InstanceProvider instanceProvider, LaunchType launchType) {
+        EClass e = instanceProvider.getOrCreate(EClass.class, launchType);
+        return new DClass(e, instanceProvider.getOrCreate(Stepper.class));
     }
 
     @Override

@@ -1,7 +1,7 @@
 package net.igsoft.sdi.testclasses;
 
-public class H {
-    public H(Stepper stepper, G g) {
+public class PrivateCtrClass {
+    private PrivateCtrClass(Stepper stepper) {
         stepper.addStep(this.getClass(), "ctor");
     }
 }

@@ -1,4 +1,4 @@
-:sdi-version: 0.9.1
+:sdi-version: 0.9.2
 
 = Simple Dependency Injection
 
@@ -52,7 +52,7 @@ In the simplest case, class and its creator can look like below:
 .SimpleCreatorExample.java
 ----
 ifndef::env-github[]
-include::src/example/java/net/igsoft/sdi/SimpleCreatorExample.java[tags=config]
+include::src/example/java/net/igsoft/sdi/example/SimpleCreatorExample.java[tags=config]
 endif::[]
 
 ifdef::env-github[]
@@ -76,7 +76,7 @@ Let's say that we have a class App which has a class Config as a dependency.
 .SimpleCreatorExample.java
 ----
 ifndef::env-github[]
-include::src/example/java/net/igsoft/sdi/SimpleCreatorExample.java[tags=app]
+include::src/example/java/net/igsoft/sdi/example/SimpleCreatorExample.java[tags=app]
 endif::[]
 
 ifdef::env-github[]
@@ -106,7 +106,7 @@ Very simple: let's just create service which will keep information about all ava
 .SimpleCreatorExample.java
 ----
 ifndef::env-github[]
-include::src/example/java/net/igsoft/sdi/SimpleCreatorExample.java[tags=main]
+include::src/example/java/net/igsoft/sdi/example/SimpleCreatorExample.java[tags=main]
 endif::[]
 
 ifdef::env-github[]
@@ -139,7 +139,7 @@ are not. Another advantage of using explicit root creators is for code readabili
 visible which classes should be analyzed first, when trying to understand application. Notice that sometimes
 it is necessary to add a few root creators, which is possible and necessary if you want to have them all instantiated.
 
-== Initialization of services
+== Initialization of class instances
 
 That's nice, but very often we need to initialize and later start at least some of the classes
 in order to start our application. And when finishing application, we need to stop e.g. working
@@ -157,7 +157,7 @@ Let's see how it will work for another class: MqListener.
 .LifecycleExample.java
 ----
 ifndef::env-github[]
-include::src/example/java/net/igsoft/sdi/LifecycleExample.java[tags=classes]
+include::src/example/java/net/igsoft/sdi/example/LifecycleExample.java[tags=classes]
 endif::[]
 
 ifdef::env-github[]
@@ -220,7 +220,7 @@ Now we can start an application from our main class:
 .LifecycleExample.java
 ----
 ifndef::env-github[]
-include::src/example/java/net/igsoft/sdi/LifecycleExample.java[tags=main]
+include::src/example/java/net/igsoft/sdi/example/LifecycleExample.java[tags=main]
 endif::[]
 
 ifdef::env-github[]
@@ -251,7 +251,7 @@ creators:
 .AutoCreatorExample.java
 ----
 ifndef::env-github[]
-include::src/example/java/net/igsoft/sdi/AutoCreatorExample.java[]
+include::src/example/java/net/igsoft/sdi/example/AutoCreatorExample.java[]
 endif::[]
 
 ifdef::env-github[]
@@ -320,41 +320,41 @@ but then it will be difficult to reuse this creator in other application. That's
 .ParametrizedCreatorExample.java
 ----
 ifndef::env-github[]
-include::src/example/java/net/igsoft/sdi/ParametrizedCreatorExample.java[tags=config]
+include::src/example/java/net/igsoft/sdi/example/ParametrizedCreatorExample.java[tags=config]
 endif::[]
 
 ifdef::env-github[]
-    public static class ConfigCreatorParam extends ParameterBase {
-        private final File file;
-
-        public ConfigCreatorParam(File file) {
-            super(false);
-            this.file = file;
-        }
-
-        public File getFile() {
-            return file;
-        }
-
-        @Override
-        public String uniqueId() {
-            return file.getName();
-        }
-    }
-
     public static class Config {
-        static Config createFromFile(File file) {
-            return new Config();
+            static Config createFromFile(File file) {
+                return new Config();
+            }
         }
-    }
 
-    public static class ConfigCreator extends CreatorBase<Config, ConfigCreatorParam> {
-        @Override
-        public Config create(InstanceProvider instanceProvider, ConfigCreatorParam params) {
-            File file = params.getFile();
-            return Config.createFromFile(file);
+        public static class ConfigCreator extends CreatorBase<Config, ConfigCreator.Params> {
+            @Override
+            public Config create(InstanceProvider instanceProvider, ConfigCreator.Params params) {
+                File file = params.getFile();
+                return Config.createFromFile(file);
+            }
+
+            public static class Params extends ParameterBase {
+                private final File file;
+
+                public Params(File file) {
+                    super(false);
+                    this.file = file;
+                }
+
+                public File getFile() {
+                    return file;
+                }
+
+                @Override
+                public String uniqueId() {
+                    return file.getName();
+                }
+            }
         }
-    }
 endif::[]
 ----
 
@@ -364,46 +364,46 @@ On the call side we use it like this:
 .ParametrizedCreatorExample.java
 ----
 ifndef::env-github[]
-include::src/example/java/net/igsoft/sdi/ParametrizedCreatorExample.java[tags=app]
+include::src/example/java/net/igsoft/sdi/example/ParametrizedCreatorExample.java[tags=app]
 endif::[]
 
 ifdef::env-github[]
-    public static class AppEnvironment extends ParameterBase {
-        private final String name;
+    static class AppEnvironment extends ParameterBase {
+            private final String name;
 
-        public AppEnvironment(String name) {
-            this.name = name;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        @Override
-        public String uniqueId() {
-            return name;
-        }
-    }
-
-    public static class App {
-        public App(Config e, MqListener mqListener) {
-        }
-    }
-
-    public static class AppCreator extends CreatorBase<App, AppEnvironment> {
-        @Override
-        public App create(InstanceProvider instanceProvider, AppEnvironment appEnvironment) {
-            ConfigCreatorParam params = new ConfigCreatorParam(new File("~/config.init"));
-            Config config = instanceProvider.getOrCreate(Config.class, params);
-            MqListener mqListener = instanceProvider.getOrCreate(MqListener.class);
-
-            if (appEnvironment.getName().equals("PROD")) {
-                System.out.println("Warning! Creating PROD version of application!");
+            public AppEnvironment(String name) {
+                this.name = name;
             }
 
-            return new App(config, mqListener);
+            public String getName() {
+                return name;
+            }
+
+            @Override
+            public String uniqueId() {
+                return name;
+            }
         }
-    }
+
+        static class App {
+            public App(Config e, MqListener mqListener) {
+            }
+        }
+
+        static class AppCreator extends CreatorBase<App, AppEnvironment> {
+            @Override
+            public App create(InstanceProvider instanceProvider, AppEnvironment appEnvironment) {
+                ConfigCreator.Params params = new ConfigCreator.Params(new File("~/config.init"));
+                Config config = instanceProvider.getOrCreate(Config.class, params);
+                MqListener mqListener = instanceProvider.getOrCreate(MqListener.class);
+
+                if ("PROD".equals(appEnvironment.getName())) {
+                    System.out.println("Warning! Creating PROD version of application!");
+                }
+
+                return new App(config, mqListener);
+            }
+        }
 endif::[]
 ----
 
@@ -457,7 +457,7 @@ creators in ServiceBuilder:
 .ParametrizedCreatorExample.java
 ----
 ifndef::env-github[]
-include::src/example/java/net/igsoft/sdi/ParametrizedCreatorExample.java[tags=main]
+include::src/example/java/net/igsoft/sdi/example/ParametrizedCreatorExample.java[tags=main]
 endif::[]
 
 ifdef::env-github[]
@@ -496,7 +496,7 @@ and returning from it instances of creators.
 .DefaultCreatorsExample.java
 ----
 ifndef::env-github[]
-include::src/example/java/net/igsoft/sdi/DefaultCreatorsExample.java[tags=default_creators]
+include::src/example/java/net/igsoft/sdi/example/DefaultCreatorsExample.java[tags=default_creators]
 endif::[]
 
 ifdef::env-github[]
