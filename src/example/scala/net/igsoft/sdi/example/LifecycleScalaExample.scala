@@ -1,8 +1,9 @@
-package net.igsoft.sdi
+package net.igsoft.sdi.example
 
 import net.igsoft.sdi.creator.CreatorBase
 import net.igsoft.sdi.engine.InstanceProvider
 import net.igsoft.sdi.parameter.LaunchType
+import net.igsoft.sdi.{Manageable, Service}
 
 object LifecycleScalaExample {
 
@@ -49,14 +50,17 @@ object LifecycleScalaExample {
   // tag::main[]
   // end::classes[]
   def main(args: Array[String]): Unit = {
-    val service = Service.builder.withRootCreator(new AppCreator).withCreator(new ConfigCreator)
-                  .withCreator(new MqListenerCreator).build
+    val service = Service.builder
+                  .withRootCreator(new AppCreator)
+                  .withCreator(new ConfigCreator)
+                  .withCreator(new MqListenerCreator)
+                  .build
 
     sys.ShutdownHookThread {
       service.close()
     }
+
     service.start()
   }
-
   // end::main[]
 }

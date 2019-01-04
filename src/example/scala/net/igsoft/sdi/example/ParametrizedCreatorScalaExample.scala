@@ -1,7 +1,8 @@
-package net.igsoft.sdi
+package net.igsoft.sdi.example
 
 import java.io.File
 
+import net.igsoft.sdi.Service
 import net.igsoft.sdi.creator.{AutoCreator, CreatorBase}
 import net.igsoft.sdi.engine.InstanceProvider
 import net.igsoft.sdi.parameter.ParameterBase
@@ -9,7 +10,7 @@ import net.igsoft.sdi.parameter.ParameterBase
 object ParametrizedCreatorScalaExample {
 
   // tag::config[]
-  private[sdi] case class ConfigCreatorParam(val file: File) extends ParameterBase(false) {
+  private[sdi] case class ConfigCreatorParam(file: File) extends ParameterBase(false) {
     override def uniqueId: String = file.getName
   }
 
@@ -30,7 +31,7 @@ object ParametrizedCreatorScalaExample {
   private[sdi] class MqListener {}
 
   // tag::app[]
-  private[sdi] case class AppEnvironment(val name: String) extends ParameterBase {
+  private[sdi] case class AppEnvironment(name: String) extends ParameterBase {
     override def uniqueId: String = name
   }
 
@@ -38,7 +39,7 @@ object ParametrizedCreatorScalaExample {
 
   private[sdi] class AppCreator extends CreatorBase[App, AppEnvironment] {
     override def create(instanceProvider: InstanceProvider, appEnvironment: AppEnvironment): App = {
-      val params = new ConfigCreatorParam(new File("~/config.init"))
+      val params = ConfigCreatorParam(new File("~/config.init"))
       val config = instanceProvider.getOrCreate(classOf[Config], params)
       val mqListener = instanceProvider.getOrCreate(classOf[MqListener])
 
@@ -51,15 +52,17 @@ object ParametrizedCreatorScalaExample {
   // tag::main[]
   // end::app[]
   def main(args: Array[String]): Unit = {
-    val service = Service.builder.withRootCreator(new AppCreator, new AppEnvironment("PROD"))
-                  .withCreator(new ConfigCreator, new ConfigCreatorParam(new File(".")))
+    val service = Service.builder
+                  .withRootCreator(new AppCreator, AppEnvironment("PROD"))
+                  .withCreator(new ConfigCreator, ConfigCreatorParam(new File(".")))
                   .withCreator(new AutoCreator[MqListener, ParameterBase](classOf[MqListener]))
                   .build
+
     sys.ShutdownHookThread {
       service.close()
     }
+
     service.start()
   }
-
   // end::main[]
 }

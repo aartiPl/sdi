@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import net.igsoft.sdi.engine.InstanceDescriptor;
 import net.igsoft.sdi.engine.KeyGenerator;
 import net.igsoft.sdi.engine.ManageableState;
+import net.igsoft.sdi.parameter.LaunchType;
 import net.igsoft.sdi.parameter.ParameterBase;
 
 public class Service implements Manageable {
@@ -46,18 +47,14 @@ public class Service implements Manageable {
         InstanceDescriptor instance = instances.get(keyGenerator.generate(clazz, params.cachedUniqueId()));
         checkArgument(instance != null, new IllegalArgumentException(
                 format("There is no instance of class %s with parameters %s available in Service",
-                       clazz.getSimpleName(), params)));
+                       clazz.getSimpleName(), params.getClass().getSimpleName())));
         return (T) instance.getValue();
     }
 
     @SuppressWarnings("unchecked")
     public <T, P extends ParameterBase> T get(Class<T> clazz) {
-        checkArgument(clazz != null);
-        InstanceDescriptor instance = instances.get(keyGenerator.generate(clazz, ""));
-        checkArgument(instance != null, new IllegalArgumentException(
-                format("There is no instance of class %s available in Service",
-                       clazz.getSimpleName())));
-        return (T) instance.getValue();
+        //might be also LaunchType.MANUAL - LaunchType does not contribute to instance identifier
+        return get(clazz, LaunchType.AUTOMATIC);
     }
 
     @Override

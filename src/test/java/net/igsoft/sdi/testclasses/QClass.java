@@ -1,11 +1,11 @@
 package net.igsoft.sdi.testclasses;
 
-public class Q {
-    public Q(Stepper stepper, String id, R r) {
+public class QClass {
+    public QClass(Stepper stepper, String id, RClass r) {
         stepper.addStep(this.getClass(), "ctor(" + id + " r)");
     }
 
-    public Q(Stepper stepper) {
+    public QClass(Stepper stepper) {
         stepper.addStep(this.getClass(), "ctor()");
     }
 }

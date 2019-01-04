@@ -9,12 +9,12 @@ import net.igsoft.sdi.creator.CreatorBase;
 import net.igsoft.sdi.engine.InstanceProvider;
 import net.igsoft.sdi.parameter.LaunchType;
 
-public class RWithDefaultCreatorsDoubledCreator extends CreatorBase<R, LaunchType> {
+public class RWithDefaultCreatorsDoubledCreator extends CreatorBase<RClass, LaunchType> {
     @Override
-    public R create(InstanceProvider instanceProvider, LaunchType launchType) {
-        D d = instanceProvider.getOrCreate(D.class);
+    public RClass create(InstanceProvider instanceProvider, LaunchType launchType) {
+        DClass d = instanceProvider.getOrCreate(DClass.class);
 
-        return new R(instanceProvider.getOrCreate(Stepper.class), "a", "b");
+        return new RClass(instanceProvider.getOrCreate(Stepper.class), "a", "b");
     }
 
     @Override

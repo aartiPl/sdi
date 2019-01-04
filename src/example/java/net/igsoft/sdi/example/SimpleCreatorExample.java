@@ -1,12 +1,13 @@
-package net.igsoft.sdi;
+package net.igsoft.sdi.example;
 
+import net.igsoft.sdi.Service;
 import net.igsoft.sdi.creator.CreatorBase;
 import net.igsoft.sdi.engine.InstanceProvider;
 import net.igsoft.sdi.parameter.LaunchType;
 
-public class LifecycleExample {
+public class SimpleCreatorExample {
 
-    // tag::classes[]
+    // tag::config[]
     public static class Config {
     }
 
@@ -16,38 +17,11 @@ public class LifecycleExample {
             return new Config();
         }
     }
+    // end::config[]
 
-    public static class MqListener implements Manageable {
-        @Override
-        public void init() {
-            //Initialize class
-        }
-
-        @Override
-        public void start() {
-            //Start class
-        }
-
-        @Override
-        public void stop() {
-            //Stop class (with ability to start it again)
-        }
-
-        @Override
-        public void close() {
-            //Destruct class
-        }
-    }
-
-    public static class MqListenerCreator extends CreatorBase<MqListener, LaunchType> {
-        @Override
-        public MqListener create(InstanceProvider instanceProvider, LaunchType launchType) {
-            return new MqListener();
-        }
-    }
-
+    // tag::app[]
     public static class App {
-        public App(Config e, MqListener mqListner) {
+        public App(Config e) {
         }
     }
 
@@ -55,18 +29,16 @@ public class LifecycleExample {
         @Override
         public App create(InstanceProvider instanceProvider, LaunchType launchType) {
             Config config = instanceProvider.getOrCreate(Config.class);
-            MqListener mqListener = instanceProvider.getOrCreate(MqListener.class);
-            return new App(config, mqListener);
+            return new App(config);
         }
     }
-    // end::classes[]
+    // end::app[]
 
     // tag::main[]
     public static void main(String[] args) {
         Service service = Service.builder()
                                  .withRootCreator(new AppCreator())
                                  .withCreator(new ConfigCreator())
-                                 .withCreator(new MqListenerCreator())
                                  .build();
 
         Runtime.getRuntime().addShutdownHook(new Thread(service::close));

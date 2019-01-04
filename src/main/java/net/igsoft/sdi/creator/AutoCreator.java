@@ -24,6 +24,7 @@ public class AutoCreator<T, P extends ParameterBase> extends CreatorBase<T, P> {
 
         Constructor<?>[] constructors = getCreatedClass().getConstructors();
 
+        //Only single constructor is supported
         if (constructors.length > 1) {
             throw new IllegalStateException(
                     format("Class '%s' has more than one public constructor. Can not automatically create classes with more than one public constructors.",
@@ -31,17 +32,19 @@ public class AutoCreator<T, P extends ParameterBase> extends CreatorBase<T, P> {
         }
 
         if (constructors.length == 0 || constructors[0].getParameterCount() == 0) {
+            //Default constructor or single constructor without parameters
             T instance;
             try {
-                instance = getCreatedClass().newInstance();
+                instance = getCreatedClass().getDeclaredConstructor().newInstance();
             } catch (Exception e) {
-                throw new IllegalStateException(format("Can not automatically create class '%s'",
+                throw new IllegalStateException(format("Can not automatically create class '%s'.",
                                                        getCreatedClass().getSimpleName()), e);
             }
 
             return instance;
         }
 
+        //Single constructor with parameters
         @SuppressWarnings("unchecked")
         Constructor<T> constructor = (Constructor<T>) constructors[0];
 
@@ -55,7 +58,7 @@ public class AutoCreator<T, P extends ParameterBase> extends CreatorBase<T, P> {
         try {
             instance = constructor.newInstance(values);
         } catch (Exception e) {
-            throw new IllegalStateException(format("Can not automatically create class '%s'",
+            throw new IllegalStateException(format("Can not automatically create class '%s' with parameters.",
                                                    getCreatedClass().getSimpleName()), e);
         }
 

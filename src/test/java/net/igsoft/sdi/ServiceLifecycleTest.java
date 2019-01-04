@@ -19,15 +19,15 @@ public class ServiceLifecycleTest {
 
     /*
         Class hierarchy:
-          1.          C
+          1.          CClass
                      /\
-          2.        A  \
+          2.        AClass  \
                    /    \
-          3.      B      B
+          3.      BClass      BClass
                  |  \     | \
-          4.     D   P    D  P
+          4.     DClass   PClass    DClass  PClass
                  |     \   |   \
-          5.     E     R    E    R
+          5.     EClass     RClass    EClass    RClass
      */
 
     private Service service;
@@ -51,7 +51,7 @@ public class ServiceLifecycleTest {
         service.init();
 
         assertThat(service.get(Stepper.class).toString()).isEqualTo(
-                "E:ctor D:ctor R:ctor(name surname) P:ctor(id r) B:ctor A:ctor C:ctor D:init B:init A:init C:init");
+                "EClass:ctor DClass:ctor RClass:ctor(name surname) PClass:ctor(id r) BClass:ctor AClass:ctor CClass:ctor DClass:init BClass:init AClass:init CClass:init");
     }
 
     @Test
@@ -59,8 +59,8 @@ public class ServiceLifecycleTest {
         service.start();
 
         assertThat(service.get(Stepper.class).toString()).isEqualTo(
-                "E:ctor D:ctor R:ctor(name surname) P:ctor(id r) B:ctor A:ctor C:ctor D:init B:init A:init C:init " +
-                "D:start B:start A:start C:start");
+                "EClass:ctor DClass:ctor RClass:ctor(name surname) PClass:ctor(id r) BClass:ctor AClass:ctor CClass:ctor DClass:init BClass:init AClass:init CClass:init " +
+                "DClass:start BClass:start AClass:start CClass:start");
     }
 
     @Test
@@ -69,8 +69,8 @@ public class ServiceLifecycleTest {
         service.start();
 
         assertThat(service.get(Stepper.class).toString()).isEqualTo(
-                "E:ctor D:ctor R:ctor(name surname) P:ctor(id r) B:ctor A:ctor C:ctor D:init B:init A:init C:init " +
-                "D:start B:start A:start C:start");
+                "EClass:ctor DClass:ctor RClass:ctor(name surname) PClass:ctor(id r) BClass:ctor AClass:ctor CClass:ctor DClass:init BClass:init AClass:init CClass:init " +
+                "DClass:start BClass:start AClass:start CClass:start");
     }
 
     @Test
@@ -78,7 +78,7 @@ public class ServiceLifecycleTest {
         service.close();
 
         assertThat(service.get(Stepper.class).toString()).isEqualTo(
-                "E:ctor D:ctor R:ctor(name surname) P:ctor(id r) B:ctor A:ctor C:ctor");
+                "EClass:ctor DClass:ctor RClass:ctor(name surname) PClass:ctor(id r) BClass:ctor AClass:ctor CClass:ctor");
     }
 
     @Test
@@ -88,7 +88,7 @@ public class ServiceLifecycleTest {
         service.close();
 
         assertThat(service.get(Stepper.class).toString()).isEqualTo(
-                "E:ctor D:ctor R:ctor(name surname) P:ctor(id r) B:ctor A:ctor C:ctor D:init B:init A:init C:init " +
-                "D:start B:start A:start C:start C:stop A:stop B:stop D:stop C:close A:close B:close D:close");
+                "EClass:ctor DClass:ctor RClass:ctor(name surname) PClass:ctor(id r) BClass:ctor AClass:ctor CClass:ctor DClass:init BClass:init AClass:init CClass:init " +
+                "DClass:start BClass:start AClass:start CClass:start CClass:stop AClass:stop BClass:stop DClass:stop CClass:close AClass:close BClass:close DClass:close");
     }
 }

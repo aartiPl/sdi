@@ -1,7 +1,7 @@
-package net.igsoft.sdi
+package net.igsoft.sdi.example
 
 import net.igsoft.sdi.creator.AutoCreator
-import net.igsoft.sdi.parameter.ParameterBase
+import net.igsoft.sdi.{Manageable, Service}
 
 object AutoCreatorScalaExample {
 
@@ -25,13 +25,12 @@ object AutoCreatorScalaExample {
     }
   }
 
-  private[sdi] class App(val e: Config, val mqListner: MqListener)
+  private[sdi] class App(val e: Config, val mqListener: MqListener)
 
   def main(args: Array[String]): Unit = {
-    val service = Service.builder.withRootCreator(new AutoCreator[App, ParameterBase](classOf[App]))
-                  .withCreator(new AutoCreator[Config, ParameterBase](classOf[Config]))
-                  .withCreator(new AutoCreator[MqListener, ParameterBase](classOf[MqListener]))
-                  .build
+    val service = Service.builder.withRootCreator(new AutoCreator(classOf[App]))
+                  .withCreator(new AutoCreator(classOf[Config]))
+                  .withCreator(new AutoCreator(classOf[MqListener])).build
 
     sys.ShutdownHookThread {
       service.close()
