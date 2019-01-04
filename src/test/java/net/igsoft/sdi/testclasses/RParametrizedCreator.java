@@ -17,7 +17,7 @@ public class RParametrizedCreator extends CreatorBase<RClass, RParametrizedCreat
         private final String name;
         private final String surname;
 
-        Params(String name, String surname) {
+        public Params(String name, String surname) {
             this.name = name;
             this.surname = surname;
         }

@@ -98,7 +98,9 @@ dependencies {
 
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.2.0'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.2.0'
-    testImplementation 'org.assertj:assertj-core:3.10.0'
+    testImplementation 'org.assertj:assertj-core:3.11.1'
+    testImplementation 'com.openpojo:openpojo:0.8.10'
+    testImplementation 'nl.jqno.equalsverifier:equalsverifier:3.1.4'
 }
 
 test {
