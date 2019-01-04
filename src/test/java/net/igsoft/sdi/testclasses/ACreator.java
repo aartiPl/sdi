@@ -4,11 +4,11 @@ import net.igsoft.sdi.creator.CreatorBase;
 import net.igsoft.sdi.engine.InstanceProvider;
 import net.igsoft.sdi.parameter.LaunchType;
 
-public class ACreator extends CreatorBase<A, LaunchType> {
+public class ACreator extends CreatorBase<AClass, LaunchType> {
     @Override
-    public A create(InstanceProvider instanceProvider, LaunchType launchType) {
-        B b = instanceProvider.getOrCreate(B.class, launchType);
+    public AClass create(InstanceProvider instanceProvider, LaunchType launchType) {
+        BClass b = instanceProvider.getOrCreate(BClass.class, launchType);
 
-        return new A(b, instanceProvider.getOrCreate(Stepper.class));
+        return new AClass(b, instanceProvider.getOrCreate(Stepper.class));
     }
 }

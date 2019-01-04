@@ -1,7 +1,7 @@
 package net.igsoft.sdi.testclasses;
 
-public class P {
-    public P(Stepper stepper, String id, R r) {
+public class PClass {
+    public PClass(Stepper stepper, String id, RClass r) {
         stepper.addStep(this.getClass(), "ctor(" + id + " r)");
     }
 }

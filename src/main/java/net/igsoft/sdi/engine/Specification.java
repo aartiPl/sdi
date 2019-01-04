@@ -1,9 +1,8 @@
 package net.igsoft.sdi.engine;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-
-import com.google.common.collect.Sets;
 
 public class Specification {
 
@@ -16,7 +15,7 @@ public class Specification {
         this.value = null;
         this.level = 0;
         this.manualStartAndStop = false;
-        this.dependencies = Sets.newHashSet();
+        this.dependencies = new HashSet<>();
     }
 
     public Object getValue() {
@@ -51,26 +50,6 @@ public class Specification {
 
     public void addDependency(String instanceId) {
         dependencies.add(instanceId);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Specification specification = (Specification) o;
-        return level == specification.level &&
-               manualStartAndStop == specification.manualStartAndStop &&
-               Objects.equals(value, specification.value) &&
-               Objects.equals(dependencies, specification.dependencies);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(value, level, manualStartAndStop, dependencies);
     }
 
     @Override

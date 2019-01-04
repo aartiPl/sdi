@@ -1,6 +1,7 @@
-package net.igsoft.sdi
+package net.igsoft.sdi.example
 
 import com.google.common.collect.Lists
+import net.igsoft.sdi.Service
 import net.igsoft.sdi.creator.{AutoCreator, CreatorBase}
 import net.igsoft.sdi.engine.InstanceProvider
 import net.igsoft.sdi.parameter.{LaunchType, ParameterBase}
@@ -31,9 +32,12 @@ object DefaultCreatorsScalaExample {
 
   // tag::main[]
   def main(args: Array[String]): Unit = {
-    val service = Service.builder.withRootCreator(new AutoCreator[App, ParameterBase](classOf[App]))
+    val service = Service.builder
+                  .withRootCreator(new AutoCreator(classOf[App]))
                   .withCreator(new MqListenerCreator)
-                  .withCreator(new AutoCreator[Config, ParameterBase](classOf[Config])).build
+                  .withCreator(new AutoCreator(classOf[Config]))
+                  .build
+
     sys.ShutdownHookThread {
       service.close()
     }
