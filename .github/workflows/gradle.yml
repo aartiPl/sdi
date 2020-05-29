@@ -24,8 +24,4 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       run: ./gradlew build
-    - name: Codecov
-      uses: codecov/codecov-action@v1.0.7
-    - name: SonarCloud Scan
-      uses: SonarSource/sonarcloud-github-action@v1.2
       
