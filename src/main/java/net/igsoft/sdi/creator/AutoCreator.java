@@ -6,22 +6,15 @@ import java.lang.reflect.Constructor;
 
 import net.igsoft.sdi.engine.InstanceProvider;
 import net.igsoft.sdi.parameter.LaunchType;
-import net.igsoft.sdi.parameter.ParameterBase;
 
-public class AutoCreator<T, P extends ParameterBase> extends CreatorBase<T, P> {
+public class AutoCreator<T> extends CreatorBase<T, LaunchType> {
 
     public AutoCreator(Class<T> myClazz) {
-        super(myClazz, (Class<P>) LaunchType.class);
+        super(myClazz, LaunchType.class);
     }
 
     @Override
-    public T create(InstanceProvider instanceProvider, P params) {
-
-        if (!params.getClass().equals(LaunchType.class)) {
-            throw new IllegalStateException(
-                    "Can not automatically create instance based on creator parameters.");
-        }
-
+    public T create(InstanceProvider instanceProvider, LaunchType params) {
         Constructor<?>[] constructors = getCreatedClass().getConstructors();
 
         //Only single constructor is supported

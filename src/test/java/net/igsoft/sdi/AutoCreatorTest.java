@@ -35,12 +35,10 @@ class AutoCreatorTest {
     @Test
     void assertThatAutoCreatorWithNotSingleConstructorThrows() {
         //Given-When
-        Throwable thrown = catchThrowable(() -> {
-            Service.builder()
-                   .withCreator(new AutoCreator<>(QClass.class))
-                   .withCreator(new AutoCreator<>(Stepper.class))
-                   .build();
-        });
+        Throwable thrown = catchThrowable(() -> Service.builder()
+                                                   .withCreator(new AutoCreator<>(QClass.class))
+                                                   .withCreator(new AutoCreator<>(Stepper.class))
+                                                   .build());
 
         //Then
         assertThat(thrown).isExactlyInstanceOf(IllegalStateException.class)
@@ -49,30 +47,12 @@ class AutoCreatorTest {
     }
 
     @Test
-    void assertThatUsingAutoCreatorWithParametersThrowsException() {
-        //Given-When
-        Throwable thrown = catchThrowable(() -> {
-            Service.builder()
-                   .withCreator(new AutoCreator<>(RClass.class), new RParametrizedCreator.Params("name", "surname"))
-                   .withCreator(new AutoCreator<>(Stepper.class))
-                   .build();
-        });
-
-        //Then
-        assertThat(thrown).isExactlyInstanceOf(IllegalStateException.class)
-                          .hasMessageStartingWith(
-                                  "Can not automatically create instance based on creator parameters.");
-    }
-
-    @Test
     void assertThatUsingAutoCreatorWithClassWithPrivateConstructorThrowsException() {
         //Given-When
-        Throwable thrown = catchThrowable(() -> {
-            Service.builder()
-                   .withCreator(new AutoCreator<>(PrivateCtrClass.class))
-                   .withCreator(new AutoCreator<>(Stepper.class))
-                   .build();
-        });
+        Throwable thrown = catchThrowable(() -> Service.builder()
+                                                   .withCreator(new AutoCreator<>(PrivateCtrClass.class))
+                                                   .withCreator(new AutoCreator<>(Stepper.class))
+                                                   .build());
 
         //Then
         assertThat(thrown).isExactlyInstanceOf(IllegalStateException.class)
@@ -83,12 +63,10 @@ class AutoCreatorTest {
     @Test
     void assertThatUsingAutoCreatorWithClassWithThrowingConstructorThrowsException() {
         //Given-When
-        Throwable thrown = catchThrowable(() -> {
-            Service.builder()
-                   .withCreator(new AutoCreator<>(ThrowingCtrClass.class))
-                   .withCreator(new AutoCreator<>(Stepper.class))
-                   .build();
-        });
+        Throwable thrown = catchThrowable(() -> Service.builder()
+                                                   .withCreator(new AutoCreator<>(ThrowingCtrClass.class))
+                                                   .withCreator(new AutoCreator<>(Stepper.class))
+                                                   .build());
 
         //Then
         assertThat(thrown).isExactlyInstanceOf(IllegalStateException.class)

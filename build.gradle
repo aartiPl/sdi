@@ -1,13 +1,13 @@
-group 'net.igsoft'
-version '0.9.2'
+apply plugin: "java-library"
+apply plugin: "maven-publish"
+apply plugin: "signing"
+apply plugin: "scala"
 
-apply plugin: 'java'
-apply plugin: 'maven'
-apply plugin: 'signing'
-apply plugin: 'scala'
+group "net.igsoft"
+version "0.9.3"
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
 
 repositories {
     mavenCentral()
@@ -15,8 +15,8 @@ repositories {
 
 sourceSets {
     example {
-        java.srcDir(file('src/example/java'))
-        scala.srcDir(file('src/example/scala'))
+        java.srcDir(file("src/example/java"))
+        scala.srcDir(file("src/example/scala"))
         compileClasspath += sourceSets.main.output
         runtimeClasspath += sourceSets.main.output
     }
@@ -28,12 +28,12 @@ configurations {
 }
 
 task javadocJar(type: Jar) {
-    classifier = 'javadoc'
+    archiveClassifier.set("javadoc")
     from javadoc
 }
 
 task sourcesJar(type: Jar) {
-    classifier = 'sources'
+    archiveClassifier.set("sources")
     from sourceSets.main.allSource
 }
 
@@ -45,68 +45,76 @@ signing {
     sign configurations.archives
 }
 
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
 
-            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = "sdi"
+            from components.java
 
-            pom.project {
-                name "Simple Dependency Injection for Java"
-                packaging 'jar'
-
-                description 'Simple Dependency Injection framework for Java'
-                url 'https://github.com/aartiPl/SDI'
-
-                scm {
-                    connection 'scm:git:git://https://github.com/aartiPl/SDI.git'
-                    developerConnection 'scm:git:ssh:https://github.com/aartiPl/SDI.git'
-                    url 'https://github.com/aartiPl/SDI/tree/master'
+            versionMapping {
+                usage("java-api") {
+                    fromResolutionOf("runtimeClasspath")
                 }
+                usage("java-runtime") {
+                    fromResolutionResult()
+                }
+            }
+
+            pom {
+                name = "Simple Dependency Injection"
+                description = "Simple Dependency Injection for Java"
+                url = "https://github.com/aartiPl/sdi/tree/master"
 
                 licenses {
                     license {
-                        name 'MIT License'
-                        url 'https://opensource.org/licenses/MIT'
+                        name = "MIT License"
+                        url = "https://opensource.org/licenses/MIT"
                     }
                 }
-
                 developers {
                     developer {
-                        id 'aartiPl'
-                        name 'Marcin Kuszczak'
-                        email 'marcin.kuszczak.apps@gmail.com'
+                        id = "aartiPl"
+                        name = "Marcin Kuszczak"
+                        email = "marcin.kuszczak.apps@gmail.com"
                     }
                 }
+                scm {
+                    connection = "scm:git:git://https://github.com/aartiPl/sdi.git"
+                    developerConnection = "scm:git:ssh:https://github.com/aartiPl/sdi.git"
+                    url = "https://github.com/aartiPl/sdi/tree/master"
+                }
             }
+        }
+    }
+    repositories {
+        maven {
+            // change URLs to point to your repos, e.g. http://my.org/repo
+            def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+            url = version.endsWith("SNAPSHOT") ? snapshotsRepoUrl : releasesRepoUrl
         }
     }
 }
 
 dependencies {
-    implementation 'com.google.guava:guava:23.5-jre'
-    implementation 'ch.qos.logback:logback-classic:1.2.3'
+    implementation("com.google.guava:guava:30.1.1-jre")
+    implementation("ch.qos.logback:logback-classic:1.2.5")
 
-    exampleImplementation 'org.scala-lang:scala-library:2.12.6'
+    exampleImplementation("org.scala-lang:scala-library:2.13.6")
 
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.2.0'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.2.0'
-    testImplementation 'org.assertj:assertj-core:3.11.1'
-    testImplementation 'com.openpojo:openpojo:0.8.10'
-    testImplementation 'nl.jqno.equalsverifier:equalsverifier:3.1.4'
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.2")
+    testImplementation("org.assertj:assertj-core:3.20.2")
+    testImplementation("com.openpojo:openpojo:0.9.1")
+    testImplementation("nl.jqno.equalsverifier:equalsverifier:3.7.1")
 }
 
 test {
     useJUnitPlatform()
 
     reports {
-        html.enabled = true
+        html.getRequired().set(true)
     }
 }
