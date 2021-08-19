@@ -4,7 +4,7 @@ apply plugin: "signing"
 apply plugin: "scala"
 
 group "net.igsoft"
-version "0.9.3"
+version "0.9.3-SNAPSHOT"
 
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
