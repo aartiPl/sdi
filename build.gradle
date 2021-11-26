@@ -45,8 +45,6 @@ signing {
     sign configurations.archives
 }
 
-
-
 publishing {
     publications {
         mavenJava(MavenPublication) {
