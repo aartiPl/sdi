@@ -1,4 +1,4 @@
-:sdi-version: 0.9.2
+:sdi-version: 0.9.3
 
 = Simple Dependency Injection
 
