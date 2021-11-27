@@ -111,7 +111,7 @@ dependencies {
     implementation("com.google.guava:guava:31.0.1-jre")
     implementation("ch.qos.logback:logback-classic:1.2.7")
 
-    scalaExampleImplementation("org.scala-lang:scala-library:2.13.6")
+    scalaExampleImplementation("org.scala-lang:scala3-library_3:3.1.0")
 
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.1")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
