@@ -55,7 +55,7 @@ object ParametrizedCreatorScalaExample {
     val service = Service.builder
                   .withRootCreator(new AppCreator, AppEnvironment("PROD"))
                   .withCreator(new ConfigCreator, ConfigCreatorParam(new File(".")))
-                  .withCreator(new AutoCreator[MqListener, ParameterBase](classOf[MqListener]))
+                  .withCreator(new AutoCreator[MqListener](classOf[MqListener]))
                   .build
 
     sys.ShutdownHookThread {

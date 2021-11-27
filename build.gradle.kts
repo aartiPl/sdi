@@ -29,9 +29,11 @@ sourceSets {
         runtimeClasspath += sourceSets.getByName("main").output + sourceSets.getByName("main").runtimeClasspath
     }
     create("scalaExample") {
-        java.srcDir("src/example/scala")
-        compileClasspath += sourceSets.getByName("main").output
-        runtimeClasspath += sourceSets.getByName("main").output
+        withConvention(ScalaSourceSet::class) {
+            scala.srcDir("src/example/scala")
+            compileClasspath += sourceSets.getByName("main").output + sourceSets.getByName("main").compileClasspath
+            runtimeClasspath += sourceSets.getByName("main").output + sourceSets.getByName("main").runtimeClasspath
+        }
     }
 }
 
