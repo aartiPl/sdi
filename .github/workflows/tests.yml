@@ -1,0 +1,22 @@
+name: Tests
+on:
+  - push
+  - workflow_dispatch
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+        # https://github.com/marketplace/actions/checkout
+      - name: CHECKOUT REPOSITORY
+        uses: actions/checkout@v2
+        # https://github.com/marketplace/actions/setup-java-jdk
+      - name: SETUP JAVA JDK
+        uses: actions/setup-java@v2.3.1
+        with:
+          java-version: 11
+          distribution: 'zulu'
+        # https://github.com/marketplace/actions/gradle-build-action
+      - name: BUILD
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: build

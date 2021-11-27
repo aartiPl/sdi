@@ -20,7 +20,7 @@ object DefaultCreatorsScalaExample {
     }
 
     override def defaultCreators: java.util.List[CreatorBase[_, _ <: ParameterBase]] = Lists
-                                                                                  .newArrayList(new AutoCreator[MqListenerWorker, ParameterBase](classOf[MqListenerWorker]))
+                                                                                  .newArrayList(new AutoCreator[MqListenerWorker](classOf[MqListenerWorker]))
   }
 
   private[sdi] class MqListener(val mqListenerWorker: MqListenerWorker) {
