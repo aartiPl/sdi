@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "net.igsoft"
-version = "0.9.3-SNAPSHOT"
+version = "0.9.3"
 
 java {
     toolchain {
